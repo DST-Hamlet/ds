@@ -8,6 +8,8 @@ local assets =
 	Asset("SOUND", "sound/forest.fsb"),
 	--Asset("INV_IMAGE", "jungleTreeSeed"),
 	Asset("MINIMAP_IMAGE", "tuber_trees"),
+	Asset("MINIMAP_IMAGE", "tuber_trees_stump"),
+	Asset("MINIMAP_IMAGE", "tuber_trees_burnt"),
 }
 
 local prefabs =
@@ -81,12 +83,38 @@ local old_anims =
 local function dig_up_stump(inst, chopper)
 	inst:Remove()
 	inst.components.lootdropper:SpawnLootPrefab("tuber_crop")
---[[
-	if inst:HasTag("mystery") and inst.components.mystery.investigated then
-		inst.components.lootdropper:SpawnLootPrefab(inst.components.mystery.reward)
-		inst:RemoveTag("mystery")
+end
+
+local function set_stump(inst, push_anim)
+	inst:RemoveComponent("burnable")
+	inst:RemoveComponent("propagator")
+	MakeSmallBurnable(inst)
+	MakeSmallPropagator(inst)
+
+	inst:RemoveComponent("growable")
+	inst:RemoveComponent("hackable")
+	inst:RemoveComponent("bloomable")
+
+	inst:RemoveComponent("blowinwindgust")
+
+	RemovePhysicsColliders(inst)
+
+	if push_anim then
+		inst.AnimState:PushAnimation(inst.anims.stump)
+	else
+		inst.AnimState:PlayAnimation(inst.anims.stump)
 	end
-	]]
+
+	inst.MiniMapEntity:SetIcon("tuber_trees_stump.png")
+
+	inst:AddTag("stump")
+	inst:RemoveTag("shelter")
+	inst:RemoveTag("gustable")
+
+	inst:AddComponent("workable")
+	inst.components.workable:SetWorkAction(ACTIONS.DIG)
+	inst.components.workable:SetOnFinishCallback(dig_up_stump)
+	inst.components.workable:SetWorkLeft(1)
 end
 
 local function chop_down_burnt_tree(inst, chopper)
@@ -95,7 +123,9 @@ local function chop_down_burnt_tree(inst, chopper)
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/bamboo_hack")
 	inst.AnimState:PlayAnimation(inst.anims.chop_burnt)
 	RemovePhysicsColliders(inst)
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 	inst.components.lootdropper:SpawnLootPrefab("charcoal")
 	inst.components.lootdropper:DropLoot()
 	if inst.pineconetask then
@@ -124,15 +154,17 @@ end
 
 local burnt_highlight_override = {.5,.5,.5}
 local function OnBurnt(inst, imm)
-
 	local function changes()
 		if inst.components.burnable then
 			inst.components.burnable:Extinguish()
 		end
+
 		inst:RemoveComponent("burnable")
 		inst:RemoveComponent("propagator")
 		inst:RemoveComponent("growable")
+		inst:RemoveComponent("bloomable")
 		inst:RemoveComponent("blowinwindgust")
+		
 		inst:RemoveTag("shelter")
 		inst:RemoveTag("dragonflybait_lowprio")
 		inst:RemoveTag("fire")
@@ -157,6 +189,7 @@ local function OnBurnt(inst, imm)
 		inst:DoTaskInTime( 0.5, changes)
 	end
 	inst.AnimState:PlayAnimation(inst.anims.burnt, true)
+	inst.MiniMapEntity:SetIcon("tuber_trees_burnt.png")
 	--inst.AnimState:SetRayTestOnBB(true);
 	inst:AddTag("burnt")
 
@@ -269,21 +302,17 @@ end
 local function tree_lit(inst)
 	DefaultIgniteFn(inst)
 end
---[[
-local function handler_growfromseed (inst)
-	inst.components.growable:SetStage(1)
-	inst.AnimState:PlayAnimation("grow_seed_to_short")
-	inst.SoundEmitter:PlaySound("dontstarve/forest/treeGrow")
-	updateart(inst)
-	PushSway(inst)
-end
-]]
+
 local function updateTreeType(inst)
 	inst.AnimState:SetBuild(GetBuild(inst).file)
 end
 
+local function canbloom(inst)
+	return not inst:HasTag("stump") and not inst:HasTag("burnt") and not inst:HasTag("rotten")
+end
+
 local function doTransformBloom(inst)
-	if not inst:HasTag("rotten") then
+	if canbloom(inst) then
 		inst.build = "blooming"
 		inst.components.hackable.product = "tuber_bloom_crop"
 		
@@ -292,7 +321,7 @@ local function doTransformBloom(inst)
 end
 
 local function doTransformNormal(inst)
-	if not inst:HasTag("rotten") then	
+	if canbloom(inst) then	
 		inst.build = "normal"
 		if inst.components.hackable then
 			inst.components.hackable.product = "tuber_crop"
@@ -326,12 +355,13 @@ end
 local function onload(inst, data)
 	if data then
 		if not data.build or builds[data.build] == nil then				
-			 doTransformNormal(inst)
+			doTransformNormal(inst)
 		else
 			inst.build = data.build
 		end
 
-        if data.bloomtask then
+		--[[
+		if data.bloomtask then
             if inst.bloomtask then inst.bloomtask:Cancel() inst.bloomtask = nil end
             inst.bloomtaskinfo = nil
             inst.bloomtask, inst.bloomtaskinfo = inst:ResumeTask(data.bloomtask, function() doTransformBloom(inst) end)
@@ -340,46 +370,35 @@ local function onload(inst, data)
             if inst.unbloomtask then inst.unbloomtask:Cancel() inst.unbloomtask = nil end
             inst.unbloomtaskinfo = nil
             inst.unbloomtask, inst.unbloomtaskinfo = inst:ResumeTask(data.unbloomtask, function() doTransformNormal(inst) end)
-        end 
+        end
+		]]
 
 		if data.flushed then
 			inst.flushed = data.flushed
 		end
 
 		if data.tubers then
-			inst.tubers = data.tubers
+			inst.tubers = math.min(data.tubers, inst.maxtubers) -- inst.maxtubers is correctly set by growable component.
+			updateart(inst)
 		end
 
 		if data.burnt then
 			inst:AddTag("fire") -- Add the fire tag here: OnEntityWake will handle it actually doing burnt logic
+			inst.MiniMapEntity:SetIcon("tuber_trees_burnt.png")
+
 		elseif data.stump then
-			inst:RemoveComponent("burnable")
-			MakeSmallBurnable(inst)
-			inst:RemoveComponent("propagator")
-			MakeSmallPropagator(inst)
-			inst:RemoveComponent("growable")
-			RemovePhysicsColliders(inst)
-			inst.AnimState:PlayAnimation(inst.anims.stump)
-			inst:AddTag("stump")
-			inst:RemoveTag("shelter")
-			inst:RemoveTag("gustable")
-			inst:RemoveComponent("blowinwindgust")
-			inst:AddComponent("workable")
-			inst.components.workable:SetWorkAction(ACTIONS.DIG)
-			inst.components.workable:SetOnFinishCallback(dig_up_stump)
-			inst.components.workable:SetWorkLeft(1)
+			set_stump(inst)
 		end
 	end
 end
 
 local function OnEntitySleep(inst)
-	local fire = false
-	if inst:HasTag("fire") then
-		fire = true
-	end
+	local fire = inst:HasTag("fire")
+
 	inst:RemoveComponent("burnable")
 	inst:RemoveComponent("propagator")
 	inst:RemoveComponent("inspectable")
+
 	if fire then
 		inst:AddTag("fire")
 	end
@@ -426,9 +445,11 @@ local function OnGustAnimDone(inst)
 		inst.AnimState:PlayAnimation(inst.anims["blown"..tostring(anim)], false)
 	else
 		inst:DoTaskInTime(math.random()/2, function(inst)
-			inst:RemoveEventCallback("animover", OnGustAnimDone)
-			inst.AnimState:PlayAnimation(inst.anims.blown_pst, false)
-			PushSway(inst)
+            if not inst:HasTag("stump") and not inst:HasTag("burnt") then
+                inst.AnimState:PlayAnimation(inst.anims.blown_pst, false)
+                PushSway(inst)
+            end
+            inst:RemoveEventCallback("animover", OnGustAnimDone)
 		end)
 	end
 end
@@ -438,6 +459,9 @@ local function OnGustStart(inst, windspeed)
 		return
 	end
 	inst:DoTaskInTime(math.random()/2, function(inst)
+		if inst:HasTag("stump") or inst:HasTag("burnt") then
+			return
+		end
 		if inst.spotemitter == nil then
 			AddToNearSpotEmitter(inst, "treeherd", "tree_creak_emitter", TUNING.TREE_CREAK_RANGE)
 		end
@@ -456,14 +480,6 @@ local function OnGustFall(inst)
 	end
 end
 
-local function canbloom(inst)
-	 if not inst:HasTag("stump") and not inst:HasTag("rotten") then
-	 	return true
-	 else
-	 	return false
-	 end
-end
-
 local function startbloom(inst)
 	--inst.components.hackable.product = "tuber_bloom_crop"
 	doTransformBloom(inst)
@@ -475,7 +491,7 @@ local function stopbloom(inst)
 end
 
 local function onregenfn(inst)
-	if not inst:HasTag("burned") then
+	if not inst:HasTag("burnt") and not inst:HasTag("stump") then
 		inst.tubers = math.min(inst.tubers + 1, inst.maxtubers)
 		updateart(inst)
 	end
@@ -483,13 +499,12 @@ end
 
 local function onhackedfn(inst)
 	inst.AnimState:PlayAnimation(inst.anims.chop)
-	inst.AnimState:PushAnimation(inst.anims.idle)
+	PushSway(inst)
 
 	if inst.components.hackable.hacksleft <= 0 then
 		inst.tubers = inst.tubers -1
-
-		--inst.components.lootdropper:SpawnLootPrefab(inst.components.hackable.product, Point(inst.Transform:GetWorldPosition()) )	
 	end
+
 	updateart(inst)
 
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/volcano_cactus/hit")
@@ -497,23 +512,15 @@ end
 
 local function onhackedfinal(prefab,data)
 	local inst = data.plant
-	inst:RemoveTag("stump")
+
 	if inst.tubers < 0 then
-
-		inst:RemoveComponent("hackable")
-
-	    inst:RemoveComponent("burnable")
-	    MakeSmallBurnable(inst)
-	    inst:RemoveComponent("propagator")
-	    MakeSmallPropagator(inst)
 	    inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/volcano_cactus/tuber_fall")
 		
 		local he_right = math.random()>0.5 and true or false
 		local pt = Vector3(inst.Transform:GetWorldPosition())
-	    if data.hacker then
-	    	
-	    	local hispos = Vector3(data.hacker.Transform:GetWorldPosition())
 
+	    if data.hacker then
+	    	local hispos = Vector3(data.hacker.Transform:GetWorldPosition())
 	    	he_right = (hispos - pt):Dot(TheCamera:GetRightVec()) > 0
 		end
 	    
@@ -524,26 +531,11 @@ local function onhackedfinal(prefab,data)
 	        inst.AnimState:PlayAnimation(inst.anims.fallright)
 	        inst.components.lootdropper:DropLoot(pt + TheCamera:GetRightVec())
 	    end
-		RemovePhysicsColliders(inst)
-    	inst.AnimState:PushAnimation(inst.anims.stump)
 
-		inst:AddComponent("workable")
-		inst.components.workable:SetWorkAction(ACTIONS.DIG)
-		inst.components.workable:SetOnFinishCallback(dig_up_stump)
-		inst.components.workable:SetWorkLeft(1)
-    	inst:AddTag("stump")
-	    if inst.components.growable then
-	        inst.components.growable:StopGrowing()
-	    end
+		set_stump(inst, true)
+
 	    inst:AddTag("NOCLICK")
     	inst:DoTaskInTime(2, function() inst:RemoveTag("NOCLICK") end)
-
-	else
-		if  inst.components.hackable then		
-			inst.components.hackable.hacksleft = inst.components.hackable.maxhacks		 
-		    inst.components.hackable.canbehacked = true
-		    inst.components.hackable.hasbeenhacked = false		
-		end	
 	end
 end
 
@@ -555,7 +547,7 @@ local function makebarrenfn(inst)
 
 end
 
-local function onhammered(inst)
+--[[ local function onhammered(inst)
 	if inst.tubers > 0 then
 		while inst.tubers > 0 do
 			inst.components.lootdropper:SpawnLootPrefab(inst.components.hackable.product)	
@@ -565,7 +557,7 @@ local function onhammered(inst)
 	inst.tubers = -1
 	onhackedfinal(inst,{plant = inst})
 	-- should process
-end
+end ]]
 
 local function makefn(build, stage, data)
 
@@ -610,7 +602,7 @@ local function makefn(build, stage, data)
 		
 		-------------------
 
-		MakeSmallPropagator(inst)
+		MakeLargePropagator(inst)
 		inst.components.burnable:SetOnIgniteFn(tree_lit)
 
 		-------------------
@@ -631,6 +623,7 @@ local function makefn(build, stage, data)
 
 		inst.components.hackable.hacksleft = 3
 		inst.components.hackable.maxhacks = 3
+		inst.components.hackable.repeat_hack_cycle = true
 
 		-------------------
 
@@ -679,25 +672,12 @@ local function makefn(build, stage, data)
 
 		inst:SetPrefabName( GetBuild(inst).prefab_name )
 
-		if data =="burnt"  then
+		if data == "burnt"  then
 			OnBurnt(inst)
 		end
 
-		if data =="stump"  then
-			inst:RemoveComponent("burnable")
-			MakeSmallBurnable(inst)		
-			inst:RemoveComponent("propagator")
-			MakeSmallPropagator(inst)
-			inst:RemoveComponent("growable")
-			inst:RemoveComponent("blowinwindgust")
-			inst:RemoveTag("gustable")
-			RemovePhysicsColliders(inst)
-			inst.AnimState:PlayAnimation(inst.anims.stump)
-			inst:AddTag("stump")
-			inst:AddComponent("workable")
-			inst.components.workable:SetWorkAction(ACTIONS.DIG)
-			inst.components.workable:SetOnFinishCallback(dig_up_stump)
-			inst.components.workable:SetWorkLeft(1)
+		if data == "stump"  then
+			set_stump(inst)
 		end
 
 		inst.OnEntitySleep = OnEntitySleep

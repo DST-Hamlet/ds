@@ -47,7 +47,7 @@ local deerclops =
 	warnsound = "dontstarve/creatures/deerclops/distant",
 	warnduration = 60,
 	onspawnfn = onspawn_deerclops,
-	spawnconditionfn = spawncondition_deerclops,
+	spawnconditionsfn = spawncondition_deerclops,
     minspawnday = TUNING.NO_BOSS_TIME,
 }
 

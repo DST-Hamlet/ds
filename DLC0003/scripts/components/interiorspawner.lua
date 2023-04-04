@@ -525,7 +525,7 @@ function InteriorSpawner:CheckIsFollower(inst)
 	end
 
 	if inst and not isfollower and inst:GetGrandParent() == GetPlayer() then
-		print("FOUND A CHILD",inst.prefab)
+		--print("FOUND A CHILD",inst.prefab)
 		isfollower = true
 	end
 
@@ -657,7 +657,7 @@ function InteriorSpawner:Teleport(obj, destination, dontRotate)
 				local magnitude = 1
 				local dx = math.cos(angle) * magnitude
 				local dy = math.sin(angle) * magnitude
-				print("dx,dy",dx,dy)
+				--print("dx,dy",dx,dy)
 				displace.x = dx
 				displace.z = -dy
 			else
@@ -849,11 +849,11 @@ function InteriorSpawner:FadeOutFinished(dont_fadein)
 	if destination then
 		local pt1 = self:getSpawnOrigin()
 		local pt2 = self:getSpawnStorage()
-		print("SpawnOrigin:",pt1,GetTileType(pt1))
-		print("SpawnStorage:",pt2,GetTileType(pt2))
-		print("SpawnDelta:",pt2-pt1)
+		--print("SpawnOrigin:",pt1,GetTileType(pt1))
+		--print("SpawnStorage:",pt2,GetTileType(pt2))
+		--print("SpawnDelta:",pt2-pt1)
 		local ppt = GetPlayer():GetPosition()
-		print("Player at ",ppt, GetTileType(ppt))
+		--print("Player at ",ppt, GetTileType(ppt))
 	end
 
 	GetPlayer().components.locomotor:UpdateUnderLeafCanopy() 
@@ -1422,14 +1422,14 @@ end
 function InteriorSpawner:LeaveCurrentInterior()
 	if self.current_interior then
 		local dungeon_name = self.current_interior.unique_name
-		print("we're in dungeon",dungeon_name)
+		--print("we're in dungeon",dungeon_name)
 		for i,v in pairs(self.doors) do
-			print(i,v,v.target_interior)
+			--print(i,v,v.target_interior)
 			if v.target_interior == dungeon_name then
-				print("This is it")
-				for i,v in pairs(v) do
-					print("",i,v)
-				end
+				--print("This is it")
+				--for i,v in pairs(v) do
+					--print("",i,v)
+				--end
 				GetPlayer():Teleport(v.inst, true)
 				break
 			end
@@ -1683,12 +1683,11 @@ function InteriorSpawner:SpawnInterior(interior)
 
 	for k, prefab in ipairs(interior.prefabs) do
 
-		if GetWorld().getworldgenoptions(GetWorld())[prefab.name] and GetWorld().getworldgenoptions(GetWorld())[prefab.name] == "never" then
+		if GetWorld():IsWorldGenOptionNever(prefab.name) then
 			print("CANCEL SPAWN ITEM DUE TO WORLD GEN PREFS", prefab.name)
 	 	else
 
-			print("SPAWN ITEM", prefab.name)
-
+			--print("SPAWN ITEM", prefab.name)
 			local object = SpawnPrefab(prefab.name)
 			object.Transform:SetPosition(pt.x + prefab.x_offset, 0, pt.z + prefab.z_offset)	
 
@@ -1930,6 +1929,118 @@ function InteriorSpawner:RemoveInterior(interior_id)
 	self.interiors[interior_id]	= nil
 end
 
+function InteriorSpawner:IsInteriorDisconnected(interior, ignored_interior)
+    if interior and ignored_interior then
+        return not self:PlayerRoomConnectedToExit(interior.dungeon_name, interior.unique_name, nil, ignored_interior.unique_name)
+    end
+end
+
+local function CollectLootInInterior(interior, is_pigshop)
+    local loot = {}
+
+    for _, object in pairs(interior.object_list) do
+        if object.components.inventoryitem then
+            object:ReturnToScene()
+            object.components.inventoryitem:ClearOwner()
+            object.components.inventoryitem:WakeLivingItem()
+            object:RemoveTag("INTERIOR_LIMBO")
+
+            table.insert(loot, object)
+
+        else
+            if object.components.container and not (is_pigshop and object.components.container.isshelf) then
+                local container_objs = object.components.container:RemoveAllItems()
+                for i, obj in ipairs(container_objs) do
+                    table.insert(loot, obj)
+                end
+            end
+
+            if object.components.lootdropper and not (is_pigshop and object.components.health) then
+                local smash_loot = object.components.lootdropper:GenerateLoot()
+                for i,obj in ipairs(smash_loot) do
+                    table.insert(loot, SpawnPrefab(obj))
+                end
+            end
+        end
+    end
+
+    return loot
+end
+
+local function IsGenericWall(prefab)
+    -- These walls are not per room.
+    return prefab == "generic_wall_back" or prefab == "generic_wall_side"
+end
+
+function InteriorSpawner:DestroyInteriorByDoor(door, main_door)
+    --[[ 
+        Parameters:
+            - door: 	 Door Inst - has door component [required].
+            - main_door: Door Inst - used in recursion to drop connected interiors loots.
+
+        Used at:
+            * ACTIONS.DEMOLISH_ROOM.fn
+                - Destroy a interior and the disconnected interiors connected to it.
+                - Drops the all loots on the "door" parameter.
+            
+            * Workable:WorkedBy
+                - Destroy all interiors from ouside the interior.
+                - Drops the all loots on the "door" parameter.
+
+            * Green Staff Spell (staffs.lua)
+                - It depends on the door type.
+    ]]
+
+    main_door = main_door or door
+
+    local interior = self:GetInteriorByName(door.components.door.target_interior)
+
+    local loot = CollectLootInInterior(interior, not main_door:HasTag("playerhouse"))
+
+    -- Removes the found loot from the interior so it doesn't get deleted by the next for.
+    for _, item in ipairs(loot) do
+        self:removeprefab(item, interior.unique_name)
+    end
+
+    -- Deletes all disconnected interiors with a reverse for.
+    local obj_count = #interior.object_list
+    for i = obj_count, 1, -1 do
+        local inst = interior.object_list[i]
+
+        if inst and not IsGenericWall(inst.prefab) then
+
+            if inst:HasTag("house_door") then
+                local connected_door = self:GetDoorInst(inst.components.door.target_door_id)
+                local connected_interior = self:GetInteriorByName(inst.components.door.target_interior)
+                -- Don't try to destroy our current room.
+                if connected_door and connected_door ~= door then
+                    if self:IsInteriorDisconnected(connected_interior, interior) then
+                        self:DestroyInteriorByDoor(inst, main_door)
+                    end
+                    connected_door:DeactivateSelf()
+                end
+            end
+
+            inst:Remove()
+        end
+    end
+
+    for _, item in ipairs(loot) do
+        item.Transform:SetPosition(main_door.Transform:GetWorldPosition())
+
+        if item.components.inventoryitem then
+            item.components.inventoryitem:OnDropped(true)
+        end
+    end
+
+    if door.DeactivateSelf then door:DeactivateSelf() end
+
+    self:RemoveInterior(interior.unique_name)
+    self:RemovePlayerRoom(interior.dungeon_name, interior.unique_name)
+
+    GetWorld():PushEvent("roomremoved")
+end
+
 function InteriorSpawner:CreatePlayerHome(house_id, interior_id)
 	self.player_homes[house_id] = 
 	{
@@ -2112,12 +2223,11 @@ function InteriorSpawner:getPropInterior(inst)
 end
 
 function InteriorSpawner:removeprefab(inst,interiorID)
-	print("trying to remove",inst.prefab,interiorID)
 	local interior = self.interiors[interiorID]
 	if interior then
 		for i, prop in ipairs(interior.object_list) do
 			if prop == inst then
-				print("REMOVING",prop.prefab)
+				--print("---> InteriorSpawner: Removed from interior: ",prop.prefab)
 				table.remove(interior.object_list, i)
 				inst.interior = nil
 				break
@@ -2415,7 +2525,7 @@ end
 function InteriorSpawner:CheckForInvalidSpawnOrigin()
 	-- Trying to detect the issue with clouds in rooms/unplacable items
 	local pt1 = self:getSpawnOrigin()
-	print("SpawnOrigin:",pt1,GetTileType(pt1))
+	--print("SpawnOrigin:",pt1,GetTileType(pt1))
 	if (GetTileType(pt1) == "IMPASSABLE") then
 		print("World has suspicious SpawnOrigin")
 	end
@@ -2444,7 +2554,7 @@ end
 function InteriorSpawner:FixRelicOutOfBounds()
 
 
-	print("FIXING RELIC OUT OF BOUNDS")
+	--print("FIXING RELIC OUT OF BOUNDS")
 	for k, room in pairs(self.interiors) do
 		local interior = self:GetInteriorByName(room.unique_name)
 
@@ -2800,7 +2910,7 @@ function InteriorSpawner:CleanupBlackRoomAfterHiddenDoor()
 			--assert(interior)
 			--print("interior:",interior,interior.unique_name)
 			-- add this entity to the object list for this interior
-			if interior.object_list and #interior.object_list > 0 then
+			if interior and interior.object_list and #interior.object_list > 0 then
 				local found = false
 				for i,v in pairs(interior.object_list) do
 					if v == entity then

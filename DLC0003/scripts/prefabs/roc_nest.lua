@@ -51,7 +51,7 @@ local function onworked(inst, worker)
     end
     inst.components.lootdropper:DropLoot()
     SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_"..inst.breaksoundsufix)
     inst:Remove()
 end
 
@@ -75,8 +75,8 @@ local function onload(inst, data)
     end
 end
 
-local function workable(file, anim, action, loot, lootmax, minimap, eightfaced)
-      local inst = CreateEntity()
+local function workable(file, anim, action, loot, lootmax, minimap, eightfaced, breaksoundsufix)
+    local inst = CreateEntity()
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
@@ -86,6 +86,7 @@ local function workable(file, anim, action, loot, lootmax, minimap, eightfaced)
     inst.AnimState:PlayAnimation(anim)
 
     inst.animname = anim
+    inst.breaksoundsufix = breaksoundsufix or "wood"
 
     if minimap then
         inst.entity:AddMiniMapEntity()
@@ -168,19 +169,19 @@ end
 
 return Prefab("roc_nest", nest, assets, prefabs),
     
-    Prefab("roc_nest_egg1",       function() return workable("roc_egg_shells",  "shell1", ACTIONS.MINE, rock_loot, 3) end, assets, prefabs ),
-    Prefab("roc_nest_egg2",       function() return workable("roc_egg_shells",  "shell2", ACTIONS.MINE, rock_loot, 3) end, assets, prefabs ),
-    Prefab("roc_nest_egg3",       function() return workable("roc_egg_shells",  "shell3", ACTIONS.MINE, rock_loot, 3) end, assets, prefabs ),
-    Prefab("roc_nest_egg4",       function() return workable("roc_egg_shells",  "shell4", ACTIONS.MINE, rock_loot, 3) end, assets, prefabs ),
+    Prefab("roc_nest_egg1",       function() return workable("roc_egg_shells",  "shell1", ACTIONS.MINE, rock_loot, 3, nil, nil, "stone") end, assets, prefabs ),
+    Prefab("roc_nest_egg2",       function() return workable("roc_egg_shells",  "shell2", ACTIONS.MINE, rock_loot, 3, nil, nil, "stone") end, assets, prefabs ),
+    Prefab("roc_nest_egg3",       function() return workable("roc_egg_shells",  "shell3", ACTIONS.MINE, rock_loot, 3, nil, nil, "stone") end, assets, prefabs ),
+    Prefab("roc_nest_egg4",       function() return workable("roc_egg_shells",  "shell4", ACTIONS.MINE, rock_loot, 3, nil, nil, "stone") end, assets, prefabs ),
 
-    Prefab("roc_nest_tree1",      function() return workable("roc_junk", "tree1",      ACTIONS.CHOP, tree_loot,    1, "roc_junk_tree1.png"      ) end, assets, prefabs ),
-    Prefab("roc_nest_tree2",      function() return workable("roc_junk", "tree2",      ACTIONS.CHOP, tree_loot,    1, "roc_junk_tree2.png"      ) end, assets, prefabs ),
-    Prefab("roc_nest_bush",       function() return workable("roc_junk", "bush",       ACTIONS.PICK, "cutgrass", nil, "roc_junk_bush.png"       ) end, assets, prefabs ),
-    Prefab("roc_nest_branch1",    function() return workable("roc_junk", "branch1",    ACTIONS.CHOP, branch_loot,  1, "roc_junk_branch1.png"    ) end, assets, prefabs ),
-    Prefab("roc_nest_branch2",    function() return workable("roc_junk", "branch2",    ACTIONS.CHOP, branch_loot,  1, "roc_junk_branch2.png"    ) end, assets, prefabs ),
-    Prefab("roc_nest_trunk",      function() return workable("roc_junk", "trunk",      ACTIONS.CHOP, tree_loot,    1, "roc_junk_trunk.png"      ) end, assets, prefabs ),
-    Prefab("roc_nest_house",      function() return workable("roc_junk", "house",      ACTIONS.HAMMER, house_loot, 3, "roc_junk_house.png"      ) end, assets, prefabs ),
-    Prefab("roc_nest_rusty_lamp", function() return workable("roc_junk", "rusty_lamp", ACTIONS.HAMMER, lamp_loot,  2, "roc_junk_rusty_lamp.png" ) end, assets, prefabs ),
+    Prefab("roc_nest_tree1",      function() return workable("roc_junk", "tree1",      ACTIONS.CHOP, tree_loot,    1, "roc_junk_tree1.png"                    ) end, assets, prefabs ),
+    Prefab("roc_nest_tree2",      function() return workable("roc_junk", "tree2",      ACTIONS.CHOP, tree_loot,    1, "roc_junk_tree2.png"                    ) end, assets, prefabs ),
+    Prefab("roc_nest_bush",       function() return workable("roc_junk", "bush",       ACTIONS.PICK, "cutgrass", nil, "roc_junk_bush.png"                     ) end, assets, prefabs ),
+    Prefab("roc_nest_branch1",    function() return workable("roc_junk", "branch1",    ACTIONS.CHOP, branch_loot,  1, "roc_junk_branch1.png"                  ) end, assets, prefabs ),
+    Prefab("roc_nest_branch2",    function() return workable("roc_junk", "branch2",    ACTIONS.CHOP, branch_loot,  1, "roc_junk_branch2.png"                  ) end, assets, prefabs ),
+    Prefab("roc_nest_trunk",      function() return workable("roc_junk", "trunk",      ACTIONS.CHOP, tree_loot,    1, "roc_junk_trunk.png"                    ) end, assets, prefabs ),
+    Prefab("roc_nest_house",      function() return workable("roc_junk", "house",      ACTIONS.HAMMER, house_loot, 3, "roc_junk_house.png",      nil, "stone" ) end, assets, prefabs ),
+    Prefab("roc_nest_rusty_lamp", function() return workable("roc_junk", "rusty_lamp", ACTIONS.HAMMER, lamp_loot,  2, "roc_junk_rusty_lamp.png", nil, "metal" ) end, assets, prefabs ),
 
     Prefab("roc_nest_debris1",    function() return workable("roc_junk", "stick01",    ACTIONS.PICK, "twigs", 1, nil, true) end, assets, prefabs ),
     Prefab("roc_nest_debris2",    function() return workable("roc_junk", "stick02",    ACTIONS.PICK, "twigs", 1, nil, true) end, assets, prefabs ),

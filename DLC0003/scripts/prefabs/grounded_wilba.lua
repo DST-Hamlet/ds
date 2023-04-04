@@ -23,13 +23,19 @@ local function callGuards(inst, attacker, count)
                     guardprefab = "pigman_royalguard_2"
                     cityID = 2
                 end
-                local spawnpt = Vector3(ents[math.random(#ents)].Transform:GetWorldPosition() )
+                local spawnpt = Vector3(ents[math.random(#ents)].Transform:GetWorldPosition())
+
                 local guard = SpawnPrefab(guardprefab)
                 guard.components.citypossession:SetCity(cityID)
                 guard.Transform:SetPosition(spawnpt.x,spawnpt.y,spawnpt.z)
                 guard:PushEvent("attacked", {attacker = attacker, damage = 0, weapon = nil})
                 if attacker then
                     attacker:AddTag("wanted_by_guards")
+                end
+
+                local interior = GetInteriorSpawner():getPropInterior(inst)
+                if interior then
+                    GetInteriorSpawner():injectprefab(guard, interior)
                 end
             end)
         end

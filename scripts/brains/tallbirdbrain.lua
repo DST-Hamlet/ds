@@ -14,7 +14,7 @@ local WARN_BEFORE_ATTACK_TIME = 2
 local function GoHomeAction(inst)
     if inst.components.homeseeker and 
        inst.components.homeseeker:HasHome() then 
-        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.GOHOME, nil, nil, nil, 0.2)
+        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.GOHOME, nil, nil, nil, 0)
     end
 end
 
@@ -28,15 +28,15 @@ end
 local function LayEggAction(inst)
     if inst.components.homeseeker and 
        inst.components.homeseeker:HasHome() and
-	   inst.components.homeseeker.home.readytolay then 
-        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.LAYEGG, nil, nil, nil, 0.2)
+       inst.components.homeseeker.home.readytolay then 
+        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.LAYEGG, nil, nil, nil, 0)
     end
 end
 
 local function IsNestEmpty(inst)
     return inst.components.homeseeker and 
-		inst.components.homeseeker:HasHome() and 
-		(not inst.components.homeseeker.home.components.pickable or not inst.components.homeseeker.home.components.pickable:CanBePicked() )
+        inst.components.homeseeker:HasHome() and 
+        (not inst.components.homeseeker.home.components.pickable or not inst.components.homeseeker.home.components.pickable:CanBePicked() )
 end
 
 local function GetNearbyThreatFn(inst)
@@ -47,6 +47,10 @@ local function KeepFaceTargetFn(inst, target)
     return target.components.health and
         not target.components.health:IsDead() and
         inst:GetDistanceSqToInst(target) <= KEEP_FACE_DIST*KEEP_FACE_DIST
+end
+
+local function CanMakeNewNest(inst)
+    return inst.components.homeseeker == nil and inst:CanMakeNewHome() and not inst.sg:HasStateTag("busy")
 end
 
 local TallbirdBrain = Class(Brain, function(self, inst)
@@ -61,15 +65,17 @@ function TallbirdBrain:OnStart()
         PriorityNode(
         {
             WhileNode( function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
-			ChaseAndAttack(self.inst, MAX_CHASE_TIME),
-			WhileNode(function() return self.inst.components.homeseeker and self.inst.components.homeseeker:HasHome() and GetNearbyThreatFn(self.inst.components.homeseeker.home) end, "ThreatNearNest",
-				DoAction(self.inst, function() return DefendHomeAction(self.inst) end, "GoHome", true)
-			),
+            ChaseAndAttack(self.inst, MAX_CHASE_TIME),
+            WhileNode(function() return self.inst.components.homeseeker and self.inst.components.homeseeker:HasHome() and GetNearbyThreatFn(self.inst.components.homeseeker.home) end, "ThreatNearNest",
+                DoAction(self.inst, function() return DefendHomeAction(self.inst) end, "GoHome", true)
+            ),
             WhileNode(function() return clock and not clock:IsDay() end, "IsNight",
-				DoAction(self.inst, function() return GoHomeAction(self.inst) end, "GoHome", true)
-			),
-			DoAction(self.inst, function() return LayEggAction(self.inst) end, "LayEgg", true),
-			Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, MAX_WANDER_DIST),
+                DoAction(self.inst, function() return GoHomeAction(self.inst) end, "GoHome", true)
+            ),
+            DoAction(self.inst, function() return LayEggAction(self.inst) end, "LayEgg", true),
+            WhileNode(function() return CanMakeNewNest(self.inst) end, "Make Nest",
+                ActionNode(function() self.inst:PushEvent("makenewnest") end)),
+            Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, MAX_WANDER_DIST),
       },1)
     
     self.bt = BT(self.inst, root) 
@@ -77,7 +83,7 @@ function TallbirdBrain:OnStart()
 end
 
 function TallbirdBrain:OnInitializationComplete()
-    self.inst.components.knownlocations:RememberLocation("home", Point(self.inst.Transform:GetWorldPosition()), true)
+    self.inst.components.knownlocations:RememberLocation("home", Point(self.inst.Transform:GetWorldPosition()))
 end
 
 return TallbirdBrain

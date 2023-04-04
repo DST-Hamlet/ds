@@ -416,6 +416,32 @@ function EntityScript:GetIsWet()
     return GetWorld().components.moisturemanager:IsWorldWet() and not GetWorld().components.moisturemanager:IsEntityDry(self)
 end
 
+function EntityScript:GetInheritedMoisture()
+    local targetMoisture = 0
+    if self.components.moisturelistener then
+        targetMoisture = self.components.moisturelistener:GetMoisture()
+    elseif self.components.moisture then
+        targetMoisture = self.components.moisture:GetMoisture()
+    else
+        targetMoisture = GetWorld().components.moisturemanager:GetWorldMoisture()
+    end
+    
+    return targetMoisture
+end 
+
+function EntityScript:ApplyInheritedMoisture(other)
+    local targetMoisture = self:GetInheritedMoisture()
+            
+    other.targetMoisture = targetMoisture
+    other:DoTaskInTime(2*FRAMES, function()
+        if other.components.moisturelistener then 
+            other.components.moisturelistener.moisture = other.targetMoisture
+            other.targetMoisture = nil
+            other.components.moisturelistener:DoUpdate()
+        end
+    end)
+end 
+
 function EntityScript:SetPrefabName(name)
     self.prefab = name
     self.entity:SetPrefabName(name)
@@ -763,6 +789,10 @@ end
 function EntityScript:GetPosition()
     return Point(self.Transform:GetWorldPosition())
 end
+
+function EntityScript:GetRotation()
+    return self.Transform:GetRotation()
+ end
 
 function EntityScript:GetAngleToPoint(x, y, z)
 	if not x then

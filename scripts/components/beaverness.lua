@@ -56,7 +56,7 @@ function Beaverness:OnLoad(data)
 
 end
 
-function Beaverness:DoDelta(delta, overtime)
+function Beaverness:DoDelta(delta, overtime)    
     local oldpercent = self.current/self.max
     self.current = self.current + delta
     

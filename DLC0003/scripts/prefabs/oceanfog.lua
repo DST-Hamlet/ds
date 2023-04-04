@@ -71,6 +71,7 @@ local function commonfn(Sim)
 	local trans = inst.entity:AddTransform()
 	inst:AddTag("FX")
 	inst:AddTag("NOCLICK")
+	inst:AddTag("INTERIOR_LIMBO_IMMUNE")
 	
 	InitEnvelopes()
 

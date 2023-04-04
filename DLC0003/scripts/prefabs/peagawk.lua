@@ -34,8 +34,12 @@ local function refreshart(inst)
     for i=1,TAIL_FEATHERS_MAX do
         if inst.feathers < i then
             inst.AnimState:Hide("perd_tail_"..i)
+            inst.AnimState:Hide("plume_"..i)
+            inst.AnimState:Hide("eye_"..i)
         else
             inst.AnimState:Show("perd_tail_"..i)
+            inst.AnimState:Show("plume_"..i)
+            inst.AnimState:Show("eye_"..i)
         end
     end
 end
@@ -91,13 +95,21 @@ local function canbepickedfn(inst)
     return inst.feathers and inst.feathers >= 1
 end
 
+local function Regen(inst)
+    if inst.components.pickable then
+        inst.components.pickable:Regen()
+    end
+end
+
 local function OnRegen(inst)
-    inst.feathers = inst.feathers+1
+    inst.feathers = inst.feathers + 1
     if inst.feathers < TAIL_FEATHERS_MAX then
         local pickable = inst.components.pickable
-        pickable.task = inst:DoTaskInTime(pickable.regentime, inst.components.pickable.Regen, "regen")
+
+        pickable.task = inst:DoTaskInTime(pickable.regentime, Regen, "regen")
         pickable.targettime = GetTime() + pickable.regentime
     end
+
     refreshart(inst)
 end
 
@@ -150,25 +162,34 @@ local function OnPicked(inst, picker, loot)
     
 end
 
-
 local function OnSave(inst, data)
     data.feathers = inst.feathers
     data.is_bush = inst.is_bush
     data.prism = inst.prism
-
-    if inst.is_bush then
-        inst.TransformToBush(inst)
-    end
-
-    if inst.prism then
-        inst.TransformToRainbow(inst)
-    end
 end
 
 local function OnLoad(inst, data)
-    if data and data.feathers then
+    if not data then return end
+
+    if data.feathers then
         inst.feathers = data.feathers
         inst.prism = data.prism
+
+        -- The pickable OnLoad considers whether there is an active regen to set these variables.
+        if inst.feathers > 0 then
+            inst.components.pickable.canbepicked = true
+            inst.components.pickable.hasbeenpicked = false
+        end
+
+        refreshart(inst)
+    end
+
+    if data.is_bush then
+        inst.TransformToBush(inst)
+    end
+
+    if data.prism then
+        inst.TransformToRainbow(inst)
     end
 end
 

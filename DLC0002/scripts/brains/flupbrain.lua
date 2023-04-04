@@ -2,6 +2,7 @@ require "behaviours/wander"
 require "behaviours/doaction"
 require "behaviours/chaseandattack"
 require "behaviours/standstill"
+require "behaviours/panic"
 
 local AVOID_PLAYER_DIST = 1.5
 local AVOID_PLAYER_STOP = 3
@@ -36,6 +37,7 @@ function FlupBrain:OnStart()
 
     local root = PriorityNode(
     {
+        WhileNode(function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
         WhileNode(function() return not self.inst.components.combat.target end, "No Target",
             Leash(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, HOME_LEASH_DIST, HOME_RETURN_DIST, true)),
         DoAction(self.inst, SetUpAmbush, "Try Ambush"),

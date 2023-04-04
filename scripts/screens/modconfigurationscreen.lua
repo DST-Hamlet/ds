@@ -22,6 +22,7 @@ local spinnerFont = { font = BUTTONFONT, size = 30 }
 
 local COLS = 2
 local ROWS_PER_COL = 7
+local ROWS_PER_SCROLL = ROWS_PER_COL * 2
 
 local options = {}
 
@@ -98,7 +99,7 @@ local ModConfigurationScreen = Class(Screen, function(self, modname)
 	self.rightbutton = self.optionspanel:AddChild(ImageButton("images/ui.xml", "scroll_arrow.tex", "scroll_arrow_over.tex", "scroll_arrow_disabled.tex"))
     self.rightbutton:SetPosition(440, 0, 0)
     self.rightbutton:SetScale(.9)
-    self.rightbutton:SetOnClick( function() self:Scroll(ROWS_PER_COL) end)
+    self.rightbutton:SetOnClick( function() self:Scroll(ROWS_PER_SCROLL) end)
     if #options <= ROWS_PER_COL * COLS then -- Only show the arrow if we have a ton of options
 		self.rightbutton:Hide()
 	end
@@ -106,7 +107,7 @@ local ModConfigurationScreen = Class(Screen, function(self, modname)
 	self.leftbutton = self.optionspanel:AddChild(ImageButton("images/ui.xml", "scroll_arrow.tex", "scroll_arrow_over.tex", "scroll_arrow_disabled.tex"))
     self.leftbutton:SetPosition(-440, 0, 0)
     self.leftbutton:SetScale(-.9,.9,.9)
-    self.leftbutton:SetOnClick( function() self:Scroll(-ROWS_PER_COL) end)	
+    self.leftbutton:SetOnClick( function() self:Scroll(-ROWS_PER_SCROLL) end)	
     self.leftbutton:Hide()
 
     self.optionwidgets = {}
@@ -216,12 +217,12 @@ function ModConfigurationScreen:OnControl(control, down)
 	    elseif control == CONTROL_PAGELEFT then
     		if self.leftbutton.shown then
     			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-    			self:Scroll(-ROWS_PER_COL)
+    			self:Scroll(-ROWS_PER_SCROLL)
     		end
     	elseif control == CONTROL_PAGERIGHT then
     		if self.rightbutton.shown then
     			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-    			self:Scroll(ROWS_PER_COL)
+    			self:Scroll(ROWS_PER_SCROLL)
     		end
     	else
     		return false

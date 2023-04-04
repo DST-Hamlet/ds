@@ -113,61 +113,65 @@ function InventoryItem:OnRemoved()
     self:WakeLivingItem()
 end
 
-function InventoryItem:OnDropped(randomdir)
-    --print("InventoryItem:OnDropped", self.inst, randomdir)
-    
+function InventoryItem:OnDropped(randomdir, tossdir, skipfall, setspeed)
 	if not self.inst:IsValid() then
 		return
 	end
 	
-    --print("OWNER", self.owner, self.owner and Point(self.owner.Transform:GetWorldPosition()))
-
     local x,y,z = self.inst.Transform:GetWorldPosition()
-    --print("pos", x,y,z)
 
+    local dropper = nil
     if self.owner then
+        dropper = self.owner
         -- if we're owned, our own coords are junk at this point
         x,y,z = self.owner.Transform:GetWorldPosition()
     end
 
-    --print("REMOVED", self.inst)
 	self:OnRemoved()
 
     -- now in world space, if we weren't already
-    --print("setpos", x,y,z)
     self.inst.Transform:SetPosition(x,y,z)
     self.inst.Transform:UpdateTransform()
 
     if self.inst.Physics then
         if not self.nobounce then
             y = y + 1
-            --print("setpos", x,y,z)
             self.inst.Physics:Teleport(x,y,z)
 		end
 
 		local vel = Vector3(0, 5, 0)
-        if randomdir then
+
+        if tossdir then 
+            vel.x = tossdir.x * 4 --speed
+            vel.z = tossdir.z * 4 --speed
+            self.inst.Transform:SetPosition(x + tossdir.x ,y,z + tossdir.z) -- move the position a bit so it doesn't clip through the player 
+        elseif randomdir then
             local speed = 2 + math.random()
+            if setspeed then
+               speed = setspeed + math.random()
+            end            
             local angle = math.random()*2*PI
             vel.x = speed*math.cos(angle)
 			vel.y = speed*3
             vel.z = speed*math.sin(angle)
         end
+
         if self.nobounce then
 			vel.y = 0
         end
-        --print("vel", vel.x, vel.y, vel.z)
+    
 		self.inst.Physics:SetVel(vel.x, vel.y, vel.z)
     end
 
     if self.ondropfn then
-        self.ondropfn(self.inst)
+        self.ondropfn(self.inst, dropper)
     end
+
     self.inst:PushEvent("ondropped")
-    
+
     if self.inst.components.propagator then
         self.inst.components.propagator:Delay(5)
-    end    
+    end
 end
 
 -- If this function retrns true then it has destroyed itself and you shouldnt give it to the player
@@ -206,7 +210,7 @@ function InventoryItem:GetImage()
 end
 
 function InventoryItem:GetAtlas()
-	return self.atlasname or "images/inventoryimages.xml"
+    return self.atlasname or GetInventoryItemAtlas(self:GetImage())
 end
 
 function InventoryItem:RemoveFromOwner(wholestack)
@@ -245,6 +249,10 @@ function InventoryItem:CollectUseActions(doer, target, actions)
         if self:GetGrandOwner() == doer then
             table.insert(actions, target:HasTag("bundle") and ACTIONS.BUNDLESTORE or ACTIONS.STORE)
         end
+    end
+
+    if target.components.trader and target.components.trader.acceptnontradable then
+        table.insert(actions, ACTIONS.GIVE)
     end
 end
 

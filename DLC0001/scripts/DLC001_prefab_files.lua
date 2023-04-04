@@ -251,7 +251,6 @@ local PREFABFILES = {
   "wes",
   "wickerbottom",
   "willow",
-  "willowfire",
   "wilson",
   "winterometer",
   "wolfgang",

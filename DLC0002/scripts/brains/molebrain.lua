@@ -37,7 +37,7 @@ end
 
 local function MakeNewHomeAction(inst)
     local angle = math.random(0,360)
-    local offset = FindWalkableOffset(inst:GetPosition(), angle*DEGREES, math.random(5,15), 120, false, false)
+    local offset = FindGroundOffset(inst:GetPosition(), angle*DEGREES, math.random(5,15), 120, false, false)
     return BufferedAction(inst, nil, ACTIONS.MAKEMOLEHILL, nil, inst:GetPosition() + offset)
 end
 
@@ -48,7 +48,7 @@ local function TakeBaitAction(inst)
     end
 
     local target = FindEntity(inst, SEE_BAIT_DIST, function(item) return item:HasTag("molebait") and (item.components.bait or item:HasTag("bell")) and not (item.components.inventoryitem and item.components.inventoryitem:IsHeld()) end)
-    if target and not target.selectedasmoletarget then
+    if target and not target.selectedasmoletarget and target:GetIsOnLand() then
         target.selectedasmoletarget = true
         target:DoTaskInTime(5, function(target) target.selectedasmoletarget = false end)
         local act = BufferedAction(inst, target, ACTIONS.STEALMOLEBAIT)

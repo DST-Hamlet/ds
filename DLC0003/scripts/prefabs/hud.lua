@@ -61,8 +61,8 @@ local assets =
     Asset("ANIM", "anim/progressbar.zip"),   
     Asset("ANIM", "anim/wind_fx.zip"),
     
-    --Asset("ATLAS", "images/hud_shipwrecked.xml"),
-    --Asset("IMAGE", "images/hud_shipwrecked.tex"),
+    Asset("ATLAS", "images/hud_shipwrecked.xml"),
+    Asset("IMAGE", "images/hud_shipwrecked.tex"),
     
     Asset("ATLAS", "images/hud_porkland.xml"),
     Asset("IMAGE", "images/hud_porkland.tex"),

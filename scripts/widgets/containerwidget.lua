@@ -163,7 +163,7 @@ function ContainerWidget:OnItemLose(data)
 end
 
 
-function ContainerWidget:Close()
+function ContainerWidget:Close(dont_close_container)
     if self.isopen then
     	self.isopen = false
 		self:StopUpdating()
@@ -174,7 +174,7 @@ function ContainerWidget:Close()
 		end
 		
 		if self.container then
-			self.container.components.container:Close()
+			if not dont_close_container then self.container.components.container:Close() end
 			--self.inst:RemoveAllEventCallbacks()
 			if self.onitemlosefn then
 				self.inst:RemoveEventCallback("itemlose", self.onitemlosefn, self.container)

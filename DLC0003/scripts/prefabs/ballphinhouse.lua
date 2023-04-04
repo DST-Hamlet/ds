@@ -77,8 +77,8 @@ local function onhammered(inst, worker)
 	if inst.components.childspawner then inst.components.childspawner:ReleaseAllChildren() end
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
-	inst:Remove()
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
+    	inst:Remove()
 end
 
 local function ongusthammerfn(inst)
@@ -87,8 +87,12 @@ end
 
 local function onhit(inst, worker)
     if not inst:HasTag("burnt") then
-    	inst.AnimState:PlayAnimation("hit")
-    	inst.AnimState:PushAnimation("idle")
+        inst.AnimState:PlayAnimation("hit")
+        if inst.lightson then
+            inst.AnimState:PushAnimation("lit")
+        else
+            inst.AnimState:PushAnimation("idle")
+        end
     end
 end
 

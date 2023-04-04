@@ -12,6 +12,8 @@ local prefabs =
 	"stafflight",
     "staff_tornado",
     "cutgrass",
+    "sand_puff_large_front",
+    "sand_puff_large_back",
 }
 
 ---------RED STAFF---------
@@ -59,7 +61,7 @@ local function onattack_red(inst, attacker, target)
 
     attacker.SoundEmitter:PlaySound("dontstarve/wilson/fireball_explo")
 
-    target:PushEvent("attacked", { attacker = attacker, damage = 0 })
+    target:PushEvent("attacked", { attacker = attacker, damage = 0, weapon = inst})
 end
 
 local function onlight(inst, target)
@@ -92,7 +94,7 @@ local function onattack_blue(inst, attacker, target)
     end
 
     if target.sg ~= nil and not target.sg:HasStateTag("frozen") then
-        target:PushEvent("attacked", { attacker = attacker, damage = 0 })
+        target:PushEvent("attacked", { attacker = attacker, damage = 0, weapon = inst})
     end
 
     if target.components.freezable then
@@ -103,11 +105,11 @@ end
 
 ---------PURPLE STAFF---------
 
-local function getrandomposition(inst, caster)
+local function getrandomposition(inst, target)
     local ground = GetWorld()
     local centers = {}
 
-    if caster:HasTag("aquatic") then
+    if target:GetIsOnWater() or target:HasTag("aquatic") then
         for i,node in ipairs(ground.topology.nodes) do
             if inst:GetIsOnWater(node.x, 0, node.y) then
                 table.insert(centers, {x = node.x, z = node.y})
@@ -144,7 +146,7 @@ local function teleport_thread(inst, caster, teletarget, loctarget)
     if loctarget then
         t_loc = loctarget:GetPosition()
     else
-        t_loc = getrandomposition(inst, caster)
+        t_loc = getrandomposition(inst, teletarget)
     end
 
     local teleportee = teletarget
@@ -218,7 +220,7 @@ local function teleport_func(inst, target)
     local targets = {}
     for k,v in pairs(ents) do
         local v_pt = v:GetPosition()
-        if distsq(pt, v_pt) >= mindistance * mindistance then
+        if distsq(pt, v_pt) >= mindistance * mindistance and not (v:GetIsInInterior() and tar:HasTag("dontteleporttointerior")) then
             table.insert(targets, {base = v, distance = distsq(pt, v_pt)}) 
         end
     end
@@ -307,6 +309,10 @@ local function SpawnLootPrefab(inst, lootprefab)
                     pt = pt + Vector3(math.cos(angle), 0, math.sin(angle))*(loot.Physics:GetRadius() + inst.Physics:GetRadius())
                     loot.Transform:SetPosition(pt.x,pt.y,pt.z)
                 end
+
+                if loot.components.inventoryitem then
+                    loot.components.inventoryitem:OnLootDropped()
+                end
                 
                 loot:DoTaskInTime(1, 
                     function() 
@@ -353,6 +359,14 @@ local function getsoundsforstructure(inst, target)
 
 end
 
+local function InsertOincs(loots, num, type)
+	if num > 0 then
+		for n=1, num do
+			table.insert(loots, type)
+		end
+	end
+end
+
 local function destroystructure(staff, target)
 
     local ingredient_percent = 1
@@ -375,8 +389,18 @@ local function destroystructure(staff, target)
         for k,v in ipairs(recipe.ingredients) do
             if not string.find(v.type, "gem") then
                 local amt = math.ceil(v.amount * ingredient_percent)
-                for n = 1, amt do
-                    table.insert(loot, v.type)
+                if v.type == "oinc" then
+                    local oinc100 = math.floor(amt / 100)
+                    local oinc10  = math.floor((amt - (oinc100 * 100)) / 10)
+                    local oinc    = amt - (oinc100 * 100) - (oinc10 * 10)
+                    
+                    InsertOincs(loot, oinc100, "oinc100")
+                    InsertOincs(loot, oinc10,  "oinc10" )
+                    InsertOincs(loot, oinc,    "oinc"   )
+                else
+                    for n = 1, amt do
+                        table.insert(loot, v.type)
+                    end
                 end
             end
         end
@@ -422,6 +446,10 @@ local function destroystructure(staff, target)
         target.components.fixable.overridden = true
     end
 
+    if target.components.door and not target:HasTag("predoor") then
+        GetInteriorSpawner():DestroyInteriorByDoor(target)
+    end
+
     target:Remove()
     
     if target.components.resurrector and not target.components.resurrector.used then
@@ -438,7 +466,7 @@ local function cancreatelight(staff, caster, target, pos)
     local ground = GetWorld()
     if ground and pos then
         local tile = ground.Map:GetTileAtPoint(pos.x, pos.y, pos.z)
-        return tile ~= GROUND.IMPASSIBLE and tile < GROUND.UNDERGROUND
+        return tile ~= GROUND.IMPASSABLE and tile < GROUND.UNDERGROUND
     end
     return false
 end
@@ -630,9 +658,11 @@ local function red()
 
 
     inst:AddTag("firestaff")
+    inst:AddTag("projectile")
     inst:AddTag("rangedfireweapon")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     inst.components.weapon:SetOnAttack(onattack_red)
@@ -652,9 +682,11 @@ local function blue()
     local inst = commonfn("blue")
     
     inst:AddTag("icestaff")
+    inst:AddTag("projectile")
     inst:AddTag("extinguisher")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     inst.components.weapon:SetOnAttack(onattack_blue)
@@ -708,6 +740,8 @@ end
 local function green()
     local inst = commonfn("green")
     inst:AddTag("nopunch")
+    inst:AddTag("greenstaff")
+
     inst.fxcolour = {51/255,153/255,51/255}
     inst:AddComponent("spellcaster")
     inst.components.spellcaster.canuseontargets = true

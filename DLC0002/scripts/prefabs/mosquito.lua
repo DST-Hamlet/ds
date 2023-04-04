@@ -162,10 +162,8 @@ local function commonfn(Sim)
 	inst:AddTag("smallcreature")
 
 	
-	MakeCharacterPhysics(inst, 1, .5)
+	MakeAmphibiousCharacterPhysics(inst, 1, .5)
 	inst.Physics:SetCollisionGroup(COLLISION.FLYERS)
-	inst.Physics:ClearCollisionMask()
-	inst.Physics:CollidesWith(COLLISION.WORLD)
 	inst.Physics:CollidesWith(COLLISION.FLYERS)
 
 	inst.AnimState:SetBank("mosquito")
@@ -185,11 +183,10 @@ local function commonfn(Sim)
 	inst.OnEntityWake = OnWake
 	inst.OnEntitySleep = OnSleep    
 
-
-	inst:AddComponent("inventoryitem")
 	inst:AddComponent("stackable")
-	--inst.components.inventoryitem:SetOnDroppedFn(OnDropped) Done in MakeFeedablePet
-	--inst.components.inventoryitem:SetOnPutInInventoryFn(OnPickedUp)
+	
+	inst:AddComponent("inventoryitem")
+	inst.components.inventoryitem.nosink = true
 	inst.components.inventoryitem.canbepickedup = false
 
 	---------------------
@@ -242,7 +239,7 @@ end
 
 local function mosquitofn(sim)
 	local inst = commonfn(sim)
-	MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst, "body", Vector3(0, -1, 1))
 	inst.components.lootdropper:SetChanceLootTable('mosquito')	
 	return inst 
 end 

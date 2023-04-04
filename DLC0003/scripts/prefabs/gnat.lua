@@ -81,6 +81,17 @@ local function stopinfesttest(inst)
 	end
 end
 
+local function OnUninfest(inst)
+    if not (
+		inst.components.homeseeker and 
+		inst.components.homeseeker.home and 
+		inst.components.homeseeker.home:IsValid()
+	)
+    then
+		inst.components.knownlocations:RememberLocation("home", inst:GetPosition())
+	end
+end
+
 local function makehome(act)
 	local home = SpawnPrefab("gnatmound")
 	local pos = Vector3(act.doer.Transform:GetWorldPosition())
@@ -184,6 +195,7 @@ local function fn(Sim)
 	inst:AddComponent("infester")
 	inst.components.infester.bitefn = bite
 	inst.components.infester.stopinfesttestfn = stopinfesttest
+	inst.components.infester.onuninfestfn = OnUninfest
 	------------------
 	
 	inst:AddComponent("lootdropper")
@@ -199,15 +211,15 @@ local function fn(Sim)
 
 	inst:ListenForEvent("freeze", function()
 		if inst.components.freezable then
-			inst.components.health.invincible =false
+			inst.components.health.invincible = false
 		end
 	end)    
 
 	inst:ListenForEvent("unfreeze", function() 
 		if inst.components.freezable then
-			inst.components.health.invincible =true
+			inst.components.health.invincible = true
 		end
-	end)    
+	end)
 
 	inst.special_action = makehome
 

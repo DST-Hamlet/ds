@@ -52,12 +52,11 @@ local function spawnpugalisk(inst)
 end
 
 local function activate(inst, fountain)
-
-    if GetWorld().getworldgenoptions(GetWorld())["pugalisk"] and GetWorld().getworldgenoptions(GetWorld())["pugalisk"] == "never" then
+    if GetWorld():IsWorldGenOptionNever("pugalisk") then
         return
-    end    
+    end
 
-    if inst.state == STATES.CLOSED then        
+    if inst.state == STATES.CLOSED then
         inst.fountain = fountain
         inst.state = STATES.OPENING
         inst.AnimState:PlayAnimation("opening")

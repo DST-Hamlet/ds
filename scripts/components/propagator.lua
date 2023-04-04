@@ -92,6 +92,18 @@ function Propagator:OnUpdate(dt)
 			    if v ~= self.inst and v.components.propagator and v.components.propagator.acceptsheat then
                     v.components.propagator:AddHeat(self.heatoutput*dt)
 			    end
+
+                if v ~= self.inst and v.components.freezable then
+                    v.components.freezable:AddColdness((-self.heatoutput/4)*dt)
+                    if v.components.freezable:IsFrozen() and v.components.freezable.coldness <= 0 then
+                        v.components.freezable:Unfreeze()
+                    end
+                end
+
+                if v:HasTag("frozen") or v:HasTag("meltable") then
+                    v:PushEvent("firemelt")
+                    v:AddTag("firemelt")
+                end
     			
 			    if self.damages and v.components.health and v.components.health.vulnerabletoheatdamage then
 				    local dsq = distsq(pos, Vector3(v.Transform:GetWorldPosition()))

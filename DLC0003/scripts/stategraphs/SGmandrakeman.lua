@@ -91,17 +91,6 @@ local states=
         {
             EventHandler("animover", function(inst) inst.sg:GoToState("idle") end ),
         },        
-    },    
-    
-    State {
-		name = "frozen",
-		tags = {"busy"},
-		
-        onenter = function(inst)
-            inst.AnimState:PlayAnimation("frozen")
-            inst.Physics:Stop()
-            --inst.components.highlight:SetAddColour(Vector3(82/255, 115/255, 124/255))
-        end,
     },
 
     State{

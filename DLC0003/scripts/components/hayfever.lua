@@ -2,15 +2,19 @@ local Hayfever = Class(function(self, inst)
     self.inst = inst
     self.enabled = false
     self.sneezed = false
-    self.nextsneeze  = self:GetNextSneezTime()    
+    self.nextsneeze  = self:GetNextSneezTimeInitial()
 end)
 
 function Hayfever:GetNextSneezTime()
-    return math.random(10,40) 
+    return math.random(10, 40)
+end
+
+function Hayfever:GetNextSneezTimeInitial()
+    return math.random(60, 80)
 end
 
 function Hayfever:SetNextSneezeTime(newtime)
-    if self.nextsneeze < newtime then         
+    if self.nextsneeze < newtime then
         self.nextsneeze = newtime
     end
 end
@@ -39,21 +43,21 @@ function Hayfever:OnUpdate(dt)
                     self.nextsneeze = self:GetNextSneezTime()
                 else
                     self.sneezed = true
-                    self.nextsneeze = 1                
+                    self.nextsneeze = 1
                 end
 
                 self.inst.wantstosneeze = true
-                self.inst:PushEvent("sneeze")               
+                self.inst:PushEvent("sneeze")
             end
         else
-            self.nextsneeze = self.nextsneeze -dt
-        end        
+            self.nextsneeze = self.nextsneeze - dt
+        end
     else
         if self.nextsneeze < 120 then
             self.nextsneeze = self.nextsneeze + (dt*0.9)
         end
     end
-    self.inst:PushEvent("updatepollen", {sneezetime = self.nextsneeze})  
+    self.inst:PushEvent("updatepollen", {sneezetime = self.nextsneeze})
 end
 
 function Hayfever:OnSave()
@@ -68,7 +72,7 @@ function Hayfever:OnSave()
 end
 
 function Hayfever:OnLoad(data, newents)
-   if data then
+    if data then
         if data.enabled then
             self.enabled = data.enabled
         end
@@ -77,24 +81,35 @@ function Hayfever:OnLoad(data, newents)
         end
         if data.nextsneeze then
             self.nextsneeze = data.nextsneeze
-        end    
-   end 
-   if self.enabled then
+        end
+    end
+
+    if self.enabled then
         self:Enable()
-   end
+    end
+end
+
+function Hayfever:OnProgress()
+    if self.enabled then
+        self.inst:PushEvent("updatepollen", {sneezetime = nil})  
+        self:SetNextSneezeTime(self:GetNextSneezTimeInitial())
+    end
+
+    self.enabled = false
+    self.inst:StopUpdatingComponent(self) 
 end
 
 function Hayfever:Enable()
     if not self.hayfeverimune then
-
-        if GetWorld().getworldgenoptions(GetWorld())["hayfever"] and GetWorld().getworldgenoptions(GetWorld())["hayfever"] == "never" then
+        if GetWorld():IsWorldGenOptionNever("hayfever") then
             return
         end
 
         if not self.enabled then
-            print("HAYVEVER STARTED")    
+            print("HAYVEVER STARTED")
             self.inst.components.talker:Say(GetString(self.inst.prefab, "ANNOUNCE_HAYFEVER"))
         end
+
         self.enabled = true
 
         self.inst:StartUpdatingComponent(self)
@@ -102,11 +117,14 @@ function Hayfever:Enable()
 end
 
 function Hayfever:Disable()
-    if self.enabled then   
-        print("HAYVEVER OVER")    
+    if self.enabled then
+        print("HAYVEVER OVER")
         self.inst:PushEvent("updatepollen", {sneezetime = nil})  
-        self.inst.components.talker:Say(GetString(self.inst.prefab, "ANNOUNCE_HAYFEVER_OFF"))    
+        self.inst.components.talker:Say(GetString(self.inst.prefab, "ANNOUNCE_HAYFEVER_OFF"))
+
+        self:SetNextSneezeTime(self:GetNextSneezTimeInitial())
     end
+
     self.enabled = false
     self.inst:StopUpdatingComponent(self) 
 end
@@ -116,42 +134,41 @@ function Hayfever:GetDebugString()
 end
 
 function Hayfever:DoSneezeEffects()
-    
     self.inst.components.sanity:DoDelta(-TUNING.SANITY_SUPERTINY*3)
 
     -- cause player to drop stuff here.
-    local itemstodrop = 0 
+    local itemstodrop = 0
+
     if math.random() < 0.6 then
-        itemstodrop = itemstodrop +1
+        itemstodrop = itemstodrop + 1
     end
+
     if math.random() < 0.1 then
-        itemstodrop = itemstodrop +1
+        itemstodrop = itemstodrop + 1
     end    
 
     if itemstodrop > 0 then
         local findItems = self.inst.components.inventory:FindItems(
-                        function(item)
-                            return not item:HasTag("nosteal")
-                        end) 
+            function(item)
+                return not item:HasTag("nosteal")
+            end)
 
-        for i=1,itemstodrop do            
+        for i=1, itemstodrop do
             for i=1, itemstodrop do
                 if #findItems > 0 then
-                    local itemnum = math.random(1,#findItems)
+                    local itemnum = math.random(1, #findItems)
                     local item = findItems[itemnum]
 
                     table.remove(findItems,itemnum)
 
                     if item then
-                        local direction = Vector3(math.random(1)-2,0,math.random(1)-2)        
-                        print("DROPPING",item.prefab)                
+                        local direction = Vector3(math.random(1)-2,0,math.random(1)-2)
                         self.inst.components.inventory:DropItem(item, false, direction:GetNormalized())
-                    end                   
-
-                end                      
+                    end
+                end
             end
         end
     end
-end 
+end
 
 return Hayfever

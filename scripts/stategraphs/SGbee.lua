@@ -101,7 +101,7 @@ local states=
         ontimeout = function(inst)
             if (inst.components.combat and not inst.components.combat.target)
                and not inst:GetBufferedAction() and
-               inst:HasTag("worker") then
+               inst:HasTag("worker") and not (inst.GetIsOnWater and inst:GetIsOnWater()) then
                 inst.sg:GoToState("catchbreath")
             else
                 inst.sg:GoToState("moving")

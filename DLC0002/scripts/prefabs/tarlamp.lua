@@ -53,13 +53,9 @@ local function turnoff(inst)
 
     if inst.equippedby then
         setswapsymbol(inst, "swap_lantern_off")
-    else       
-        if inst:GetIsOnWater() then
-            inst.AnimState:PlayAnimation("idle_off_water")
-        else
-            inst.AnimState:PlayAnimation("idle_off")
-        end
     end
+
+    inst.components.floatable:UpdateAnimations("idle_off_water", "idle_off")
 end
 
 local function turnon(inst)
@@ -80,14 +76,9 @@ local function turnon(inst)
 
     if inst.equippedby then
         setswapsymbol(inst, "swap_lantern")      
-    else
-        if inst:GetIsOnWater() then
-            inst.AnimState:PlayAnimation("idle_on_water")
-        else
-            inst.AnimState:PlayAnimation("idle_on")
-        end
     end
 
+    inst.components.floatable:UpdateAnimations("idle_on_water", "idle_on")
 end
 
 
@@ -179,7 +170,7 @@ end
 
 local function ondropped(inst)
     inst.components.equippable:ToggleOff()
-   inst.components.equippable:ToggleOn()
+    inst.components.equippable:ToggleOn()
 end
 
 local function onpickup(inst)
@@ -213,6 +204,9 @@ local function fn(Sim)
     anim:SetBank("tarlamp")
     anim:SetBuild("tarlamp")
     anim:PlayAnimation("idle_off")
+
+    MakeInventoryFloatable(inst, "idle_off_water", "idle_off")
+
     MakeInventoryPhysics(inst)
     
     inst:AddComponent("weapon")
@@ -234,6 +228,7 @@ local function fn(Sim)
     inst:AddComponent("inventoryitem")
     inst.components.inventoryitem:SetOnDroppedFn(ondropped)
     inst.components.inventoryitem:SetOnPickupFn(onpickup)
+    inst.components.inventoryitem.canbepickedupwhileburning = true
     -----------------------------------
     
     inst:AddComponent("equippable")
@@ -261,14 +256,18 @@ local function fn(Sim)
     inst.components.machine.turnonfn = turnon
     inst.components.machine.turnofffn = turnoff
     inst.components.machine.cooldowntime = 0
-    inst.components.machine.caninteractfn = function() return not inst.components.fueled:IsEmpty() and (inst.components.inventoryitem.owner == nil or inst.components.equippable.isequipped) end
+    -- The equippable:CollectInventoryActions will handle turning on/off in the inventory.
+    inst.components.machine.caninteractfn = function() return not inst.components.fueled:IsEmpty() and (inst.components.inventoryitem.owner == nil) end
     inst.components.machine.noswitchanim = true
 
     inst:AddComponent("burnable")
     inst.components.burnable.canlight = false
     inst.components.burnable.fxprefab = nil
+    inst.components.burnable.burntonwater = true
 
     inst:AddComponent("fueled")
+    inst.components.fueled.fueltype = "TAR"
+    inst.components.fueled.accepting = true
     inst.components.fueled:SetUpdateFn( onfueledupdate )
     inst.components.fueled:SetSectionCallback(
         function(section)
@@ -276,11 +275,11 @@ local function fn(Sim)
 
                 depleted(inst)
                 turnoff(inst) 
-                local owner = inst.components.inventoryitem.owner                                
+                local owner = inst.components.inventoryitem.owner
                 if owner then
                     owner:PushEvent("torchranout", {torch = inst})
                 end
-                inst:Remove()                
+                inst:Remove()
             end
         end)
     inst.components.fueled:InitializeFuelLevel(TUNING.TORCH_FUEL)

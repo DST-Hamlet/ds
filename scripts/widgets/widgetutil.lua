@@ -35,17 +35,13 @@ function DoRecipeClick(owner, recipe)
         
         if knows then
             if buffered then
-                --TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-                --owner.HUD.controls.crafttabs.tabs:DeselectAll()
                 if recipe.placer then
                     owner.components.playercontroller:StartBuildPlacementMode(recipe, function(pt) return owner.components.builder:CanBuildAtPoint(pt, recipe) end)
                 else
                     owner.components.builder:MakeRecipe(recipe)
                 end
             elseif can_build then
-                --TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")           
                 if recipe.placer then
-                    --owner.HUD.controls.crafttabs.tabs:DeselectAll()
                     owner.components.builder:BufferBuild(recipe.name)
                     owner.components.playercontroller:StartBuildPlacementMode(recipe, function(pt) return owner.components.builder:CanBuildAtPoint(pt, recipe) end)
                 else
@@ -57,22 +53,21 @@ function DoRecipeClick(owner, recipe)
             end
         else
             local tech_level = owner.components.builder.accessible_tech_trees
-            
+
             if can_build and CanPrototypeRecipe(recipe.level, tech_level) then
                 owner.SoundEmitter:PlaySound("dontstarve/HUD/research_unlock")
-                
-                
+
                 local onsuccess = function()
                     owner.components.builder:ActivateCurrentResearchMachine()
                     owner.components.builder:UnlockRecipe(recipe.name)
-                end                 
-                
+                end
+
                 if recipe.placer then
                     onsuccess()
                     owner.components.builder:BufferBuild(recipe.name)
                     owner.components.playercontroller:StartBuildPlacementMode(recipe, function(pt) return owner.components.builder:CanBuildAtPoint(pt, recipe) end)
                 else
-                    owner.components.builder:MakeRecipe(recipe, nil, onsuccess)
+                    owner.components.builder:MakeRecipe(recipe, nil, nil, onsuccess)
                 end
             else
                 return true

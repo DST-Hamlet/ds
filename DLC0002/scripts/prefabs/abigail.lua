@@ -25,13 +25,10 @@ local function Retarget(inst)
 end
 
 local function OnAttacked(inst, data)
-    --print(inst, "OnAttacked")
-    local attacker = data.attacker
+    local attacker = data.target or data.attacker
 
     if attacker and attacker:HasTag("player") then
         inst.components.health:SetVal(0)
-    else
-        inst.components.combat:SetTarget(attacker)
     end
 end
 
@@ -133,13 +130,18 @@ local function fn(Sim)
 		player.components.leader:AddFollower(inst)        
 	end
     inst.components.follower:SetFollowExitDestinations({EXIT_DESTINATION.LAND,EXIT_DESTINATION.WATER})
-    
-	--inst:ListenForEvent( "daytime", function(tgi, data) inst.components.health:SetVal(0) end, GetWorld())
+
+    inst:ListenForEvent("newcombattarget", OnAttacked)
     inst:ListenForEvent("attacked", OnAttacked)
+
     inst:ListenForEvent( "dusktime", function() updatedamage(inst) end , GetWorld())
     inst:ListenForEvent( "daytime", function() updatedamage(inst) end , GetWorld())
     inst:ListenForEvent( "nighttime", function() updatedamage(inst) end , GetWorld())
     updatedamage(inst)
+
+    inst:AddComponent("characterspecific")
+    inst.components.characterspecific:SetOwner("wendy")
+    
     return inst
 end
 

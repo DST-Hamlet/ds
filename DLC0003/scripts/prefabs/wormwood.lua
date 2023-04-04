@@ -8,7 +8,10 @@ local assets =
     Asset("ANIM", "anim/wormwood_stage_3.zip"),
     Asset("ANIM", "anim/wormwood_stage_4.zip"),
     Asset("ANIM", "anim/player_wormwood.zip"),
-    Asset("ANIM", "anim/player_wormwood_fertilizer.zip"),    
+    Asset("ANIM", "anim/player_mount_wormwood.zip"),
+    Asset("ANIM", "anim/player_wormwood_fertilizer.zip"),
+    Asset("ANIM", "anim/player_mount_wormwood_fertilizer.zip"),
+
 	Asset("SCRIPT", "scripts/prefabs/player_common.lua"),
 }
 
@@ -158,7 +161,7 @@ local fn = function(inst)
 	--inst:AddTag("bramble_resistant")  -- TIE THIS INTO THE BRAMBLE ARMOR
 
 	inst.AnimState:Hide("BEARD")
-	inst.AnimState:AddOverrideBuild("player_wormwood_fertilizer")
+    inst.AnimState:AddOverrideBuild("player_wormwood_fertilizer")
 
 	inst:AddComponent("bloomable")
 	inst.components.bloomable:SetCanBloom(canbloom)

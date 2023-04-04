@@ -50,7 +50,7 @@ function FrogBrain:OnStart()
         WhileNode(function() return ShouldGoHome(self.inst) end, "ShouldGoHome",
             DoAction(self.inst, function() return GoHomeAction(self.inst) end, "go home", true )),
         DoAction(self.inst, EatFoodAction),
-		WhileNode(function() return clock and not clock:IsNight() end, "IsNotNight",
+		WhileNode(function() return clock and (not clock:IsNight() or self.inst:HasTag("aporkalypse_cleanup")) end, "IsNotNight",
 			Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, MAX_WANDER_DIST)),                
 		StandStill(self.inst, function() return self.inst.sg:HasStateTag("idle") end, nil),
     }, .25)

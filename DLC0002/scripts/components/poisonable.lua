@@ -383,4 +383,10 @@ function Poisonable:OnLoad(data)
 	end
 end
 
+function Poisonable:OnProgress()
+	if SaveGameIndex:GetCurrentMode(Settings.save_slot) ~= "adventure" then
+		self:Cure()
+	end 
+end
+
 return Poisonable

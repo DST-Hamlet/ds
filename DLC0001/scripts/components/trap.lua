@@ -193,6 +193,10 @@ function Trap:DoSpring()
             end
         end
 
+        if self.target.components.inventory then
+            self.target.components.inventory:DropEverything()
+        end
+
         self:StartStarvation()
 
         if self.lootprefabs then

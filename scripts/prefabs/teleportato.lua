@@ -268,7 +268,7 @@ local widgetbuttoninfo = {
 }
 
 local function ItemTest(inst, item, slot)
-	return not item:HasTag("nonpotatable")
+	return not item:HasTag("nonpotatable") and not item:HasTag("bundle")
 end
 
 local function OnSave(inst, data)

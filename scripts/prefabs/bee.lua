@@ -203,7 +203,8 @@ local function workerbee()
     inst.components.health:SetMaxHealth(TUNING.BEE_HEALTH)
     inst.components.combat:SetDefaultDamage(TUNING.BEE_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.BEE_ATTACK_PERIOD)
-	inst:AddComponent("pollinator")
+    inst.components.combat:SetRange(0.6)
+    inst:AddComponent("pollinator")
     inst:SetBrain(workerbrain)
     inst.sounds = workersounds
 
@@ -221,6 +222,7 @@ local function killerbee()
     inst.components.health:SetMaxHealth(TUNING.BEE_HEALTH)
     inst.components.combat:SetDefaultDamage(TUNING.BEE_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.BEE_ATTACK_PERIOD)
+    inst.components.combat:SetRange(0.6)
     inst.components.combat:SetRetargetFunction(2, KillerRetarget)
     inst:SetBrain(killerbrain)
     inst.sounds = killersounds

@@ -51,16 +51,18 @@ function DefaultSleepTest(inst)
         return GetClock():IsNight()
         and not (inst.components.combat and inst.components.combat.target)
         and not (inst.components.burnable and inst.components.burnable:IsBurning() )
-       and not (inst.components.freezable and inst.components.freezable:IsFrozen() )
-       and not (inst.components.teamattacker and inst.components.teamattacker.inteam)
-       and not has_home_near
+        and not (inst.components.freezable and inst.components.freezable:IsFrozen() )
+        and not (inst.components.teamattacker and inst.components.teamattacker.inteam)
+        and not inst.sg:HasStateTag("busy")
+        and not has_home_near
    else
         return GetClock():IsDay()
         and not (inst.components.combat and inst.components.combat.target)
         and not (inst.components.burnable and inst.components.burnable:IsBurning() )
-       and not (inst.components.freezable and inst.components.freezable:IsFrozen() )
-       and not (inst.components.teamattacker and inst.components.teamattacker.inteam)
-       and not has_home_near
+        and not (inst.components.freezable and inst.components.freezable:IsFrozen() )
+        and not (inst.components.teamattacker and inst.components.teamattacker.inteam)
+        and not inst.sg:HasStateTag("busy")
+        and not has_home_near
    end
 end
 

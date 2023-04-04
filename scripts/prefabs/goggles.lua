@@ -369,10 +369,12 @@ function MakeGoggle(name)
     	inst.components.weapon:SetDamage(50)
     	inst.components.weapon:SetRange(8, 10)    	
     	inst.components.weapon:SetProjectile("fryfocals_charge")
+		inst.components.weapon.projectilelaunchsymbol = "swap_hat"
     	inst.components.weapon:SetOnAttack(onattack_shoot)
 		
 		inst:AddComponent("finiteuses")
-		inst:AddTag("Shockwhenwet")
+		inst:AddTag("projectile")
+		
 		inst.components.finiteuses:SetMaxUses(TUNING.GOGGLES_SHOOT_USES)
 		inst.components.finiteuses:SetUses(TUNING.GOGGLES_SHOOT_USES)
 		inst.components.finiteuses:SetOnFinished( generic_perish )

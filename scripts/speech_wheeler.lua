@@ -523,10 +523,12 @@ return {
 		BOOK_TENTACLES = "I'm guessing it's not a children's book.",
 		BOOK_GARDENING = "I'm not digging this one.",
 		BOOK_BRIMSTONE = "Feel good story of the year.",
+		BOOK_METEOR = "Who comes up with this stuff?",
 		BOOK_SLEEP = "A sleeper hit.",
 		LUCY = "You look different. Different is good.",
 		BALLOONS_EMPTY = "Too bad they weren't 100 times bigger and attached to a basket.",
 		SPEAR_WATHGRITHR = "Looks sharp. Sharp could come in handy around here.",
+		WATHGRITHRHAT = "Sure wish those wings were a little bigger.",
 		WAXWELLJOURNAL = "That's an adventure waiting to happen.",
 
 		ABIGAIL_FLOWER = 
@@ -706,6 +708,7 @@ return {
             OPEN = "An dark adventure waiting to happen.",
         },
         CAVE_EXIT = "Looks like the way out. But do I want out?",
+		CAVE_REGENERATOR = "I think I'll bring it back to the entrance, see what happens.",
         CAVE_ENTRANCE = "My Grandma taught me to always look under rocks.",
         CAVE_ENTRANCE_RUINS = "Smells like trouble. I like trouble.",
 
@@ -1154,7 +1157,7 @@ return {
 		PLANT_NORMAL =
 		{
 			GENERIC = "I believe the name for that is \"plant\".",
-			GROWING = "It's growing! I guess I'm not a totally incompetant gardener.",
+			GROWING = "It's growing! I guess I'm not a totally incompetent gardener.",
 			READY = "Harvest time!",
 			WITHERED = "If you can't take the heat, get out of the garden.",
 		},
@@ -1418,7 +1421,7 @@ return {
 		CLOTHSAIL = "Nice cloth. It makes good material for a hot air balloon too.",
 		COCONUT = 
 		{
-		    GENERIC = "A tough coconut to crack",
+		    GENERIC = "A tough coconut to crack.",
 		    PLANTED = "Coconutty little guy.",
 		},
 		COCONUT_COOKED = "Looks good. It'd look better flying from the Pew-matic.",
@@ -1527,7 +1530,7 @@ return {
 		STUNGRAY = "Swell. The most horrible parts of skunks and sting-rays put together.",
 		SUPERTELESCOPE = "I can almost see all the danger from here.",
 		SWORDFISH = "Swell. A swimming swashbuckler.",
-		TELESCOPE = "I could see farther that this if I was up in my balloon.",
+		TELESCOPE = "I could see farther than this if I was up in my balloon.",
 		TIGERSHARK = "I still like you better than a dog.",
 		TIGERSHARKSHADOW = "Lurking adventure.",
 		TOUCAN = "If you can fly with that big beak, maybe you can handle flying a person.",
@@ -1576,7 +1579,7 @@ return {
 		OX = "You'd think the water would wash away all its stink.",
 		PEACOCK = "Pretty. Pretty conceded.",
 		SEAGULL_WATER = "You have wings, why aren't you flying!?",
-		SNAKE_POISON = "You're poison does nothing to endear you to me.",
+		SNAKE_POISON = "Your poison does nothing to endear you to me.",
 		SOLOFISH = "Should've been a catfish. I might've taken pity on you.",
 		SPOILED_FISH = "Mmm... smells like my home cooking.",
 		TWISTER = "Swell. Now the wind is alive.",
@@ -2750,6 +2753,7 @@ return {
     	HARDSHELL_TACOS = "Swell. Bug cuisine.",
     	GUMMY_CAKE = "Mmmm... grub.",
     	STEAMEDHAMSANDWICH = "I thought I was having steamed clams.",
+		MEATED_NETTLE = "The meat helps the medicine go down.",
 
     	ROC_NEST_DEBRIS1 = "Someone left their junk lying around.",
     	ROC_NEST_DEBRIS2 = "That bird isn't exactly keen on cleaning up.",
@@ -2821,6 +2825,7 @@ return {
         HIPPO_ANTLER = "Maybe I could use it as a hatrack. Or a hat.",
         BILL_QUILL = "You could poke someone's eye out with this.",
         ANTLER = "Maybe this bird whistle will convince a bird to fly me out of here.",
+        ANTLER_CORRUPTED = "This should make any giant birds steer clear.",
 
         PUGALISK_SKULL = "It's dead. Why do I feel like it's still staring at me?",
         PUGALISK_CORPSE = "It conveniently dug its own grave.",
@@ -2903,6 +2908,13 @@ return {
         ---------YOTP---------
         FIRECRACKERS = "I prefer things that \"pew\" over things that \"pow\".",
         REDLANTERN = "Must be some kind of celebration going on here.",
+
+		-------------Wormwood Specific-------
+
+		COMPOSTWRAP = "Must be someone's idea of a joke.",
+		POISONBALM = "Handy!",
+		ARMOR_BRAMBLE = "I think it looks pretty sharp on me.",
+		TRAP_BRAMBLE = "Wouldn't want to step on that.",
 
         ----------reward update ------
         TURF_DEEPRAINFOREST_NOCANOPY = "Do I really need to drag this dirt around with me?",

@@ -4,6 +4,8 @@ local assets=
 	Asset("ANIM", "anim/swap_telebrella.zip"),
     Asset("ANIM", "anim/swap_telebrella_red.zip"),
     Asset("ANIM", "anim/swap_telebrella_green.zip"),
+
+    Asset("SOUND", "sound/dontstarve_wagstaff.fsb"),
 }
 
 local TELEDIST = 40 * 12
@@ -20,7 +22,8 @@ local function UpdateSound(inst)
 end  
 
 local function onfinished(inst)
-    inst:Remove()
+    inst.persists = false
+    inst:DoTaskInTime(1.2, inst.Remove)
 end
     
 local function findclosestpad(inst, sourcepad)    

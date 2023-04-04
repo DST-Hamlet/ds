@@ -39,11 +39,13 @@ local function NearestFlowerPos(inst)
     end
 end
 
-
+local function canStartCocooning(inst)
+    local pt = inst:GetPosition()
+    return inst:HasTag("wantstococoon") and not inst.onwater and inst:IsPosSurroundedByLand(pt.x, pt.y, pt.z, 3)
+end
 
 local function startCocooning(inst)
     inst:PushEvent("cocoon") 
-  --  inst:DoTaskInTime(10, function() inst:PushEvent("hatch") end)
 end
 
 function GlowflyBrain:OnStart()
@@ -57,7 +59,7 @@ function GlowflyBrain:OnStart()
         PriorityNode{
       		WhileNode( function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
 
-          WhileNode( function() return self.inst:HasTag("wantstococoon") and  not self.inst.onwater end, "do cocoon", ActionNode(function() startCocooning(self.inst)  end)), 
+          WhileNode( function() return canStartCocooning(self.inst) end, "do cocoon", ActionNode(function() startCocooning(self.inst)  end)), 
           
           WhileNode( function() return self.inst.components.combat.target and self.inst.components.combat:InCooldown() end, "Dodge", RunAway(self.inst, function() return self.inst.components.combat.target end, RUN_AWAY_DIST, STOP_RUN_AWAY_DIST) ),
 

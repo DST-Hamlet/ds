@@ -182,6 +182,7 @@ function Tab:Select()
     if not self.selected then
         self:ScaleTo(1*self.basescale, 1.25*self.basescale, .25)
         self.group:DeselectAll()
+        self:MoveToFront()
 
         if self.selectfn then
             self.selectfn(self)

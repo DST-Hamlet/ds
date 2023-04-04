@@ -96,6 +96,7 @@ local function commonfn(Sim)
 	--minimap:SetIcon( "obelisk.png" )
 
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst.OnSave = OnSave
 	inst.OnLoad = OnLoad

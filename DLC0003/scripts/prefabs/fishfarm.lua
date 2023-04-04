@@ -139,12 +139,11 @@ local function onload(inst, data)
 end
 
 local function spawnSign(inst)
-    local pt =   Vector3(inst.Transform:GetWorldPosition())
-    --pt.x = pt.x+1
-    inst.sign_prefab = SpawnPrefab("fish_farm_sign")
-    inst.sign_prefab.Transform:SetPosition(pt.x,0,pt.z)
-    inst.sign_prefab.parent = inst
+    inst.sign_prefab = inst:SpawnChild("fish_farm_sign")
+
     inst.sign_prefab.resetArt(inst.sign_prefab)
+
+    inst.highlightchildren = {inst.sign_prefab}
 end
 
 local function onbuilt(inst)

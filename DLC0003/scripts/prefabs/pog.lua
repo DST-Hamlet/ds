@@ -226,7 +226,7 @@ local function fn()
 	inst:ListenForEvent("endaporkalypse", function() inst.AnimState:SetBuild("pog_basic") end, GetWorld())
 	inst:ListenForEvent("exitlimbo", function(inst)
         local aporkalypse = GetAporkalypse()
-        if not (aporkalypse and aporkalypse:IsActive()) then 
+        if aporkalypse and aporkalypse:IsActive() then
             inst.AnimState:SetBuild("pog_feral_build")
         end 
     end)

@@ -123,9 +123,14 @@ local function EquipWeapons(inst)
     end
 end
 
-local function CustomOnHaunt(inst)
-    inst.components.periodicspawner:TrySpawn()
-    return true
+local function OnPooped(inst, poop)
+	local heading_angle = -(inst.Transform:GetRotation()) + 180
+
+	local pos = Vector3(inst.Transform:GetWorldPosition())
+	pos.x = pos.x + (math.cos(heading_angle*DEGREES))
+	pos.y = pos.y + 0.9
+	pos.z = pos.z + (math.sin(heading_angle*DEGREES))
+	poop.Transform:SetPosition(pos.x, pos.y, pos.z)
 end
 
 local function fn()
@@ -180,6 +185,7 @@ local function fn()
     inst.components.periodicspawner:SetRandomTimes(40, 60)
     inst.components.periodicspawner:SetDensityInRange(20, 2)
     inst.components.periodicspawner:SetMinimumSpacing(8)
+    inst.components.periodicspawner:SetOnSpawnFn(OnPooped)
     inst.components.periodicspawner:Start()
 
     MakeLargeBurnableCharacter(inst, "spat_body")

@@ -11,6 +11,7 @@ Action = Class(function(self, data, priority, instant, rmb, distance)
     self.rmb = rmb or nil
     self.distance = distance or nil
     self.mount_enabled = data.mount_enabled or false
+    self.valid_hold_action = data.valid_hold_action or false
 end)
 
 ACTIONS=
@@ -19,19 +20,19 @@ ACTIONS=
     READ = Action({mount_enabled=true}),
     DROP = Action({mount_enabled=true},-1),
     TRAVEL = Action({}, 2),
-    CHOP = Action({}),
+    CHOP = Action({},nil, nil, nil, 2),
     ATTACK = Action({mount_enabled=true},2, true),
     FORCEATTACK = Action({mount_enabled=true},2, true),
-    EAT = Action({mount_enabled=true}),
-    PICK = Action({}),
-    PICKUP = Action({},1),
+	EAT = Action({mount_enabled=true, valid_hold_action=true}),
+    PICK = Action({mount_enabled=true}),
+    PICKUP = Action({mount_enabled=true},1),
     MINE = Action({}),
     DIG = Action({},nil, nil, true),
-    GIVE = Action({mount_enabled=true}),
-    COOK = Action({}),
+    GIVE = Action({mount_enabled=true, valid_hold_action=true}),
+    COOK = Action({valid_hold_action=true}),
     DRY = Action({}),
-    ADDFUEL = Action({mount_enabled=true}),
-    LIGHT = Action({},-4),
+    ADDFUEL = Action({mount_enabled=true, valid_hold_action=true}),
+	LIGHT = Action({}, -4, nil, nil, 1.5),
     EXTINGUISH = Action({},0),
     LOOKAT = Action({mount_enabled=true},-3, true),
     TALKTO = Action({mount_enabled=true},3, true),
@@ -40,14 +41,14 @@ ACTIONS=
     CHECKTRAP = Action({},2),
     BUILD = Action({mount_enabled=true}),
     PLANT = Action({}),
-    HARVEST = Action({}),
+    HARVEST = Action({valid_hold_action=true}),
     GOHOME = Action({}),
     SLEEPIN = Action({}),
     EQUIP = Action({mount_enabled=true},0,true),
     UNEQUIP = Action({mount_enabled=true},-2,true),
     --OPEN_SHOP = Action(),
     SHAVE = Action({mount_enabled=true}),
-    STORE = Action({}),
+    STORE = Action({valid_hold_action=true}),
     RUMMAGE = Action({mount_enabled=true},-1),
     DEPLOY = Action({}),
     PLAY = Action({mount_enabled=true}),
@@ -57,7 +58,7 @@ ACTIONS=
     FISH = Action({}),
     REEL = Action({},0, true),
     POLLINATE = Action({}),
-    FERTILIZE = Action({}),
+    FERTILIZE = Action({valid_hold_action=true}),
     LAYEGG = Action({}),
     HAMMER = Action({},3),
     TERRAFORM = Action({}),
@@ -65,17 +66,17 @@ ACTIONS=
 	RESETMINE = Action({},3),
     ACTIVATE = Action({}),
     MURDER = Action({mount_enabled=true},0),
-    HEAL = Action({mount_enabled=true}),
+    HEAL = Action({mount_enabled=true, valid_hold_action=true}),
     INVESTIGATE = Action({mount_enabled=true}),
     UNLOCK = Action({}),
     TEACH = Action({mount_enabled=true}),
     TURNON = Action({},2),
     TURNOFF = Action({},2),
-    SEW = Action({mount_enabled=true}),
+    SEW = Action({mount_enabled=true, valid_hold_action=true}),
     STEAL = Action({}),
     USEITEM = Action({},1, true),
     TAKEITEM = Action({}),
-    MAKEBALLOON = Action({mount_enabled=true}),
+    MAKEBALLOON = Action({mount_enabled=true, valid_hold_action=true}),
     CASTSPELL = Action({mount_enabled=true},0, false, true, 20),
     BLINK = Action({mount_enabled=true},10, false, true, 36),
     COMBINESTACK = Action({mount_enabled=true}),
@@ -94,7 +95,7 @@ ACTIONS=
     BUNDLE = Action({},2, nil, true),
     BUNDLESTORE = Action({},nil, true ),
     WRAPBUNDLE = Action({},nil, true ),
-    UNWRAP = Action({},2, nil, true),
+    UNWRAP = Action({},3, nil, true),
     
     DRAW = Action({}),
     UNPIN = Action({}),
@@ -287,7 +288,7 @@ ACTIONS.DEPLOY.fn = function(act)
         local container = act.invobject.components.inventoryitem and act.invobject.components.inventoryitem:GetContainer()
 	    local obj = container and container:RemoveItem(act.invobject) or act.invobject
 	    if obj then
-			if obj.components.deployable:Deploy(act.pos, act.doer) then
+			if obj.components.deployable:Deploy(act.pos, act.doer, act.rotation) then
 				return true
             elseif container then
                 container:GiveItem(obj)
@@ -299,13 +300,13 @@ ACTIONS.DEPLOY.fn = function(act)
 end
 
 ACTIONS.DEPLOY.strfn = function(act)
-	if act.invobject and act.invobject:HasTag("groundtile") then
-		return "GROUNDTILE"
-	elseif act.invobject and act.invobject:HasTag("wallbuilder") then
-		return "WALL"
-	elseif act.invobject and act.invobject:HasTag("eyeturret") then
-        return "TURRET"
-    end
+	return act.invobject and (
+        (act.invobject:HasTag("eyeturret") and "TURRET") or
+        (act.invobject:HasTag("wallbuilder") and "WALL") or
+        (act.invobject:HasTag("groundtile") and "GROUNDTILE") or
+        (act.invobject:HasTag("gatebuilder") and "GATE") or 
+        (act.invobject:HasTag("fencebuilder") and "FENCE")
+    ) or nil
 end
 
 ACTIONS.CHECKTRAP.fn = function(act)
@@ -532,6 +533,11 @@ ACTIONS.GIVE.fn = function(act)
 		act.target.components.trader:AcceptGift(act.doer, act.invobject)
 	    return true
     end
+
+    if act.invobject.components.usableitem then
+        act.invobject.components.usableitem:Use(act.doer, act.target)
+        return true
+    end
 end
 
 ACTIONS.GIVE.strfn = function(act)
@@ -587,10 +593,8 @@ end
 
 ACTIONS.BUILD.fn = function(act)
     if act.doer.components.builder then
-	    if act.doer.components.builder:DoBuild(act.recipe, act.pos) then
-	        return true
-	    end
-	end
+        return act.doer.components.builder:DoBuild(act.recipe, act.pos, act.rotation, act.modifydata)
+    end
 end
 
 ACTIONS.PLANT.fn = function(act)
@@ -723,12 +727,12 @@ end
 ACTIONS.INVESTIGATE.fn = function(act)
     local investigatePos = act.doer.components.knownlocations and act.doer.components.knownlocations:GetLocation("investigate")
     if investigatePos then
-        act.doer.components.knownlocations:RememberLocation("investigate", nil, true)
+        act.doer.components.knownlocations:RememberLocation("investigate", nil)
         --try to get a nearby target
         if act.doer.components.combat then
             act.doer.components.combat:TryRetarget()
         end
-		return true
+        return true
     end
 end
 

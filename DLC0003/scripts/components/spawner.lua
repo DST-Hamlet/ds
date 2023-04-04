@@ -203,11 +203,17 @@ function Spawner:ReleaseChild()
 			childname = self.childfn(self.inst)
         end
 
-        if GetWorld().getworldgenoptions and GetWorld().getworldgenoptions(GetWorld())[childname] and GetWorld().getworldgenoptions(GetWorld())[childname] == "never" then
+        if GetWorld():IsWorldGenOptionNever(childname) then
             return 
         end
         
         local child = SpawnPrefab(childname)
+
+        local interior = GetInteriorSpawner():getPropInterior(self.inst)
+		if interior then
+			GetInteriorSpawner():injectprefab(child, interior)
+		end
+
         self:TakeOwnership(child)
         self:GoHome(child)
     end
@@ -263,6 +269,11 @@ function Spawner:ReleaseChild()
             end
             self.child.components.citypossession.cityID =  self.inst.components.citypossession.cityID
         end
+
+        local interior = GetInteriorSpawner():getPropInterior(self.inst)
+		if interior then
+			GetInteriorSpawner():injectprefab(self.child, interior)
+		end
 
         return true
 	end

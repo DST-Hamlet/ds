@@ -667,9 +667,11 @@ function VolcanoManager:Appease(segs)
 			print("Wrath causing eruption")
 			DoEruption(self)
 		end 
+	end
 
-	end 
 	self.appeasesegs = self.appeasesegs + segs
+
+	self:RebuildDrySchedule() -- Make the warns again, if necessary.
 end
 
 return VolcanoManager

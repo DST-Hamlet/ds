@@ -57,7 +57,7 @@ local function fadeout(inst)
 end
 
 local function updatelight(inst)
-    if GetClock():IsDusk() or GetClock():IsNight() then
+    if GetClock():IsDusk() or GetClock():IsNight() or GetWorld():IsCave() then
         if not inst.lighton then
             inst:DoTaskInTime(math.random()*2, function() 
                 fadein(inst)
@@ -202,9 +202,7 @@ local function fn(Sim)
     inst.AnimState:PlayAnimation("idle", true)
 
     inst.AnimState:Hide("FIRE")
-    inst.AnimState:Hide("GLOW")    
-
-    inst.AnimState:SetRayTestOnBB(true);
+    inst.AnimState:Hide("GLOW")
 
     inst:AddTag("lightsource")
 

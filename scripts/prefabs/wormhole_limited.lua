@@ -132,6 +132,7 @@ local function makewormhole(uses)
 		inst:AddComponent("inventory")
 
 		inst:AddComponent("trader")
+		inst.components.trader.acceptnontradable = true
 		inst.components.trader.onaccept = onaccept
 
 		inst.OnSave = onsave

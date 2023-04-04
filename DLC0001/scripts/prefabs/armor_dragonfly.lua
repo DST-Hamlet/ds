@@ -3,10 +3,12 @@ local assets =
 	Asset("ANIM", "anim/torso_dragonfly.zip"),
 }
 
-local function OnBlocked(owner, data) 
-    owner.SoundEmitter:PlaySound("dontstarve_DLC001/common/hit_scalemail")
-    if data.attacker and data.attacker.components.burnable and not data.attacker:HasTag("thorny") then
-        data.attacker.components.burnable:Ignite()
+local function OnBlocked(owner, data)
+    if not data.redirected then
+        owner.SoundEmitter:PlaySound("dontstarve_DLC001/common/hit_scalemail")
+        if data.attacker and data.attacker.components.burnable and not data.attacker:HasTag("thorny") then
+            data.attacker.components.burnable:Ignite()
+        end
     end
 end
 

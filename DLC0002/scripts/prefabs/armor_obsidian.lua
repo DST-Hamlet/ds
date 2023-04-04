@@ -3,13 +3,15 @@ local assets =
 	Asset("ANIM", "anim/armor_obsidian.zip"),
 }
 
-local function OnBlocked(owner, data) 
-    owner.SoundEmitter:PlaySound("dontstarve_DLC002/common/armour/obsidian")
-    if (data.weapon == nil or (not data.weapon:HasTag("projectile") and data.weapon.projectile == nil))
-        and data.attacker and data.attacker.components.burnable 
-        and (data.attacker.components.combat == nil or (data.attacker.components.combat.defaultdamage > 0)) then
+local function OnBlocked(owner, data)
+    if not data.redirected then
+        owner.SoundEmitter:PlaySound("dontstarve_DLC002/common/armour/obsidian")
+        if (data.weapon == nil or (not data.weapon:HasTag("projectile") and data.weapon.projectile == nil))
+            and data.attacker and data.attacker.components.burnable 
+            and (data.attacker.components.combat == nil or (data.attacker.components.combat.defaultdamage > 0)) then
 
-        data.attacker.components.burnable:Ignite()
+            data.attacker.components.burnable:Ignite()
+        end
     end
 end
 

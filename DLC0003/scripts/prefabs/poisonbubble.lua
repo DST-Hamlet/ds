@@ -42,7 +42,8 @@ local function common(Sim, level, loop)
 
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/poisoned", "poisoned")
 
-	inst:AddTag("fx")
+	inst:AddTag("FX")
+	inst:AddTag("INTERIOR_LIMBO_IMMUNE")
 
 	inst.StopBubbles = StopBubbles
 	

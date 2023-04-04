@@ -54,7 +54,7 @@ local function OnActivate(inst)
 				TheFrontEnd:PushScreen(NewIntegratedGameScreen(targetmode, portal_event, SaveGameIndex:GetCurrentSaveSlot(), true, cancel))
 			end
 		else
-			TravelBetweenWorlds(targetmode, portal_event, 7.5, {"chester_eyebone", "packim_fishbone", "ro_bin_gizzard_stone","roc_robin_egg"})
+			TravelBetweenWorlds(targetmode, portal_event, 7.5, "dropontravel")
 		end
 	end
 

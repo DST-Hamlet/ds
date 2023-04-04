@@ -4,6 +4,7 @@ local Placer = Class(function(self, inst)
 	self.radius = 1
 	self.selected_pos = nil
 	self.inst:AddTag("NOCLICK")
+	self.linked = {}
 end)
 
 function Placer:SetBuilder(builder, recipe, invobject)
@@ -13,11 +14,15 @@ function Placer:SetBuilder(builder, recipe, invobject)
 	self.inst:StartUpdatingComponent(self)	
 end
 
+function Placer:LinkEntity(ent)
+    table.insert(self.linked, ent)
+end
+
 function Placer:GetDeployAction()
 	if self.invobject then
 		print("GetDeployAction")
 		self.selected_pos = self.inst:GetPosition()
-		local action = BufferedAction(self.builder, nil, ACTIONS.DEPLOY, self.invobject, self.selected_pos)
+		local action = BufferedAction(self.builder, nil, ACTIONS.DEPLOY, self.invobject, self.selected_pos, nil, nil, self.inst.Transform:GetRotation())
 		table.insert(action.onsuccess, function() self.selected_pos = nil end)
 		return action
 	end
@@ -64,6 +69,11 @@ function Placer:OnUpdate(dt)
 			end
 		end
 	end
+
+	if self.fixedcameraoffset then
+		local rot = TheCamera:GetHeading()
+	 	self.inst.Transform:SetRotation(-rot+self.fixedcameraoffset) -- rotate against the camera
+	end
 	
 	self.can_build = true
 
@@ -89,6 +99,10 @@ function Placer:OnUpdate(dt)
 	
 	local color = self.can_build and Vector3(.25,.75,.25) or Vector3(.75,.25,.25)
 	self.inst.AnimState:SetAddColour(color.x, color.y, color.z ,1)
+
+	for i, v in ipairs(self.linked) do
+		v.AnimState:SetAddColour(color.x, color.y, color.z, 1)
+	end
 	
 end
 

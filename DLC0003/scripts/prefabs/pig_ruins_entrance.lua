@@ -37,7 +37,6 @@ local prefabs =
     "deco_ruins_crack_roots2",
     "deco_ruins_crack_roots3",
     "deco_ruins_crack_roots4",
-    "deco_ruins_crack_roots5",
 
     "deco_ruins_pigqueen_relief",
     "deco_ruins_pigking_relief",
@@ -241,7 +240,7 @@ local function mazemaker(inst, dungeondef)
                 room = newroom.idx,
             }
 
-            if GetWorld().getworldgenoptions(GetWorld())["door_vines"] and GetWorld().getworldgenoptions(GetWorld())["door_vines"] == "never" then
+            if GetWorld():IsWorldGenOptionNever("door_vines") then
                 dungeondef.doorvines = nil
             end
 
@@ -531,11 +530,11 @@ local function mazemaker(inst, dungeondef)
         local roomtype = nil
         local roomtypes = {"grownover","storeroom","smalltreasure","snakes!",nil} -- lightfires -- critters
 
-        if not GetWorld().getworldgenoptions(GetWorld())["spear_traps"] or GetWorld().getworldgenoptions(GetWorld())["spear_traps"] ~= "never" then
+        if not GetWorld():IsWorldGenOptionNever("spear_traps") then
             table.insert(roomtypes,"speartraps!")
         end
 
-        if not GetWorld().getworldgenoptions(GetWorld())["dart_traps"] or GetWorld().getworldgenoptions(GetWorld())["dart_traps"] ~= "never" then
+        if not GetWorld():IsWorldGenOptionNever("dart_traps") then
             table.insert(roomtypes,"darts!")
         end       
 
@@ -830,10 +829,10 @@ local function mazemaker(inst, dungeondef)
                 elseif not southexitopen then                
                     table.insert(addprops, { name = relic, x_offset = -depth/2+2, z_offset =  0, addtags={"trggerdarttraps"}} )
                     table.insert(addprops, { name = "pig_ruins_light_beam", x_offset = -depth/2+2, z_offset =  0} )
-                elseif not eastexitopen then
+                elseif not westexitopen then
                     table.insert(addprops, { name = relic, x_offset = 0, z_offset = width/2-2, addtags={"trggerdarttraps"}} )                
                     table.insert(addprops, { name = "pig_ruins_light_beam",  x_offset = 0, z_offset = width/2-2} )
-                elseif not westexitopen then
+                elseif not eastexitopen then
                     table.insert(addprops, { name = relic, x_offset = 0, z_offset = -width/2+2, addtags={"trggerdarttraps"}} )                
                     table.insert(addprops, { name = "pig_ruins_light_beam", x_offset = 0, z_offset = -width/2+2} )
                 end     

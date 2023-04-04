@@ -90,10 +90,12 @@ local function SetRangeMode(inst)
         return
     end
 
+    local scale = inst.Transform:GetScale()
+
     inst.combatmode = "RANGE"
     inst.components.combat:SetDefaultDamage(0)
     inst.components.combat:SetAttackPeriod(6)
-    inst.components.combat:SetRange(20, 25)
+    inst.components.combat:SetRange(20*scale, 25*scale)
     inst:ListenForEvent("onattackother", OnAttack)
 end
 
@@ -102,10 +104,12 @@ local function SetMeleeMode(inst)
         return
     end
 
+    local scale = inst.Transform:GetScale()
+
     inst.combatmode = "MELEE"
-    inst.components.combat:SetDefaultDamage(TUNING.PALMTREEGUARD_DAMAGE)
+    inst.components.combat:SetDefaultDamage(TUNING.PALMTREEGUARD_DAMAGE*scale)
     inst.components.combat:SetAttackPeriod(TUNING.PALMTREEGUARD_ATTACK_PERIOD)
-    inst.components.combat:SetRange(20, 3)
+    inst.components.combat:SetRange(20*scale, 3*scale)
     inst:RemoveEventCallback("onattackother", OnAttack)
 end
 

@@ -77,7 +77,7 @@ function Poisonable:IsPoisonGasBlockerEquiped()
 	return false
 end
 
-function Poisonable:CanBePoisoned(gas)
+function Poisonable:CanBePoisoned(gas, food)
 	if IsPoisonDisabled() then
 		return false
 	end
@@ -87,14 +87,16 @@ function Poisonable:CanBePoisoned(gas)
 		return false
 	end
 
-	-- Normal poison, check normal blockers
-	if not gas and self:IsPoisonBlockerEquiped() then
-		return false
-	end
+	if not food then
+		-- Normal poison, check normal blockers
+		if not gas and self:IsPoisonBlockerEquiped() then
+			return false
+		end
 
-	-- Gas poison, check gas blockers
-	if gas and self:IsPoisonGasBlockerEquiped() then
-		return false
+		-- Gas poison, check gas blockers
+		if gas and self:IsPoisonGasBlockerEquiped() then
+			return false
+		end
 	end
 
 	if self.immune then
@@ -140,8 +142,8 @@ function Poisonable:OnRemoveEntity()
 	end
 end
 
-function Poisonable:Poison(isGas, loadTime, strong)
-	if loadTime or self:CanBePoisoned(isGas) then
+function Poisonable:Poison(isGas, loadTime, strong, isFood)
+	if loadTime or self:CanBePoisoned(isGas, isFood) then
 		self.inst:AddTag("poison")
 		self.poisoned = true
 		self.start_time = loadTime or GetTime()
@@ -400,6 +402,12 @@ function Poisonable:OnLoad(data)
 	if data.strongpoison then
 		self.strongpoison = true
 	end
+end
+
+function Poisonable:OnProgress()
+	if SaveGameIndex:GetCurrentMode(Settings.save_slot) ~= "adventure" then
+		self:Cure()
+	end 
 end
 
 return Poisonable

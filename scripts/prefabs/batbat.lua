@@ -21,7 +21,7 @@ local function onunequip(inst, owner)
 end
 
 local function onattack(inst, owner, target)
-    if owner.components.health and owner.components.health:GetPercent() < 1 and not target:HasTag("wall") then
+    if owner.components.health and owner.components.health:IsHurt() and not target:HasTag("wall") then
         owner.components.health:DoDelta(TUNING.BATBAT_DRAIN,false,"batbat")
         owner.components.sanity:DoDelta(-TUNING.BATBAT_DRAIN * 0.5)
     end

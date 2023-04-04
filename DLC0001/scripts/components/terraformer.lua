@@ -37,7 +37,7 @@ function Terraformer:CanTerraformPoint(pt)
     local ground = GetWorld()
     if ground then
 		local tile = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
-		return tile ~= GROUND.IMPASSIBLE and tile ~= GROUND.DIRT and tile < GROUND.UNDERGROUND
+		return tile ~= GROUND.IMPASSABLE and tile ~= GROUND.DIRT and tile < GROUND.UNDERGROUND
 	end
 	return false
 end

@@ -52,7 +52,7 @@ local function tossitems(inst,target)
             item = target.components.container:RemoveItem(item)
             
             local x,y,z = target.Transform:GetWorldPosition()               
-            item.Transform:SetPosition(x,y,z)
+            item.Transform:SetPosition(x,1,z)
 
             local vel = Vector3(0, 5, 0)
             local speed = 3 + math.random()          
@@ -237,9 +237,7 @@ local states=
         name = "ransack",
         tags = {"canrotate","preoccupied"},
         
-        onenter = function(inst)     
-            print("ENTERING RANSACK")   
-            
+        onenter = function(inst)
             inst.components.locomotor:StopMoving()    
             
             local act = inst:GetBufferedAction()         
@@ -272,7 +270,7 @@ local states=
         onupdate = function(inst)
             local p_pt = Vector3(inst.ransacking.Transform:GetWorldPosition())
             local m_pt = Vector3(inst.Transform:GetWorldPosition())
-            if distsq(p_pt, m_pt) > 1 * 1 then
+            if distsq(p_pt, m_pt) > 1.5 * 1.5 then
                 inst.sg:GoToState("idle","rummage_pst")
             end        
         end,
@@ -280,12 +278,11 @@ local states=
         onexit = function(inst)                
         --print("EXITING RANSACK",inst.keepransacking, inst.ransacking.GUID)
             if inst.ransacking and not inst.keepransacking then
-                print("SHOULD CLOSE")
                 inst.ransacking.components.container:Close()
                 inst.ransacking:RemoveTag("pogged")                                                              
             end
             inst.keepransacking = nil
-        end,        
+        end,
 
         events=
         {
@@ -311,17 +308,16 @@ local states=
             TimeEvent(16*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/wilson/make_whoosh") end),
         },
 
-        onexit = function(inst)    
-            print("SHOULD CLOSE")        
+        onexit = function(inst)
             if not inst.keepransacking then
                inst.ransacking.components.container:Close() 
             end
-            if inst.ransacking then                
-                inst.ransacking:RemoveTag("pogged")                  
-                --inst.ransacking                               
+            if inst.ransacking then
+                inst.ransacking:RemoveTag("pogged")
+                --inst.ransacking
             end
             inst.keepransacking = nil
-        end,        
+        end,
 
         events=
         {

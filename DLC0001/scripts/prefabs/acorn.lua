@@ -22,6 +22,11 @@ local function growtree(inst)
 	end
 end
 
+local function digup(inst, digger)
+    inst.components.lootdropper:DropLoot()
+    inst:Remove()
+end
+
 local function plant(inst, growtime)
     inst:RemoveComponent("inventoryitem")
     RemovePhysicsColliders(inst)
@@ -31,6 +36,15 @@ local function plant(inst, growtime)
     if inst.components.edible then
         inst:RemoveComponent("edible")
     end
+
+    inst:AddComponent("lootdropper")
+    inst.components.lootdropper:SetLoot({"twigs"})
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
+
     print ("PLANT", growtime)
     -- Pacify a nearby monster tree
     local ent = FindEntity(inst, 30, nil, {"birchnut", "monster"}, {"stump", "burnt", "FX", "NOCLICK","DECOR","INLIMBO"})
@@ -53,6 +67,11 @@ end
 
 local function ondeploy (inst, pt) 
     inst = inst.components.stackable:Get()
+
+    if inst.components.inventoryitem then
+        inst.components.inventoryitem:OnRemoved()
+    end
+
     inst.Transform:SetPosition(pt:Get() )
     inst:RemoveComponent("perishable")
     local timeToGrow = GetRandomWithVariance(TUNING.ACORN_GROWTIME.base, TUNING.ACORN_GROWTIME.random)
@@ -68,7 +87,7 @@ local function stopgrowing(inst)
 end
 
 local function restartgrowing(inst)
-    if inst and not inst.growtask then
+    if inst and not inst.growtask and not inst.components.inventoryitem then -- It won't have inventoryitem component if it's already a sapling.
         local growtime = GetRandomWithVariance(TUNING.ACORN_GROWTIME.base, TUNING.ACORN_GROWTIME.random)
         inst.growtime = GetTime() + growtime
         inst.growtask = inst:DoTaskInTime(growtime, growtree)

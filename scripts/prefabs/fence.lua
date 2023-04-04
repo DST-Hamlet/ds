@@ -1,9 +1,8 @@
 require "prefabutil"
 
-local wall_prefabs =
-{
-    "collapse_small",
-}
+local wall_prefabs = {"collapse_small"}
+local ROT_SIDES = 8
+
 
 local DEPLOY_EXTRA_SPACING = 0
 local DEPLOY_IGNORE_TAGS = { "NOBLOCK", "player", "FX", "INLIMBO", "DECOR" }
@@ -19,12 +18,6 @@ local function IsNearOtherWall(other, pt, min_spacing_sq)
         return math.floor(x) == math.floor(pt.x) and math.floor(z) == math.floor(pt.z)
     end
     return IsNearOther(other, pt, min_spacing_sq)
-end
-
-function IsPassableAtPoint(x, y, z)
-    local tile = GetWorld().Map:GetTileAtPoint(x, y, z)
-    return tile ~= GROUND.IMPASSABLE and
-        tile ~= GROUND.INVALID
 end
 
 function IsDeployPointClear(pt, inst, min_spacing, min_spacing_sq_fn, near_other_fn)
@@ -48,7 +41,7 @@ local function DeployTest(inst, pt, deployer)
 end
 
 local function CalcRotationEnum(rot, isdoor)
-    return math.floor((math.floor(rot + 0.5) / 45) % (isdoor and 8 or 4))
+    return math.floor((math.floor(rot + 0.5) / 45) % ROT_SIDES)
 end
 
 local function CalcFacingAngle(rot, isdoor)
@@ -84,7 +77,6 @@ local function SetIsSwingRight(inst, is_swing_right)
     if inst.dooranim then
         inst.dooranim.isswingright = is_swing_right
     end
-    --OnDoorStateDirty(inst)
 end
 
 local function FindPairedDoor(inst)
@@ -134,14 +126,13 @@ local function ApplyDoorOffset(inst)
 end
 
 local function SetOrientation(inst, rotation)
-    rotation = CalcFacingAngle(rotation, inst.isdoor)
-
+    
     inst.Transform:SetRotation(rotation)
     if inst.dooranim ~= nil then
         inst.dooranim.Transform:SetRotation(rotation)
     end
 
-    if inst.builds and  inst.builds.narrow then
+    if inst.builds and inst.builds.narrow then
         if IsNarrow(inst) then
             GetAnimState(inst):SetBuild(inst.builds.narrow)
             GetAnimState(inst):SetBank(inst.builds.narrow)
@@ -149,10 +140,10 @@ local function SetOrientation(inst, rotation)
             GetAnimState(inst):SetBuild(inst.builds.wide)
             GetAnimState(inst):SetBank(inst.builds.wide)
         end
+    end
 
-        if inst.isdoor then
-            ApplyDoorOffset(inst)
-        end
+    if inst.isdoor then
+        ApplyDoorOffset(inst)
     end
 end
 
@@ -198,84 +189,74 @@ local function RefreshDoorOffset(inst, neighbors)
     end
 end
 
-local function FixUpFenceOrientation(inst, deployedrotation) -- rotates the placer but not the any near by "alignwall"
-    local neighbors = GetNeighbors(inst)
+local function FixUpFenceOrientation(inst, deployedrotation)
+    local x, y, z = inst.Transform:GetWorldPosition()
+    local neighbors = TheSim:FindEntities(x,0,z, 1.5, {"wall"})
 
-    if deployedrotation then
-        if inst.isdoor then
-            local neighbor = neighbors[2]
-            if neighbor ~= nil then
-                if neighbor.isdoor then
-                    SetIsSwingRight(inst, not IsSwingRight(neighbor))
-                else
-                    local x, y, z = inst.Transform:GetWorldPosition()
-                    local x1, y1, z1 = neighbor.Transform:GetWorldPosition()
-                    local rot = math.atan2(x - x1, z - z1) * RADIANS
-                    SetIsSwingRight(inst, CalcRotationEnum(deployedrotation, true) ~= CalcRotationEnum(rot, true))
-                end
-            end
+    local rot = inst.Transform:GetRotation()
+    local neighbor_index = 1
+    local neighbor = neighbors[neighbor_index]
+    if deployedrotation ~= nil then --has a value for spawned items
+        neighbor_index = 2
+        neighbor = neighbors[neighbor_index]
+        rot = deployedrotation
+    end
+
+    if inst.isdoor then
+        SetIsSwingRight(inst, false) --set it to false and assume we'll recalculate each frame
+    end
+
+    --Only look for parallel fence/gate neighbours when matching rotation and doing swing-side changes
+    local this_e = CalcRotationEnum(rot)
+    local neighbor_e = nil
+    while neighbor ~= nil do
+        neighbor_e = CalcRotationEnum(neighbor.Transform:GetRotation())
+
+        if (neighbor.isdoor or neighbor.prefab == "fence") and (this_e % (ROT_SIDES/2) == neighbor_e % (ROT_SIDES/2)) then
+            --found a parallel fence/gate neighbour!
+            break
         end
+        neighbor_index = neighbor_index + 1
+        neighbor = neighbors[neighbor_index]
+    end
 
-        SetOrientation(inst, deployedrotation)
-        RefreshDoorOffset(inst, neighbors)
-    else
-        local neighbor = neighbors[1]
-
-        for i,testn in ipairs(neighbors)do
-            if testn.isdoor then               
-                neighbor = testn
-                break
-            end
-        end
-
-        if neighbor then
-            local x, y, z = inst.Transform:GetWorldPosition()
-            local x1, y1, z1 = neighbor.Transform:GetWorldPosition()
-            local rot_to_neighbor = math.atan2(x - x1, z - z1) * RADIANS
-            local rot = CalcFacingAngle(rot_to_neighbor, inst.isdoor)
-            
-            if inst.isdoor then
-                if Vector3(x - x1, 0, z - z1):Dot(TheCamera:GetRightVec()) < 0 then
-                    rot = rot + 180
-                end
-
-                if neighbor.isdoor then          
-                    if CalcRotationEnum(neighbor.Transform:GetRotation(), false) == CalcRotationEnum(rot, false) then
-                        rot = neighbor.Transform:GetRotation()
-                    end
-                    SetIsSwingRight(inst, not IsSwingRight(neighbor))
-                    --[[ 
-                    SetIsSwingRight(inst, CalcRotationEnum(rot, true) ~= CalcRotationEnum(rot_to_neighbor, true))
-
-                    -- some extra fixup to handle the case when two doors are placed with opposite camera angles, but the found neighbour was a wall even though there is a door on the otherside
-                    inst.Transform:SetRotation(rot)
-                    local otherdoor = FindPairedDoor(inst)
-                    if otherdoor ~= nil then
-                        rot = otherdoor.Transform:GetRotation()
-                        SetIsSwingRight(inst, not IsSwingRight(otherdoor))
-                    end
-                    ]]
-                end
-            end
-
-            SetOrientation(inst, rot)
-
-            RefreshDoorOffset(inst, neighbors)
-        else
-            if inst.isdoor then
-                SetIsSwingRight(inst, false)
-            end            
-
-            local down = TheCamera:GetDownVec()                
-            local angle = math.atan2(down.z, down.x)
-            local angle = (angle / DEGREES) + 90
-
-            if angle %2 == 0 then
-                angle = angle +90
-            end
-            SetOrientation(inst, angle)
+    if neighbor == nil then
+        --no fence/gates, try the first item again it should be a wall
+        rot = inst.Transform:GetRotation()
+        neighbor = neighbors[1]
+        if deployedrotation ~= nil then --has a value for spawned items
+            neighbor = neighbors[2]
+            rot = deployedrotation
         end
     end
+
+    if neighbor ~= nil then
+        --align with fence/gate neighbor if we're placing from behind. This exists so that you can fix a hole in a wall from the back of wall. Needed for the case where the camera is obstructed from placing from the front of the wall
+        if (neighbor.isdoor or neighbor.prefab == "fence") and (this_e + ROT_SIDES/2) % ROT_SIDES == neighbor_e then
+            rot = rot + 180
+            this_e = CalcRotationEnum(rot)
+        end
+
+        if inst.isdoor then
+            if neighbor.isdoor then
+                if this_e == neighbor_e then
+                    SetIsSwingRight(inst, not IsSwingRight(neighbor))
+                end
+            else
+                local x, y, z = inst.Transform:GetWorldPosition()
+                local x1, y1, z1 = neighbor.Transform:GetWorldPosition()
+                local rot_to_neighbor = math.atan2(x - x1, z - z1) * RADIANS
+
+                local swing_right = (CalcRotationEnum(rot_to_neighbor) + 4) % ROT_SIDES == CalcRotationEnum(rot)
+
+                SetIsSwingRight(inst, swing_right)
+            end
+        end
+    end
+
+    SetOrientation(inst, rot)
+    RefreshDoorOffset(inst)
+
     GetAnimState(inst):PlayAnimation(GetAnimName(inst, "idle"))
 end
 
@@ -286,9 +267,8 @@ local function makeobstacle(inst)
 
     local ground = GetWorld()
     if ground then
-    	local pt = Point(inst.Transform:GetWorldPosition())
-		--print("    at: ", pt)
-    	ground.Pathfinder:AddWall(pt.x, pt.y, pt.z)
+        local pt = Point(inst.Transform:GetWorldPosition())
+        ground.Pathfinder:AddWall(pt.x, pt.y, pt.z)
     end
 end
 
@@ -297,13 +277,13 @@ local function clearobstacle(inst)
 
     local ground = GetWorld()
     if ground then
-    	local pt = Point(inst.Transform:GetWorldPosition())
-    	ground.Pathfinder:RemoveWall(pt.x, pt.y, pt.z)
+        local pt = Point(inst.Transform:GetWorldPosition())
+        ground.Pathfinder:RemoveWall(pt.x, pt.y, pt.z)
     end
 end
 
 local function onremove(inst)
-	clearobstacle(inst)
+    clearobstacle(inst)
 end
 
 local function keeptargetfn()
@@ -326,7 +306,9 @@ local function onworked(inst)
 end
 
 local function onhit(inst, attacker, damage)
-    inst.components.workable:WorkedBy(attacker)
+    if inst.components.workable.workleft > 0 then
+        inst.components.workable:WorkedBy(attacker)
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -419,9 +401,9 @@ local function onload(inst, data)
             end
         end
 
-		if not data.isopen then
-			makeobstacle(inst)
-		end
+        if not data.isopen then
+            makeobstacle(inst)
+        end
 
         if IsNarrow(inst) then
             GetAnimState(inst):SetBuild(inst.builds.narrow)
@@ -474,7 +456,6 @@ local function MakeWall(name, builds, isdoor, klaussackkeyid)
             inst:AddTag("door")
             inst.isopen = false
             inst.isswingright = nil
-            inst.GetActivateVerb = getdooractionstring
         end
 
         inst.AnimState:SetBank(builds.wide)
@@ -524,7 +505,7 @@ local function MakeWall(name, builds, isdoor, klaussackkeyid)
         if isdoor then            
             inst.dooranim = SpawnPrefab(name.."_anim")
             inst.dooranim.entity:SetParent(inst.entity)            
-            inst.highlightforward = inst.dooranim
+            inst.highlightchildren = {inst.dooranim}
         end
 
         inst.builds = builds
@@ -539,6 +520,7 @@ local function MakeWall(name, builds, isdoor, klaussackkeyid)
         if isdoor then
             inst:AddComponent("activatable")
             inst.components.activatable.OnActivate = ToggleDoor
+            inst.components.activatable.getverb = getdooractionstring
             inst.components.activatable.standingaction = true
             inst.AnimState:OverrideSymbol("gate","blank","blank")
             inst.AnimState:OverrideSymbol("post","blank","blank")
@@ -569,13 +551,6 @@ local function MakeWallAnim(name, builds, isdoor)
 
     local function fn()
         local inst = CreateEntity()
-
-        --[[ TO DO, import this feature from DST
-        if isdoor then
-            --V2C: speecial =) must be the 1st tag added b4 AnimState component
-            inst:AddTag("can_offset_sort_pos")
-        end
-        ]]
 
         inst.entity:AddTransform()
         inst.entity:AddAnimState()
@@ -625,14 +600,14 @@ local function MakeInvItem(name, placement, animdata, isdoor)
             wall.Physics:SetCollides(true)
             inst.components.stackable:Get():Remove()
 
-            FixUpFenceOrientation(wall)
+            FixUpFenceOrientation(wall, rot or 0)
 
             wall.SoundEmitter:PlaySound("dontstarve/common/place_structure_wood")
 
-		    local ground = GetWorld()
-		    if ground then
-		    	ground.Pathfinder:AddWall(pt.x, pt.y, pt.z)
-		    end
+            local ground = GetWorld()
+            if ground then
+                ground.Pathfinder:AddWall(pt.x, pt.y, pt.z)
+            end
 
         end
     end
@@ -660,7 +635,6 @@ local function MakeInvItem(name, placement, animdata, isdoor)
         inst:AddComponent("deployable")
         inst.components.deployable.ondeploy = ondeploywall
         inst.components.deployable.test = DeployTest
-        --inst.components.deployable:SetDeployMode(DEPLOYMODE.WALL)
 
         MakeSmallBurnable(inst, TUNING.MED_BURNTIME)
         MakeSmallPropagator(inst)
@@ -715,7 +689,8 @@ local function MakeWallPlacer(placer, placement, builds, isdoor)
             placerupdate(placer)
             return true
         end,
-        function(inst)         
+        function(inst)
+            inst.components.placer.fixedcameraoffset = 0 -- Base Game and RoG do not have fixedcameraoffset handled in the constructor.
             inst.builds = builds
             if isdoor then
                 inst.isdoor = true

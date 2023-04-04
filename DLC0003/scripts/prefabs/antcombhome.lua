@@ -72,7 +72,7 @@ local function onhammered(inst, worker)
 	if inst.components.spawner then inst.components.spawner:ReleaseChild() end
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
 	inst:Remove()
 
 end
@@ -110,7 +110,7 @@ end
 local function maintainantpop(inst)
     if not inst:HasTag("INTERIOR_LIMBO") and not inst:HasTag("burnt") then
         local pt = inst:GetPosition()
-        local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 40, {"antman"}, {"INTERIOR_LIMBO"})
+        local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 40, {"ant"}, {"INTERIOR_LIMBO"})
         if #ents < TUNING.ANTMAN_MIN then
             local theta = math.random() * 2 * PI
             local radius = math.random() * 4 + 4

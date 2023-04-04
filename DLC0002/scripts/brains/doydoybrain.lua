@@ -3,6 +3,7 @@ require "behaviours/wander"
 require "behaviours/doaction"
 require "behaviours/panic"
 require "behaviours/minperiod"
+require "behaviours/standstill"
 
 local TIME_BETWEEN_EATING = 3.5
 
@@ -134,6 +135,10 @@ local function MateAction(inst)
 	end
 end
 
+local function ShouldStandStill(inst)
+	return inst.onwater
+end
+
 local DoydoyBrain = Class(Brain, function(self, inst)
 	Brain._ctor(self, inst)
 end)
@@ -150,7 +155,8 @@ function DoydoyBrain:OnStart()
 
 	local root =
 	PriorityNode(
-	{
+	{	
+		StandStill(self.inst, ShouldStandStill),
 		DoAction(self.inst, function() return MateAction(self.inst) end, "Mate", true),
 
 		WhileNode( function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),

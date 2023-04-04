@@ -1189,7 +1189,7 @@ local states=
         end,
 
         onupdate = function(inst)
-            if inst.sg.statemem.target ~= nil then
+            --[[ if inst.sg.statemem.target ~= nil then
                 if inst.sg.statemem.target:IsValid() then
                     local x, y, z = inst.Transform:GetWorldPosition()
                     local x1, y1, z1 = inst.sg.statemem.target.Transform:GetWorldPosition()
@@ -1200,7 +1200,7 @@ local states=
                     end
                 end
                 inst.sg.statemem.target = nil
-            end
+            end ]]
             if inst.sg.statemem.lightval ~= nil then
                 inst.sg.statemem.lightval = inst.sg.statemem.lightval * .99
                 SetLightValueAndOverride(inst, inst.sg.statemem.lightval, (inst.sg.statemem.lightval - 1) * 3)
@@ -1434,9 +1434,8 @@ local states=
             end
             SetLightValueAndOverride(inst, 1, 0)
             SetLightColour(inst, 1)
-            if not inst.sg.statemem.keepfacing then
-      --          DisableEightFaced(inst)
-            end
+
+            inst.Light:Enable(false)
         end,
     },
 

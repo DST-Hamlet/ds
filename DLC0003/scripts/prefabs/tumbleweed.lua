@@ -132,7 +132,10 @@ local function onpickup(inst, owner)
     inst:RemoveEventCallback("animover", startmoving, inst)
     inst.AnimState:PlayAnimation("break")
     inst.DynamicShadow:Enable(false)
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
+    
     return true --This makes the inventoryitem component not actually give the tumbleweed to the player
 end
 

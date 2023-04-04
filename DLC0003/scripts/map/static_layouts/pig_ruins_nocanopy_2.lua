@@ -87,7 +87,7 @@ return {
         },
         {
           name = "",
-          type = "smashing_pot",
+          type = "smashingpot",
           shape = "rectangle",
           x = 84,
           y = 74,

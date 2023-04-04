@@ -33,6 +33,7 @@ local function fn(Sim)
     anim:PlayAnimation("idle_loop", true)
 
     inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
     --anim:PlayAnimation("down")
     --anim:PushAnimation("idle_loop", true)
 

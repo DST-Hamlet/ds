@@ -19,7 +19,10 @@ local function fn(Sim)
 	inst.AnimState:SetBank("doydoy_mate_fx")
 	inst.AnimState:SetBuild("doydoy_mate_fx")
 	inst.AnimState:SetSortOrder(-1)
+
 	inst:AddTag("NOCLICK")
+	inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 
 	inst.AnimState:PlayAnimation("mate_pre")
 	inst.AnimState:PushAnimation("mate_loop")

@@ -2042,7 +2042,7 @@ return {
         	GENERIC = "I wonder if they have any gentlemanly hats.",
         	BURNING = "A waste of good lumber.",
         },
-        PIG_SHOP_MUSEUM = 
+        PIG_SHOP_ACADEMY = 
         {
         	GENERIC = "Ah! Just what I was looking for!",
         	BURNING = "What a waste!",

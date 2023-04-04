@@ -15,7 +15,7 @@ local function onspoiledhammered(inst, worker)
     to_hammer.Transform:SetPosition(inst:GetPosition():Get())
     to_hammer.components.lootdropper:DropLoot()
     SpawnPrefab("collapse_small").Transform:SetPosition(to_hammer.Transform:GetWorldPosition())
-    to_hammer.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+    to_hammer.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
 
     inst.components.workable:SetWorkLeft(1)
     
@@ -37,7 +37,6 @@ local function fn()
 
     inst:AddComponent("inspectable")
     inst:AddComponent("inventoryitem")
-    inst.components.inventoryitem.atlasname = "images/inventoryimages.xml"
 
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetLoot({"boneshard", "boneshard"})
@@ -54,11 +53,7 @@ local function fn()
 
     inst:AddComponent("appeasement")
     inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_TINY
-
-    inst:AddComponent("floatable")
-    inst.components.floatable:SetOnHitWaterFn(function(inst) inst.AnimState:PlayAnimation("idle_water", true) end)
-    inst.components.floatable:SetOnHitLandFn(function(inst) inst.AnimState:PlayAnimation("idle", true) end)
-
+    
 	return inst
 end
 

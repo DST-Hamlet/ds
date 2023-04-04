@@ -67,12 +67,13 @@ function Unwrappable:Unwrap(doer)
                 end
                 item:SetPersistData(v.data)
                 if item.components.inventoryitem ~= nil then
-                    item.components.inventoryitem:OnDropped(true)
+                    item.components.inventoryitem:OnDropped(true, nil, nil, .5)
                 end
             end
         end
         self.itemdata = nil
     end
+
     if self.onunwrappedfn ~= nil then
         self.onunwrappedfn(self.inst, pos, doer)
     end

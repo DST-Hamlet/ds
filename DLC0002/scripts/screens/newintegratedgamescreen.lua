@@ -44,20 +44,20 @@ local NewIntegratedGameScreen = Class(Screen, function(self, target_mode, slotnu
     self.bg = self.root:AddChild(Image("images/fepanels.xml", "panel_saveslots.tex"))
 
     self.title = self.root:AddChild(Text(TITLEFONT, 60))
-    self.title:SetPosition( 75, 135, 0)
+    self.title:SetPosition( 100, 140, 0)
     self.title:SetRegionSize(250,60)
     self.title:SetHAlign(ANCHOR_LEFT)
 	self.title:SetString(STRINGS.UI.NEWGAMESCREEN.TITLE)
 
 	self.portraitbg = self.root:AddChild(Image("images/saveslot_portraits.xml", "background.tex"))
-	self.portraitbg:SetPosition(-120, 135, 0)	
+	self.portraitbg:SetPosition(-110, 140, 0)	
 	self.portraitbg:SetClickable(false)	
 
 	self.portrait = self.root:AddChild(Image())
 	self.portrait:SetClickable(false)		
 	local atlas = (table.contains(MODCHARACTERLIST, self.character) and "images/saveslot_portraits/"..self.character..".xml") or "images/saveslot_portraits.xml"
 	self.portrait:SetTexture(atlas, self.character..".tex")
-	self.portrait:SetPosition(-120, 135, 0)
+	self.portrait:SetPosition(-110, 140, 0)
   
   	local menu_ypos = 30
   	local menuitems = {}
@@ -70,9 +70,9 @@ local NewIntegratedGameScreen = Class(Screen, function(self, target_mode, slotnu
 			self.dlcindicator = self.root:AddChild(Image())
 			self.dlcindicator:SetClickable(false)
 			self.dlcindicator:SetTexture("images/ui.xml", "SWicon.tex")
-			self.dlcindicator:SetPosition(0, 55, 0)
+			self.dlcindicator:SetPosition(0, 30, 0)
 			self.dlcindicator:SetScale(0.85)
-			menu_ypos = -45
+			menu_ypos = -90
 		end
 
 		table.insert(menuitems, {text = STRINGS.UI.NEWGAMESCREEN.START, cb = function() self:Start() end, offset = Vector3(0,10,0)})
@@ -100,9 +100,9 @@ local NewIntegratedGameScreen = Class(Screen, function(self, target_mode, slotnu
   			self.dlcindicator = self.root:AddChild(Image())
 			self.dlcindicator:SetClickable(false)
 			self.dlcindicator:SetTexture("images/ui.xml", "SWicon.tex")
-			self.dlcindicator:SetPosition(0, 55, 0)
+			self.dlcindicator:SetPosition(0, 30, 0)
 			self.dlcindicator:SetScale(0.85)
-			menu_ypos = -45
+			menu_ypos = -90
   		end
 
   		menuitems = 
@@ -135,6 +135,9 @@ function NewIntegratedGameScreen:OnControl(control, down)
     if Screen.OnControl(self, control, down) then return true end
     if not down and control == CONTROL_CANCEL then
         TheFrontEnd:PopScreen(self)
+		if self.cancelcb then
+			self.cancelcb()
+		end
         return true
     end
 end
@@ -274,7 +277,7 @@ function NewIntegratedGameScreen:Start()
 		CleanupTweakTable()
 		self.root:Disable()
 
-		TravelBetweenWorlds("shipwrecked_portal", 7.5, {"chester_eyebone", "packim_fishbone"}, self.customoptions)
+		TravelBetweenWorlds("shipwrecked_portal", 7.5, "dropontravel", self.customoptions)
 	end
 end
 

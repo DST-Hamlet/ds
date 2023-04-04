@@ -91,6 +91,7 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
 	inst:AddTag("FX")
+	inst:AddTag("INTERIOR_LIMBO_IMMUNE")
 
 	inst.entity:SetParent(GetPlayer().entity)
 	

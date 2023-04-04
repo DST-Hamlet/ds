@@ -44,6 +44,9 @@ local function fn()
     inst:AddComponent("armor")
     inst.components.armor:InitCondition(TUNING.ARMOR_WEEVOLE_DURABILITY, TUNING.ARMOR_WEEVOLE_ABSORPTION)
 
+    inst:AddComponent("waterproofer")
+    inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_MED)
+
     inst:AddComponent("equippable")
     inst.components.equippable.equipslot = EQUIPSLOTS.BODY
 

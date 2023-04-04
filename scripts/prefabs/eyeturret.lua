@@ -20,11 +20,10 @@ local function retargetfn(inst)
             return  guy.components.combat and 
                     inst.components.combat:CanTarget(guy) and
                     (guy.components.combat.target == GetPlayer() or GetPlayer().components.combat.target == guy)
-    end)
+    end, nil, {"eyeturret"})
 
     return newtarget
 end
-
 
 local function shouldKeepTarget(inst, target)
     if target and target:IsValid() and
@@ -117,6 +116,7 @@ local function itemfn(Sim)
     inst:AddComponent("deployable")
     inst.components.deployable.ondeploy = ondeploy
     inst.components.deployable.placer = "eyeturret_placer"
+    inst.components.deployable.deploydistance = 1.5
     
     return inst
 end
@@ -135,6 +135,8 @@ local function fn(Sim)
     minimap:SetIcon("eyeball_turret.png")
 
 	inst.base = inst:SpawnChild("eyeturret_base")
+
+    inst.highlightchildren = {inst.base}
 
     inst:AddTag("eyeturret")
     inst:AddTag("companion")

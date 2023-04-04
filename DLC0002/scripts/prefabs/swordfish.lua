@@ -29,11 +29,15 @@ local function retargetfn(inst)
     end, yestags, notags)
 end
 
+local CHASE_DIST = 40
 local function KeepTarget(inst, target)
     local shouldkeep = inst.components.combat:CanTarget(target)
     local onwater = target:HasTag("aquatic")
-    --local onboat = target.components.driver and target.components.driver:GetIsDriving()
-    return shouldkeep and onwater
+    local home = inst.components.knownlocations:GetLocation("home")
+
+    local isnearhome = not (home ~= nil and not (inst:GetDistanceSqToPoint(home) <= CHASE_DIST * CHASE_DIST))
+
+    return shouldkeep and onwater and isnearhome
 end
 
 local function SetLocoState(inst, state)

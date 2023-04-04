@@ -18,6 +18,7 @@ local customise = nil
 local options = {}
 
 local per_side = 7
+local per_scroll = 14
 
 local CustomizationScreen = Class(Screen, function(self, profile, cb, defaults, ROGEnabled, merge_options, world)
 
@@ -227,13 +228,13 @@ local CustomizationScreen = Class(Screen, function(self, profile, cb, defaults, 
 
 	self.rightbutton = self.optionspanel:AddChild(ImageButton("images/ui.xml", "scroll_arrow.tex", "scroll_arrow_over.tex", "scroll_arrow_disabled.tex"))
     self.rightbutton:SetPosition(340, 0, 0)
-    self.rightbutton:SetOnClick( function() self:Scroll(per_side) end)
+    self.rightbutton:SetOnClick( function() self:Scroll(per_scroll) end)
 	--self.rightbutton:Hide()
 	
 	self.leftbutton = self.optionspanel:AddChild(ImageButton("images/ui.xml", "scroll_arrow.tex", "scroll_arrow_over.tex", "scroll_arrow_disabled.tex"))
     self.leftbutton:SetPosition(-340, 0, 0)
     self.leftbutton:SetScale(-1,1,1)
-    self.leftbutton:SetOnClick( function() self:Scroll(-per_side) end)	
+    self.leftbutton:SetOnClick( function() self:Scroll(-per_scroll) end)	
     self.leftbutton:Hide()
 	
 	self.optionwidgets = {}
@@ -691,13 +692,13 @@ function CustomizationScreen:OnControl(control, down)
     	elseif control == CONTROL_PAGELEFT then
     		if self.leftbutton.shown then
     			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-    			self:Scroll(-per_side)
+    			self:Scroll(-per_scroll)
     		end
 
     	elseif control == CONTROL_PAGERIGHT then
     		if self.rightbutton.shown then
     			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-    			self:Scroll(per_side)
+    			self:Scroll(per_scroll)
     		end
     	else
     		return false

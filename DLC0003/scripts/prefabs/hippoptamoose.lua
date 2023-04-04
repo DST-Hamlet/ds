@@ -135,81 +135,18 @@ local function OnAttacked(inst, data)
     inst.components.combat:ShareTarget(attacker, SHARE_TARGET_DIST, function(dude) return dude:HasTag("hippopotamoose") end, MAX_TARGET_SHARES)
 end
 
-local function HitShake()
-        --       :Shake(shakeType, duration, speed, scale)
-        -- TheCamera:Shake("SIDE", 0.2, 0.05, .1)
-        TheCamera:Shake("SIDE", 0.5, 0.05, 0.1)
-end
-
-local function DoChargeDamage(inst, target)
-    if not inst.recentlycharged then
-        inst.recentlycharged = {}
-    end
-
-    for k,v in pairs(inst.recentlycharged) do
-        if v == target then
-            --You've already done damage to this by charging it recently.
-            return
-        end
-    end
-    inst.recentlycharged[target] = target
-    inst:DoTaskInTime(3, function() inst.recentlycharged[target] = nil end)
-    inst.components.combat:DoAttack(target, inst.weapon)
-    inst.SoundEmitter:PlaySound("dontstarve/creatures/rook/explo") 
-end
-
-local function oncollide(inst, other)
-    local v1 = Vector3(inst.Physics:GetVelocity())
-    if other == GetPlayer() then
-        return
-    end
-    if v1:LengthSq() < 42 then return end
-
-    HitShake()
-
-    inst:DoTaskInTime(2*FRAMES, function()   
-            if  (other and other:HasTag("smashable")) then
-                --other.Physics:SetCollides(false)
-                other.components.health:Kill()
-            elseif other and other.components.workable and other.components.workable.workleft > 0 then
-                SpawnPrefab("collapse_small").Transform:SetPosition(other:GetPosition():Get())
-                other.components.workable:Destroy(inst)
-            elseif other and other.components.health and other.components.health:GetPercent() >= 0 then
-                DoChargeDamage(inst, other)
-            end
-    end)
-
-end
-
-local function CreateWeapon(inst)
-    local weapon = CreateEntity()
-    weapon.entity:AddTransform()
-    weapon:AddComponent("weapon")
-    weapon.components.weapon:SetDamage(200)
-    weapon.components.weapon:SetRange(0)
-    weapon:AddComponent("inventoryitem")
-    weapon.persists = false
-    weapon.components.inventoryitem:SetOnDroppedFn(function() weapon:Remove() end)
-    weapon:AddComponent("equippable")
-    inst.components.inventory:GiveItem(weapon)
-    inst.weapon = weapon
-end
-
-
 local function OnWaterChange(inst, onwater)
     if onwater then
         inst.onwater = true
-        inst.sg:GoToState("submerge")
         inst.DynamicShadow:Enable(false)
-    --        inst.components.locomotor.walkspeed = 3
     else
-        inst.onwater = false        
-        inst.sg:GoToState("emerge")
+        inst.onwater = false
         inst.DynamicShadow:Enable(true)
-    --        inst.components.locomotor.walkspeed = 4
     end
-end
 
+    local noanim = inst:GetTimeAlive() < 1
+    inst.sg:GoToState(onwater and "submerge" or "emerge", noanim)
+end
 
 local function OnEntityWake(inst)
     inst.components.tiletracker:Start()
@@ -234,10 +171,8 @@ local function MakeMoose(nightmare)
     --inst.Transform:SetScale(0.66, 0.66, 0.66)
    -- MakeCharacterPhysics(inst, 50, 1.5)
     MakeAmphibiousCharacterPhysics(inst, 50, 1.5)
-    inst.Physics:SetCollisionCallback(oncollide)
 
     anim:SetBank("hippo")
-
 
     inst:AddComponent("tiletracker")
     inst.components.tiletracker:SetOnWaterChangeFn(OnWaterChange)
@@ -286,12 +221,9 @@ local function MakeMoose(nightmare)
     inst.components.groundpounder.destructionRings = 1
     inst.components.groundpounder.numRings = 2
 
-    inst:AddComponent("inventory")
-
     inst:AddComponent("inspectable")
     inst:AddComponent("knownlocations")
 
-    inst:AddComponent("knownlocations")
     inst:AddComponent("herdmember")
     inst.components.herdmember:SetHerdPrefab("hippoherd")
     
@@ -305,11 +237,9 @@ local function MakeMoose(nightmare)
     inst.OnEntityWake = OnEntityWake
     inst.OnEntitySleep = OnEntitySleep    
 
-    CreateWeapon(inst)
-
     --inst:AddComponent("debugger")
 
     return inst
 end
 
-return Prefab("chessboard/hippopotamoose", function() return MakeMoose() end , assets, prefabs)
+return Prefab("chessboard/hippopotamoose", MakeMoose, assets, prefabs)

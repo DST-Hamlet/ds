@@ -444,7 +444,8 @@ function FindWaterOffset(position, start_angle, radius, attempts, check_los, ign
         local tile = GetVisualTileType(run_point.x, run_point.y, run_point.z)
 
         if tile ~= GROUND.OCEAN_SHALLOW and tile ~= GROUND.OCEAN_MEDIUM and tile ~= GROUND.OCEAN_DEEP and
-        tile ~= GROUND.OCEAN_CORAL and tile ~= GROUND.MANGROVE and tile ~= GROUND.OCEAN_SHIPGRAVEYARD then
+        tile ~= GROUND.OCEAN_CORAL and tile ~= GROUND.MANGROVE and tile ~= GROUND.OCEAN_SHIPGRAVEYARD and 
+        tile ~= GROUND.LILYPOND then
             return false
         end
         if check_los and not ground.Pathfinder:IsClear(position.x, position.y, position.z,
@@ -507,6 +508,31 @@ function CanEntitySeeTarget(inst, target)
 end
 -- [[ END FROM DST]]
 
+function IsPassableAtPoint(x, y, z)
+    local tile = GetWorld().Map:GetTileAtPoint(x, y, z)
+    return tile ~= GROUND.IMPASSABLE and
+        tile ~= GROUND.INVALID
+end
+
+function ErodeAway(inst, erode_time)
+    local time_to_erode = erode_time or 1
+    local tick_time = TheSim:GetTickTime()
+
+    if inst.DynamicShadow ~= nil then
+        inst.DynamicShadow:Enable(false)
+    end
+
+    inst:StartThread(function()
+        local ticks = 0
+        while ticks * tick_time < time_to_erode do
+            local erode_amount = ticks * tick_time / time_to_erode
+            inst.AnimState:SetErosionParams(erode_amount, 0.1, 1.0)
+            ticks = ticks + 1
+            Yield()
+        end
+        inst:Remove()
+    end)
+end
 
 function CheckLOSFromPoint(pos, target_pos)
     local dist = target_pos:Dist(pos)
@@ -515,42 +541,52 @@ function CheckLOSFromPoint(pos, target_pos)
     local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, dist, {"blocker"})
 
     for k,v in pairs(ents) do
-        local blocker_pos = v:GetPosition()
-        local blocker_vec = (blocker_pos - pos):GetNormalized()
-        local blocker_perp = Vector3(-blocker_vec.z, 0, blocker_vec.x)
-        local blocker_radius = v.Physics:GetRadius()
-        blocker_radius = math.max(0.75, blocker_radius)
+        if v.Physics:IsActive() then
+            local blocker_pos = v:GetPosition()
+            local blocker_vec = (blocker_pos - pos):GetNormalized()
+            local blocker_perp = Vector3(-blocker_vec.z, 0, blocker_vec.x)
+            local blocker_radius = v.Physics:GetRadius()
+            blocker_radius = math.max(0.75, blocker_radius)
 
-        local blocker_edge1 = blocker_pos + Vector3(blocker_perp.x * blocker_radius, 0, blocker_perp.z * blocker_radius)
-        local blocker_edge2 = blocker_pos - Vector3(blocker_perp.x * blocker_radius, 0, blocker_perp.z * blocker_radius)
+            local blocker_edge1 = blocker_pos + Vector3(blocker_perp.x * blocker_radius, 0, blocker_perp.z * blocker_radius)
+            local blocker_edge2 = blocker_pos - Vector3(blocker_perp.x * blocker_radius, 0, blocker_perp.z * blocker_radius)
 
-        local blocker_vec1 = (blocker_edge1 - pos):GetNormalized()
-        local blocker_vec2 = (blocker_edge2 - pos):GetNormalized()
+            local blocker_vec1 = (blocker_edge1 - pos):GetNormalized()
+            local blocker_vec2 = (blocker_edge2 - pos):GetNormalized()
 
-        --[[
-        print("Checking LoS With:", v)
-        local colourstr = "00000"..v.GUID
-        local r = tonumber(colourstr:sub(-6, -5), 16) / 255
-        local g = tonumber(colourstr:sub(-4, -3), 16) / 255
-        local b = tonumber(colourstr:sub(-2), 16) / 255
-        --Note : world must have debugger component and be debug selected for this to display.
-        GetWorld().components.debugger:SetAll(v.GUID.."_angle1", {x=pos.x, y=pos.z}, {x=pos.x + (blocker_vec1.x * dist*2), y= pos.z + (blocker_vec1.z * dist*2)}, {r=r,g=g,b=b,a=1})
-        GetWorld().components.debugger:SetAll(v.GUID.."_angle2", {x=pos.x, y=pos.z}, {x=pos.x + (blocker_vec2.x * dist*2), y= pos.z + (blocker_vec2.z * dist*2)}, {r=r,g=g,b=b,a=1})
-        --]]
+            --[[
+            print("Checking LoS With:", v)
+            local colourstr = "00000"..v.GUID
+            local r = tonumber(colourstr:sub(-6, -5), 16) / 255
+            local g = tonumber(colourstr:sub(-4, -3), 16) / 255
+            local b = tonumber(colourstr:sub(-2), 16) / 255
+            --Note : world must have debugger component and be debug selected for this to display.
+            GetWorld().components.debugger:SetAll(v.GUID.."_angle1", {x=pos.x, y=pos.z}, {x=pos.x + (blocker_vec1.x * dist*2), y= pos.z + (blocker_vec1.z * dist*2)}, {r=r,g=g,b=b,a=1})
+            GetWorld().components.debugger:SetAll(v.GUID.."_angle2", {x=pos.x, y=pos.z}, {x=pos.x + (blocker_vec2.x * dist*2), y= pos.z + (blocker_vec2.z * dist*2)}, {r=r,g=g,b=b,a=1})
+            --]]
 
-        if isbetween(vec, blocker_vec1, blocker_vec2) then
-            -- print(v, "blocks LoS.")
-            -- print("-----------")
-            return false
+            if isbetween(vec, blocker_vec1, blocker_vec2) then
+                return false
+            end
         end
     end
-    -- print("Nothing blocked LoS.")
-    -- print("-----------")
 
     return true
 end
 
 local inventoryItemAtlasLookup = {}
+
+function RegisterInventoryItemAtlas(atlas, imagename)
+	if atlas ~= nil and imagename ~= nil then
+		if inventoryItemAtlasLookup[imagename] ~= nil then
+			if inventoryItemAtlasLookup[imagename] ~= atlas then
+				print("RegisterInventoryItemAtlas: Image '" .. imagename .. "' is already registered to atlas '" .. inventoryItemAtlasLookup[imagename] .."'")
+			end
+		else
+			inventoryItemAtlasLookup[imagename] = atlas
+		end
+	end
+end
 
 function GetInventoryItemAtlas(imagename)
 	local atlas = inventoryItemAtlasLookup[imagename]
@@ -558,8 +594,11 @@ function GetInventoryItemAtlas(imagename)
 		return atlas
 	end
 	local base_atlas = "images/inventoryimages.xml"
+
 	atlas = TheSim:AtlasContains(base_atlas, imagename) and base_atlas or "images/inventoryimages_2.xml"
-	inventoryItemAtlasLookup[imagename] = atlas
+	if atlas ~= nil then
+		inventoryItemAtlasLookup[imagename] = atlas
+	end
 	return atlas
 end
 
@@ -584,4 +623,50 @@ function ReplaceEntity(oldinst, newinst)
 			end
 		end
 	end
+end
+
+function IsPointInInteriorBounds(pt, distance)
+    local interiorSpawner = GetWorld().components.interiorspawner
+
+    if interiorSpawner.current_interior then
+        local width = interiorSpawner.current_interior.width
+        local depth = interiorSpawner.current_interior.depth
+        local originpt = interiorSpawner:getSpawnOrigin()
+
+        local dMax = originpt.x + depth/2
+        local dMin = originpt.x - depth/2
+
+        local wMax = originpt.z + width/2
+        local wMin = originpt.z - width/2 
+
+        local dist = distance or 0.5
+
+        if pt.x < dMin+dist or pt.x > dMax -dist or pt.z < wMin+dist or pt.z > wMax-dist then
+            return false
+        end 
+    end
+
+    return true
+end
+
+local function isWaterOrImpassable(map, tile)
+	return map:IsWater(tile) or tile == GROUND.IMPASSABLE
+end
+
+function IsPointCloseToWaterOrImpassable(x, y, z, radius)
+    local map = GetWorld().Map
+    
+    for i = -radius, radius, 1 do
+        if isWaterOrImpassable(map, map:GetTileAtPoint(x - radius, y, z + i)) or isWaterOrImpassable(map, map:GetTileAtPoint(x + radius, y, z + i)) then
+            return true
+        end
+    end
+
+    for i = -(radius - 1), radius - 1, 1 do
+        if isWaterOrImpassable(map, map:GetTileAtPoint(x + i, y, z - radius)) or isWaterOrImpassable(map, map:GetTileAtPoint(x + i, y, z + radius)) then
+            return true
+        end
+    end
+
+    return false
 end

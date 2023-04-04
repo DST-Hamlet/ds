@@ -46,6 +46,7 @@ local function fn(Sim)
     inst:AddTag("monster")
     inst:AddTag("hostile")
     inst:AddTag("ghost")
+    inst:AddTag("windspeedimmune")
     inst:AddTag("noauradamage")
 
     inst:AddComponent("locomotor")

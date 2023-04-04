@@ -98,7 +98,7 @@ function Floatable:OnHitWater(skipcrocodogtest)
 	self.inst.PushEvent("hitwater")
 	self.inst:AddTag("aquatic")
 
-	if self.inst.components.burnable then
+	if self.inst.components.burnable and not self.inst.components.burnable.burntonwater then
 		self.inst.components.burnable:Extinguish()
 	end
 
@@ -137,18 +137,11 @@ function Floatable:OnSave()
 end
 
 function Floatable:OnLoad(data)
-	
-	local world = GetWorld()
-    local x, y, z = self.inst.Transform:GetWorldPosition()
-    local tile, tileinfo = self.inst:GetCurrentTileType(x, y, z)
-    local onwater = not world.Map:IsLand(tile)
-	
-	if onwater == true then 
-		self:OnHitWater(true)
-	else 
-		self:OnHitLand(true)
-	end 
-
+	if data and data.onwater then
+        self:OnHitWater(true)
+    else 
+        self:OnHitLand(true)
+    end
 end
 
 function Floatable:SetAnimationFromPosition()

@@ -43,7 +43,6 @@ local function fn(Sim)
     inst:AddComponent("inspectable")
     
     inst:AddComponent("inventoryitem")
-    inst.components.inventoryitem.atlasname = "images/inventoryimages.xml"
     inst.components.inventoryitem.foleysound = "dontstarve_DLC002/common/foley/snakeskin_jacket"
 
     inst:AddComponent("equippable")
@@ -51,8 +50,8 @@ local function fn(Sim)
     inst.components.equippable.insulated = true
 
     inst:AddComponent("waterproofer")
-    inst.components.waterproofer.effectiveness = TUNING.WATERPROOFNESS_LARGE
-    
+    inst.components.waterproofer.effectiveness = TUNING.WATERPROOFNESS_HUGE
+
     inst.components.equippable:SetOnEquip( onequip )
     inst.components.equippable:SetOnUnequip( onunequip )
     

@@ -13,13 +13,6 @@ local events=
     CommonHandlers.OnLocomote(false,true),
 }
 
-local function GetVolume(inst)
-	if inst.components.transparentonsanity then
-		return inst.components.transparentonsanity:GetPercent()
-	end
-	return 1
-end
-
 local states=
 {
     State{
@@ -31,12 +24,12 @@ local states=
             inst.Physics:Stop()
             inst.components.combat:StartAttack()
             inst.AnimState:PlayAnimation("atk")
-            inst.SoundEmitter:PlaySound(inst.sounds.attack_grunt, nil, GetVolume(inst))
+            inst.SoundEmitter:PlaySound(inst.sounds.attack_grunt)
         end,
 
         timeline=
         {
-			TimeEvent(23*FRAMES, function(inst) inst.SoundEmitter:PlaySound(inst.sounds.attack, nil, GetVolume(inst)) end),
+			TimeEvent(23*FRAMES, function(inst) inst.SoundEmitter:PlaySound(inst.sounds.attack) end),
             TimeEvent(25*FRAMES, function(inst) inst.components.combat:DoAttack(inst.sg.statemem.target) end),
         },
 
@@ -90,7 +83,7 @@ local states=
         onenter = function(inst)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("taunt")
-            inst.SoundEmitter:PlaySound(inst.sounds.taunt, nil, GetVolume(inst))
+            inst.SoundEmitter:PlaySound(inst.sounds.taunt)
         end,
 
         events=
@@ -106,7 +99,7 @@ local states=
         onenter = function(inst)
             inst.AnimState:PlayAnimation("appear")
             inst.Physics:Stop()
-            inst.SoundEmitter:PlaySound(inst.sounds.appear, nil, GetVolume(inst))
+            inst.SoundEmitter:PlaySound(inst.sounds.appear)
         end,
 
         events =
@@ -120,7 +113,7 @@ local states=
         tags = {"busy"},
 
         onenter = function(inst)
-			inst.SoundEmitter:PlaySound(inst.sounds.death, nil, GetVolume(inst))
+			inst.SoundEmitter:PlaySound(inst.sounds.death)
             inst.AnimState:PlayAnimation("disappear")
             inst.Physics:Stop()
             RemovePhysicsColliders(inst)
@@ -134,7 +127,7 @@ local states=
 
         onenter = function(inst)
 			inst.persists = false
-			inst.SoundEmitter:PlaySound(inst.sounds.death, nil, GetVolume(inst))
+			inst.SoundEmitter:PlaySound(inst.sounds.death)
             inst.AnimState:PlayAnimation("disappear")
             inst.Physics:Stop()
         end,

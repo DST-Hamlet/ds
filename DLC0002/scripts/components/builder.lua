@@ -63,14 +63,16 @@ function Builder:BufferBuild(recipe)
 	local mats = self:GetIngredients(recipe)
 	local wetLevel = self:GetIngredientWetness(mats)	
 	self:RemoveIngredients(mats)
+
+	local used_jellybrainhat = not self:KnowsRecipeWithoutJellyBrainHat(recipe)
+
 	self.buffered_builds[recipe] = {}
 	self.buffered_builds[recipe].wetLevel = wetLevel
-	self.inst:PushEvent("bufferbuild", {recipe = GetRecipe(recipe)})
+	self.inst:PushEvent("bufferbuild", {recipe = GetRecipe(recipe), used_jellybrainhat = used_jellybrainhat})
 end
 
 function Builder:OnUpdate(dt)
 	self:EvaluateTechTrees()
-    self:EvaluateAutoFixers()
 end
 
 function Builder:GiveAllRecipes()
@@ -125,7 +127,10 @@ function Builder:CanBuildAtPoint(pt, recipe)
 	    	onWater = ground.Map:IsWater(testTile) and onWater
 	    	testTile = ground.Map:GetTileAtPoint(x , y, z - minBuffer)
 	    	onWater = ground.Map:IsWater(testTile) and onWater
-	    	return onWater
+	    	
+			if not onWater then 
+				return false 
+			end
     	else 
    
     		local testTile = self.inst:GetCurrentTileType(x, y, z)--ground.Map:GetTileAtPoint(x , y, z)
@@ -233,14 +238,15 @@ function Builder:CanBuildAtPoint(pt, recipe)
     ]]
 
 
+	local min_rad = recipe.min_spacing or 3.2
+
 	if tile == GROUND.IMPASSABLE or (boating and not recipe.aquatic) then
 		return false
-	else
+
+	elseif min_rad ~= 0 then
 		local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, 6, nil, {'player', 'fx', 'NOBLOCK'}) -- or we could include a flag to the search?
 		for k, v in pairs(ents) do
 			if v ~= self.inst and (not v.components.placer) and v.entity:IsVisible() and not (v.components.inventoryitem and v.components.inventoryitem.owner ) then
-				local min_rad = recipe.min_spacing or 2+1.2
-				--local rad = (v.Physics and v.Physics:GetRadius() or 1) + 1.25
 				
 				--stupid finalling hack because it's too late to change stuff
 				if recipe.name == "treasurechest" and v.prefab == "pond" then
@@ -248,7 +254,7 @@ function Builder:CanBuildAtPoint(pt, recipe)
 				end
 
 				local dsq = distsq(Vector3(v.Transform:GetWorldPosition()), pt)
-				if dsq <= min_rad*min_rad then
+				if dsq < min_rad*min_rad then
 					return false
 				end
 			end
@@ -256,33 +262,6 @@ function Builder:CanBuildAtPoint(pt, recipe)
 	end
 	
 	return true
-end
-
-function Builder:EvaluateAutoFixers()
-    local pos = self.inst:GetPosition()
-    local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, TUNING.RESEARCH_MACHINE_DIST, {"autofixer"})
-
-    local old_fixer = self.current_fixer
-    self.current_fixer = nil
-
-    local fixer_active = false
-    for k,v in pairs(ents) do
-        if v.components.autofixer then
-            if not fixer_active then
-                --activate the first machine in the list. This will be the one you're closest to.
-                v.components.autofixer:TurnOn(self.inst)
-                fixer_active = true
-                self.current_fixer = v
-
-            else
-                --you've already activated a machine. Turn all the other machines off.
-                v.components.autofixer:TurnOff(self.inst)
-            end
-        end
-    end
-    if old_fixer and old_fixer ~= self.current_fixer then
-        old_fixer.components.autofixer:TurnOff(self.inst)
-    end
 end
 
 function Builder:EvaluateTechTrees()
@@ -355,11 +334,14 @@ function Builder:AddRecipe(rec)
     end
 end
 
+function Builder:CanLearnRecipe(recipe)
+	return recipe ~= nil and not recipe.nounlock and not self.jellybrainhat
+end
+
 function Builder:UnlockRecipe(recname)
 	local recipe = GetRecipe(recname)
 
-	if recipe ~= nil and  not recipe.nounlock and not self.brainjellyhat then
-	--print("Unlocking: ", recname)
+	if self:CanLearnRecipe(recipe) then
 		if self.inst.components.sanity then
 			self.inst.components.sanity:DoDelta(TUNING.SANITY_MED)
 		end
@@ -398,7 +380,7 @@ function Builder:GetIngredients(recname)
 		local ingredients = {}
 		for k,v in pairs(recipe.ingredients) do
 			local amt = math.max(1, RoundUp(v.amount * self.ingredientmod))
-			local items = self.inst.components.inventory:GetItemByName(v.type, amt)
+			local items = self.inst.components.inventory:GetCraftingIngredient(v.type, amt)
 			ingredients[v.type] = items
 		end
 		return ingredients
@@ -409,7 +391,7 @@ function Builder:RemoveIngredients(ingredients)
     for item, ents in pairs(ingredients) do
     	for k,v in pairs(ents) do
     		for i = 1, v do
-    			self.inst.components.inventory:RemoveItem(k, false):Remove()
+				self.inst.components.inventory:RemoveItem(k, false, true):Remove()
     		end
     	end
     end
@@ -444,6 +426,12 @@ function Builder:DoBuild(recname, pt, rotation)
 
     if recipe and self:IsBuildBuffered(recname) or self:CanBuild(recname) then
     	
+		if recipe.placer ~= nil and
+		self.inst.components.rider ~= nil and
+		self.inst.components.rider:IsRiding() then
+			return false, "MOUNTED"
+		end
+		
     	local wetLevel = 0
 		if self.buffered_builds[recname] then
 			wetLevel = self.buffered_builds[recname].wetLevel
@@ -470,7 +458,7 @@ function Builder:DoBuild(recname, pt, rotation)
                 if self.inst.components.inventory then
 					 
                     --self.inst.components.inventory:GiveItem(prod)
-                    self.inst:PushEvent("builditem", {item=prod, recipe = recipe})
+                    self.inst:PushEvent("builditem", {item=prod, recipe = recipe, used_jellybrainhat = not self:KnowsRecipeWithoutJellyBrainHat(recname)})
                     ProfileStatsAdd("build_"..prod.prefab)
 
 
@@ -556,15 +544,24 @@ function Builder:DoBuild(recname, pt, rotation)
 end
 
 function Builder:KnowsRecipe(recname)
+	return self.jellybrainhat or self:KnowsRecipeWithoutJellyBrainHat(recname)  
+end
+
+function Builder:KnowsRecipeWithoutJellyBrainHat(recname)
 	local recipe = GetRecipe(recname)
 
-	if recipe and recipe.level.ANCIENT <= self.ancient_bonus and recipe.level.MAGIC <= self.magic_bonus and recipe.level.SCIENCE <= self.science_bonus and recipe.level.OBSIDIAN <= self.obsidian_bonus and recipe.level.LOST <= self.lost_bonus then
+	if recipe
+		and recipe.level.ANCIENT  <= self.ancient_bonus
+		and recipe.level.MAGIC    <= self.magic_bonus
+		and recipe.level.SCIENCE  <= self.science_bonus
+		and recipe.level.OBSIDIAN <= self.obsidian_bonus
+		and recipe.level.LOST     <= self.lost_bonus
+	then
 		return true
 	end
 
-	return self.freebuildmode or self.jellybrainhat or self:IsBuildBuffered(recname) or table.contains(self.recipes, recname)    
+	return self.freebuildmode or self:IsBuildBuffered(recname) or table.contains(self.recipes, recname)   
 end
-
 
 function Builder:CanBuild(recname)
 
@@ -583,7 +580,7 @@ function Builder:CanBuild(recname)
     if recipe then
         for ik, iv in pairs(recipe.ingredients) do
         	local amt = math.max(1, RoundUp(iv.amount * self.ingredientmod))
-            if not self.inst.components.inventory:Has(iv.type, amt) then
+			if not self.inst.components.inventory:Has(iv.type, amt, true) then
                 return false
             end
         end

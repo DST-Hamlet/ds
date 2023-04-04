@@ -505,11 +505,15 @@ end
 local function pickupcorkboatfn(inst, guy)
 	local boat = SpawnPrefab("corkboat_item")
 	guy.components.inventory:GiveItem(boat)
+
+	for type, item in pairs(inst.components.container.boatequipslots) do
+		guy.components.inventory:GiveItem(item, nil, nil, true)
+	end
+
 	boat.components.pocket:GiveItem("corkboat", inst)
-	inst.components.flotsamspawner.inpocket = true	
+	inst.components.flotsamspawner.inpocket = true
 	return true
 end
-
 
 local function surfboardfn(sim)
 	local inst = commonfn(sim)

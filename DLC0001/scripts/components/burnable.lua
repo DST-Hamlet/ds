@@ -400,4 +400,8 @@ function Burnable:CollectSceneActions(doer, actions)
     end
 end
 
+function Burnable:IsLightable()
+    return self.canlight
+end 
+
 return Burnable

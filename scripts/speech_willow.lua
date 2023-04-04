@@ -531,10 +531,12 @@ return {
 		BOOK_TENTACLES = "Looks like kindling to me!",
 		BOOK_GARDENING = "Ughh, who cares?",
 		BOOK_BRIMSTONE = "That's my favorite book!",
+		BOOK_METEOR = "I'll burn through this book!",
 		BOOK_SLEEP = "Bo-oring!",
 		LUCY = "We could be good friends, you and I.",
 		BALLOONS_EMPTY = "I could fill them with flammable gas.",
 		SPEAR_WATHGRITHR = "I prefer a flame, but to each her own.",
+		WATHGRITHRHAT = "It's got a name scratched on the inside... \"W\", uh...",
 		WAXWELLJOURNAL = "Would make a great bedtime story... for nightmares!",
 
 		ABIGAIL_FLOWER = 
@@ -716,6 +718,7 @@ return {
             OPEN = "I hope there's lava down there somewhere.",
         },
         CAVE_EXIT = "It's too dark and stuffy down here.",
+		CAVE_REGENERATOR = "Why do I feel like I should bring it back to the entrance?",
         CAVE_ENTRANCE = "Who plugged that hole?",
         CAVE_ENTRANCE_RUINS = "Who plugged that hole?",
 
@@ -2765,6 +2768,7 @@ return {
     	HARDSHELL_TACOS = "I like the crunchy part.",
     	GUMMY_CAKE = "Little chewier than most cakes.",
     	STEAMEDHAMSANDWICH = "It's a ham sandwich.",
+		MEATED_NETTLE = "It clears my snot.",
 
     	ROC_NEST_DEBRIS1 = "What's that doing there?",
     	ROC_NEST_DEBRIS2 = "Who leaves a stick just laying around?",
@@ -2841,6 +2845,7 @@ return {
         BILL_QUILL = "I could probably use this for something.",
 
         ANTLER = "Here birdie birdie...",
+        ANTLER_CORRUPTED = "Seeya round big birdie. Or not.",
 
         PUGALISK_SKULL = "Ha! That's what you get!",
         PUGALISK_CORPSE = "Not sorry about this at all.",
@@ -2921,6 +2926,13 @@ return {
         -------------YOTP---------
         FIRECRACKERS = "Light'em up!",
         REDLANTERN = "Anything with a fire in it is okay by me.",
+
+		-------------Wormwood Specific-------
+		
+		COMPOSTWRAP = "That's disgusting!",
+		POISONBALM = "I actually kinda like that burning feeling.",
+        ARMOR_BRAMBLE = "You mess with me, you get the thorns!",
+        TRAP_BRAMBLE = "It's got really sharp thorns.",
 
         -------rewards update-------
 

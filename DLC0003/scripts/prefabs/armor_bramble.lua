@@ -3,7 +3,8 @@ local assets =
 	Asset("ANIM", "anim/armor_bramble.zip"),
 }
 
-local function OnBlocked(owner, data) 
+local function OnBlocked(owner, data)
+	if data.redirected then return end
 --[[
 	if (data.weapon == nil or (not data.weapon:HasTag("projectile") and data.weapon.projectile == nil))		
 		and data.attacker and data.attacker.components.combat and data.stimuli ~= "thorns" and not data.attacker:HasTag("thorny")

@@ -181,6 +181,8 @@ local function MakeVeggie(name, has_seeds, iswater)
 		inst:AddComponent("inventoryitem")
 
 		inst.AnimState:PlayAnimation("idle")
+		MakeInventoryFloatable(inst, "idle_water", "idle")
+
 		inst.components.edible.healthvalue = TUNING.HEALING_TINY/2
 		inst.components.edible.hungervalue = TUNING.CALORIES_TINY
 
@@ -288,7 +290,7 @@ local function MakeVeggie(name, has_seeds, iswater)
 		inst.AnimState:SetBank(assetname)
 		inst.AnimState:SetBuild(assetname)
 		inst.AnimState:PlayAnimation("cooked")
-
+		MakeInventoryFloatable(inst, "cooked_water", "cooked")
 
 		inst:AddComponent("perishable")
 		inst:AddComponent("edible")
@@ -332,7 +334,6 @@ local function MakeVeggie(name, has_seeds, iswater)
 	    MakeSmallBurnable(inst)
 		MakeSmallPropagator(inst)
 
-		MakeInventoryFloatable(inst, "cooked_water", "cooked")
 		---------------------
 
 		inst:AddComponent("bait")

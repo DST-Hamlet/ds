@@ -26,6 +26,11 @@ local function growtree(inst)
 	end
 end
 
+local function digup(inst, digger)
+    inst.components.lootdropper:DropLoot()
+    inst:Remove()
+end
+
 local function plant(inst, growtime)
     inst:RemoveComponent("inventoryitem")
     inst:RemoveComponent("locomotor")
@@ -37,6 +42,14 @@ local function plant(inst, growtime)
     inst.growtime = GetTime() + growtime
     print ("PLANT", growtime)
     inst.growtask = inst:DoTaskInTime(growtime, growtree)
+
+    inst:AddComponent("lootdropper")
+    inst.components.lootdropper:SetLoot({"twigs"})
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
 end
 
 
@@ -67,8 +80,13 @@ local function test_ground(inst, pt)
     return false
 end
 
-local function ondeploy (inst, pt) 
+local function ondeploy(inst, pt) 
     inst = inst.components.stackable:Get()
+    
+    if inst.components.inventoryitem then
+        inst.components.inventoryitem:OnRemoved()
+    end
+
     inst.Transform:SetPosition(pt:Get() )
     local timeToGrow = GetRandomWithVariance(TUNING.PINECONE_GROWTIME.base, TUNING.PINECONE_GROWTIME.random)
     plant(inst, timeToGrow)	
@@ -78,15 +96,17 @@ end
 local function hatchtree(inst) 
     local pt = inst:GetPosition() 
     local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, 20, {"jungletree"},{"stump"})
-    if #ents < 4 and test_ground(inst, pt) then
-        ondeploy (inst, pt)
+    if #ents < 4 and test_ground(inst, pt) and not inst:IsInLimbo() then
+        ondeploy(inst, pt)
     else
         if inst:GetIsOnWater() then
             inst.AnimState:PlayAnimation("disappear_water")
         else
             inst.AnimState:PlayAnimation("disappear")
         end
-        inst:ListenForEvent("animover", function() inst:Remove() end)
+        inst.persists = false
+        inst:ListenForEvent("animover", inst.Remove)
+        inst:ListenForEvent("entitysleep", inst.Remove)
     end
 end
 
@@ -99,7 +119,7 @@ local function stopgrowing(inst)
 end
 
 local function restartgrowing(inst)
-    if inst and not inst.growtask then
+    if inst and not inst.growtask and not inst.components.inventoryitem then -- It won't have inventoryitem component if it's already a sapling.
         local growtime = GetRandomWithVariance(TUNING.PINECONE_GROWTIME.base, TUNING.PINECONE_GROWTIME.random)
         inst.growtime = GetTime() + growtime
         inst.growtask = inst:DoTaskInTime(growtime, growtree)
@@ -139,8 +159,16 @@ local function OnLoad(inst, data)
     if data and data.taskgrow then
         if inst.taskgrow then inst.taskgrow:Cancel() inst.taskgrow = nil end
         inst.taskgrowinfo = nil
-        inst.taskgrow, inst.taskgrowinfo = inst:ResumeTask(data.taskgrow, function() hatchtree(inst)  end)
+        inst.taskgrow, inst.taskgrowinfo = inst:ResumeTask(data.taskgrow, hatchtree)
     end  
+end
+
+local function OnPickedUp(inst)
+    if inst.taskgrow then 
+        inst.taskgrow:Cancel()
+        inst.taskgrowinfo = nil
+        inst.taskgrow = nil
+    end
 end
 
 local function fn(Sim)
@@ -180,7 +208,8 @@ local function fn(Sim)
     inst.components.burnable:MakeDragonflyBait(3)
     
     inst:AddComponent("inventoryitem")
-    
+    inst.components.inventoryitem:SetOnPutInInventoryFn(OnPickedUp)
+
     inst:AddComponent("deployable")
     inst.components.deployable.test = test_ground
     inst.components.deployable.ondeploy = ondeploy
@@ -188,12 +217,10 @@ local function fn(Sim)
     inst.displaynamefn = displaynamefn
 
     inst:ListenForEvent("seasonChange", function(it, data) 
-            if data.season ~= SEASONS.LUSH and not inst:HasTag("jungletree") then
-                inst.taskgrow, inst.taskgrowinfo = inst:ResumeTask( math.random()* TUNING.TOTAL_DAY_TIME/2,function()
-                    hatchtree(inst)
-                end)
-            end
-        end, GetWorld())
+        if data.season ~= SEASONS.LUSH and not inst:HasTag("jungletree") and not inst:IsInLimbo() then
+            inst.taskgrow, inst.taskgrowinfo = inst:ResumeTask( math.random()* TUNING.TOTAL_DAY_TIME/2, hatchtree)
+        end
+    end, GetWorld())
 
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad

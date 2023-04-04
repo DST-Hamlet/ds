@@ -31,7 +31,6 @@ local function fn(Sim)
     inst.AnimState:PlayAnimation("idle")
     
     inst:AddComponent("inspectable")
-    inst:AddTag("irreplaceable")
 
     inst:AddComponent("inventoryitem")
 

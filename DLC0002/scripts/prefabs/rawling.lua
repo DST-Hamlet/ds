@@ -78,6 +78,7 @@ local function fn(Sim)
 	inst:AddComponent("inspectable")
 	
 	inst:AddTag("nopunch")
+	inst:AddTag("irreplaceable")
 
 	inst:AddComponent("inventoryitem")
     inst.components.inventoryitem:SetOnPutInInventoryFn(onputininventory)
@@ -98,9 +99,6 @@ local function fn(Sim)
 
 	inst:AddComponent("sentientball")
 	
-	MakeSmallBurnable(inst, TUNING.LARGE_BURNTIME)
-	MakeSmallPropagator(inst)
-	
 	inst:AddComponent("throwable")
 	inst.components.throwable.onthrown = onthrown
 
@@ -120,14 +118,6 @@ local function fn(Sim)
 				inst.SoundEmitter:PlaySound("dontstarve_DLC002/characters/rawling/talk_LP", "talk") 
 			end
 		end
-	end)
-
-	inst:ListenForEvent("onignite", function()
-		inst.components.sentientball:OnIgnite()
-	end)
-
-	inst:ListenForEvent("onextinguish", function()
-		inst.components.sentientball:OnExtinguish()
 	end)
 
 	inst.Physics:SetCollisionCallback(oncollision)

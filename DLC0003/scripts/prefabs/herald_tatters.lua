@@ -12,6 +12,8 @@ local function fn(Sim)
     MakeInventoryFloatable(inst, "idle_water", "idle")
     MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.LIGHT, TUNING.WINDBLOWN_SCALE_MAX.LIGHT)
 
+    inst:AddTag("ancient_remnant")
+
     inst.AnimState:SetBank("ancient_remnant")
     inst.AnimState:SetBuild("ancient_remnant")
     inst.AnimState:PlayAnimation("idle")
@@ -27,6 +29,10 @@ local function fn(Sim)
     inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_LARGE
     
     inst:AddComponent("inventoryitem")
+
+    inst:AddComponent("fuel")
+    inst.components.fuel.fueltype = "ANCIENT_REMNANT"
+    inst.components.fuel.fuelvalue = TUNING.LARGE_FUEL
 
     return inst
 end

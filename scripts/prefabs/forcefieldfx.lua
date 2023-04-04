@@ -20,6 +20,9 @@ local function fn(Sim)
     anim:PlayAnimation("open")
     anim:PushAnimation("idle_loop", true)
 
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
+
     inst:AddComponent("lighttweener")
     local light = inst.entity:AddLight()
     inst.components.lighttweener:StartTween(light, 0, .9, 0.9, {1,1,1}, 0)

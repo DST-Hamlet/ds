@@ -23,9 +23,18 @@ end)
 
 local function GoHomeAction(inst)
     if inst.components.homeseeker and
-       inst.components.homeseeker:HasHome() and not
-	   inst.sg:HasStateTag("trapped") then
-        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.GOHOME)
+    inst.components.homeseeker:HasHome() then
+        if inst.components.homeseeker.home:HasTag("stump") or
+        inst.components.homeseeker.home:HasTag("burnt") or
+        inst.components.homeseeker.home:HasTag("fire") then
+            inst.components.homeseeker.home:RemoveComponent( "spawner" )
+            inst:RemoveComponent("homeseeker")
+            return
+        end
+        
+        if not inst.sg:HasStateTag("trapped") then
+            return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.GOHOME)
+        end
     end
 end
 
@@ -56,8 +65,10 @@ local function PickupAction(inst)
                     item.components.inventoryitem and
                     not item.components.inventoryitem:IsHeld() and
                     item.components.inventoryitem.canbepickedup and
+                    item.components.container == nil and
                     item:IsOnValidGround() and
-                    not item:HasTag("trap")
+                    not item:HasTag("trap") and 
+                    not item:HasTag("irreplaceable")
                 return isValidPickupItem
             end)
 

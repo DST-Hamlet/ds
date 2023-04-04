@@ -492,6 +492,15 @@ local states=
             inst.SoundEmitter:PlaySound("dontstarve_DLC001/creatures/mole/jump")
         end,
 
+        onexit = function(inst)
+            if inst.components.inventoryitem then
+                inst.components.inventoryitem.canbepickedup = false
+            end
+            inst.SoundEmitter:KillSound("stunned")
+            if inst.stunnedkillsleepsfxtask then inst.stunnedkillsleepsfxtask:Cancel() inst.stunnedkillsleepsfxtask = nil end
+            if inst.stunnedsleepsfxtask then inst.stunnedsleepsfxtask:Cancel() inst.stunnedsleepsfxtask = nil end
+        end,
+
         events=
         {
             EventHandler("animqueueover", function(inst) 

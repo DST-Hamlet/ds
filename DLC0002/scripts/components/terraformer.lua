@@ -51,13 +51,25 @@ local function getbasetile(ground)
 	return basetile
 end
 
+local CanNotTurfs = {
+	  GROUND.IMPASSABLE
+	, GROUND.BRICK_GLOW
+	, GROUND.VOLCANO_LAVA
+}
+
 function Terraformer:CanTerraformPoint(pt)
     local ground = GetWorld()
+	
     if ground then
     	local basetile = getbasetile(ground)
 		local tile = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
-		return tile ~= GROUND.IMPASSIBLE and tile ~= basetile and tile ~= GROUND.BRICK_GLOW and tile < GROUND.UNDERGROUND and not ground.Map:IsWater(tile)
+		return 
+			not table.contains(CanNotTurfs, tile) and
+			tile ~= basetile and
+			tile < GROUND.UNDERGROUND and
+			not ground.Map:IsWater(tile)
 	end
+
 	return false
 end
 

@@ -109,10 +109,23 @@ local function FindLavaSpitTargetAction(inst)
 end
 
 local function GoHomeAction(inst)
-    if inst.components.homeseeker and 
-       inst.components.homeseeker.home and 
-       inst.components.homeseeker.home:IsValid() then
-        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.GOHOME)
+	local home = inst.components.homeseeker and inst.components.homeseeker.home
+    if
+		home and 
+		home:IsValid() and
+		home.components.hackable and
+		home.components.hackable:CanBeHacked()
+	then
+        return BufferedAction(inst, home, ACTIONS.GOHOME)
+    end
+end
+
+local function HarvestAction(inst)
+	if not inst:HasTag("snake_amphibious") then return end
+
+    local target = FindEntity(inst, SEE_DIST, function(item) return item.components.breeder and item.components.breeder.volume > 0 end)
+    if target then
+        return BufferedAction(inst, target, ACTIONS.HARVEST)
     end
 end
 
@@ -121,7 +134,7 @@ function SnakeBrain:OnStart()
 	local root = PriorityNode(
 	{
 		WhileNode(function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst) ),
-		
+
 		ChaseAndAttack(self.inst, 8),
 
 		EventNode(self.inst, "gohome", 
@@ -129,6 +142,7 @@ function SnakeBrain:OnStart()
         WhileNode(function() return GetClock() and GetClock():IsDay() end, "IsDay",
             DoAction(self.inst, GoHomeAction, "go home", true )),
 
+			DoAction(self.inst, HarvestAction, "harvest", true ),
 		DoAction(self.inst, EatFoodAction, "eat food", true ),
 		WhileNode(function() return ShouldSpitFn(self.inst) end, "Spit",
             DoAction(self.inst, LavaSpitAction)),

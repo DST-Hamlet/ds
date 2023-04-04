@@ -22,7 +22,6 @@ local anim_appends =
 
 local prefabs = 
 {
-	"flotsam_basegame",
 	"flotsam",
 	"flotsam_debris",
 }
@@ -30,7 +29,9 @@ local prefabs =
 local function sink(inst)
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/boat_debris_submerge")
 	inst.AnimState:PushAnimation("sink"..inst.anim_append)
+	inst.persists = false
 	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 end
 
 local function fn(build)

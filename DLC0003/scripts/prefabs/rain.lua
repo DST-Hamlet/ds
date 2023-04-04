@@ -115,12 +115,12 @@ local function fn(Sim)
 				x = x + dx
 				z = z + dz
 
-				--if GetWorld().Map:GetTileAtPoint( x, y, z ) ~= GROUND.IMPASSABLE then
+				if GetWorld().Map:GetTileAtPoint( x, y, z ) ~= GROUND.IMPASSABLE then
 					local raindrop = SpawnPrefab( "raindrop" )
 					raindrop.Transform:SetPosition( x, y, z )
 					
 					inst.num_splashes_to_emit = inst.num_splashes_to_emit - 1
-				--end
+				end
 			end
 		end
 

@@ -263,7 +263,7 @@ local function IsWater(tile)
 end
 
 local function IsValidSprinklerTile(tile)
-	return not IsWater(tile) and (tile ~= GROUND.INVALID) and (tile ~= GROUND.IMPASSIBLE)
+	return not IsWater(tile) and (tile ~= GROUND.INVALID) and (tile ~= GROUND.IMPASSABLE)
 end
 
 local function GetValidWaterPointNearby(pt)
@@ -384,7 +384,7 @@ local function OnHammered(inst, worker)
 	inst.SoundEmitter:KillSound("idleloop")
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
 	TurnOff(inst, true)
 	RetractPipes(inst)
 	inst:Remove()

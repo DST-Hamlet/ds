@@ -40,7 +40,10 @@ local function onpickup(inst, owner)
     inst.AnimState:PlayAnimation("break")
     inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/dungbeetle/dungball_break")
     inst.DynamicShadow:Enable(false)
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
+    
     return true --This makes the inventoryitem component not actually give the tumbleweed to the player
 end
 

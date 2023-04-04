@@ -87,7 +87,7 @@ function ChildSpawner:OnUpdate(dt)
 	if self.spawning then
 		if self.childreninside > 0 then
 			self.timetonextspawn = self.timetonextspawn - dt
-			if self.timetonextspawn < 0 and not self.inst:HasTag("INTERIOR_LIMBO") then
+			if self.timetonextspawn < 0 then
 				self.timetonextspawn = self.spawnperiod + (math.random()*2-1)*self.spawnvariance								
 				self:SpawnChild()
 			end
@@ -332,8 +332,8 @@ function ChildSpawner:SpawnChild(target, prefab, radius)
 		childtospawn = self.rarechild
 	end
 
- 	if GetWorld().getworldgenoptions and GetWorld().getworldgenoptions(GetWorld())[childtospawn] and GetWorld().getworldgenoptions(GetWorld())[childtospawn] == "never" then
-	    self.childreninside = self.childreninside - 1	   
+ 	if GetWorld():IsWorldGenOptionNever(childtospawn) then
+	    self.childreninside = self.childreninside - 1
  		return nil
  	end
 
@@ -354,7 +354,12 @@ function ChildSpawner:SpawnChild(target, prefab, radius)
 		if self.childreninside == 1 and self.onvacate then
             self.onvacate(self.inst)
 	    end
-	    self.childreninside = self.childreninside - 1	   
+	    self.childreninside = self.childreninside - 1
+
+		local interior = GetInteriorSpawner():getPropInterior(self.inst)
+		if interior then
+			GetInteriorSpawner():injectprefab(child, interior)
+		end
 	end
 	return child
 end

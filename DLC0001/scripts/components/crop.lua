@@ -11,11 +11,12 @@ local Crop = Class(function(self, inst)
     self.withered = false
     self.protected = false
     self.wither_temp = math.random(TUNING.MIN_PLANT_WITHER_TEMP, TUNING.MAX_PLANT_WITHER_TEMP)
-    self.inst:ListenForEvent("witherplants", function(it, data) 
+
+    self.witherHandler = function(world_or_self, data) 
         if self.witherable and not self.withered and not self.protected and data.temp > self.wither_temp then
             self:MakeWithered()
         end
-    end, GetWorld())
+    end
 end)
 
 function Crop:SetOnMatureFn(fn)
@@ -200,26 +201,9 @@ function Crop:Harvest(harvester)
         end
 
         if product then
-            local targetMoisture = 0
-
-            if self.inst.components.moisturelistener then
-                targetMoisture = self.inst.components.moisturelistener:GetMoisture()
-            elseif self.inst.components.moisture then
-                targetMoisture = self.inst.components.moisture:GetMoisture()
-            else
-                targetMoisture = GetWorld().components.moisturemanager:GetWorldMoisture()
-            end
-            
-            product.targetMoisture = targetMoisture
-            product:DoTaskInTime(2*FRAMES, function()
-                if product.components.moisturelistener then 
-                    product.components.moisturelistener.moisture = product.targetMoisture
-                    product.targetMoisture = nil
-                    product.components.moisturelistener:DoUpdate()
-                end
-            end)
+            self.inst:ApplyInheritedMoisture(product)
         end
-        harvester.components.inventory:GiveItem(product)
+        harvester.components.inventory:GiveItem(product, nil, Vector3(TheSim:GetScreenPos(self.inst.Transform:GetWorldPosition())))
         ProfileStatsAdd("grown_"..product.prefab) 
         
         self.matured = false
@@ -234,6 +218,76 @@ function Crop:Harvest(harvester)
         end
         
         return true
+    end
+end
+
+function Crop:ForceHarvest(harvester)
+    if self.matured or self.withered then
+        local product = nil
+        if self.grower and self.grower:HasTag("fire") or self.inst:HasTag("fire") then
+            local temp = SpawnPrefab(self.product_prefab)
+            if temp.components.cookable and temp.components.cookable.product then
+                product = SpawnPrefab(temp.components.cookable.product)
+            else
+                product = SpawnPrefab("seeds_cooked")
+            end
+            temp:Remove()
+        else
+            product = SpawnPrefab(self.product_prefab)
+        end
+
+        if product then
+            self.inst:ApplyInheritedMoisture(product)
+        end
+
+    	local tookProduct = false
+    	if harvester and harvester.components.inventory then
+            harvester.components.inventory:GiveItem(product)
+    		tookProduct = true
+    	else
+    		if self.grower and self.grower:IsValid() then
+    			product.Transform:SetPosition(self.grower.Transform:GetWorldPosition())
+    			if product.components.inventoryitem then
+    				product.components.inventoryitem:OnDropped(true)
+    			end
+     			tookProduct = true
+    		end
+        end
+    	if not tookProduct then
+    		-- nothing to do with our product. What a waste
+    		product:Remove()
+    	end
+
+        self.matured = false
+        self.withered = false
+        self.inst:RemoveTag("withered")
+        self.growthpercent = 0
+        self.product_prefab = nil
+
+        if self.grower then
+            if self.grower.components.grower then
+                self.grower.components.grower:RemoveCrop(self.inst)            
+            else
+               self.inst:Remove()
+            end
+            self.grower = nil
+        else 
+            self.inst:Remove()
+        end
+        
+        return true
+    else
+	    -- nothing to give up, but pretend we did
+        if self.grower then
+            if self.grower.components.grower then
+                self.grower.components.grower:RemoveCrop(self.inst)            
+            else
+            self.inst:Remove()
+            end
+            self.grower = nil
+        else 
+            self.inst:Remove()
+        end
     end
 end
 
@@ -256,7 +310,16 @@ function Crop:CollectSceneActions(doer, actions)
     if (self:IsReadyForHarvest() or self:IsWithered()) and doer.components.inventory then
         table.insert(actions, ACTIONS.HARVEST)
     end
+end
 
+function Crop:OnEntitySleep()
+	self.inst:RemoveEventCallback("witherplants", self.witherHandler, GetWorld())
+end
+
+function Crop:OnEntityWake()
+	local data = {temp = GetSeasonManager():GetCurrentTemperature()}
+    self:witherHandler(data)
+    self.inst:ListenForEvent("witherplants", self.witherHandler, GetWorld())
 end
 
 function Crop:LongUpdate(dt)

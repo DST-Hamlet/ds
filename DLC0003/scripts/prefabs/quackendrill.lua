@@ -97,7 +97,7 @@ local function fn(Sim)
     --inst.components.deployable.test = function() return true end
     inst.components.deployable.ondeploy = ondeploy
     inst.components.deployable.test = test_ground
-    inst.components.deployable.min_spacing = 2
+    inst.components.deployable.min_spacing = 3
     
     
 	MakeInventoryFloatable(inst, "dropped_water", "dropped")

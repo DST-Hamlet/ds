@@ -114,7 +114,7 @@ local function OnGetItemFromPlayer(inst, giver, item)
     end
 
     --I eat food
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         if inst.components.combat.target and inst.components.combat.target == giver then
             inst.components.combat:SetTarget(nil)
         end
@@ -308,7 +308,7 @@ local function create_common(inst)
 	inst.entity:AddSoundEmitter()
 	inst.entity:AddDynamicShadow()
     
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "head")
 	MakeCharacterPhysics(inst, 10, .25)
     
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)

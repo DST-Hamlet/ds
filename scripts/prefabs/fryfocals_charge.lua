@@ -8,7 +8,9 @@ local function OnHit(inst, owner, target)
     inst.SoundEmitter:PlaySound("dontstarve/creatures/bishop/shotexplo")
     inst.AnimState:PlayAnimation("impact")
     inst.Physics:Stop() 
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)    
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)   
 end
 
 local function fn()

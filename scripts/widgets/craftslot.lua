@@ -42,18 +42,50 @@ function CraftSlot:OnGainFocus()
 end
 
 
+function CraftSlot:OnClick()
+    self.last_recipe_click = GetTime()
+    if not self.recipe_held then
+        if not DoRecipeClick(self.owner, self.recipe) then
+            self:Close()
+        end
+    end
+    self.recipe_held = false
+end
+
+function CraftSlot:OnDown()
+    if self.last_recipe_click and (GetTime() - self.last_recipe_click) < 1 then
+        self.recipe_held = true
+        self.last_recipe_click = nil
+    end
+end
+
+function CraftSlot:OnUpdate(dt)
+    if self.down and self.recipe_held then
+        DoRecipeClick(self.owner, self.recipe)
+	end
+end
+
 function CraftSlot:OnControl(control, down)
     if CraftSlot._base.OnControl(self, control, down) then return true end
 
-    if not down and control == CONTROL_ACCEPT then
-        if self.owner and self.recipe then
-            if self.recipepopup and not self.recipepopup.focus then 
-                TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-                if not DoRecipeClick(self.owner, self.recipe) then 
-                    self:Close() 
+    if control == CONTROL_ACCEPT then
+        if not down then
+            self.down = false
+            if self.recipe and self.owner then
+                if self.recipepopup and not self.recipepopup.focus then 
+                    TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+
+                    self:OnClick()
+                    self:StopUpdating()
+
+                    return true
                 end
-                return true
             end
+        else
+            self.down = true
+
+            self:StartUpdating()
+            self:OnDown()
         end
     end
 end
@@ -61,7 +93,10 @@ end
 
 function CraftSlot:OnLoseFocus()
     CraftSlot._base.OnLoseFocus(self)
-    self:Close()
+    self.down = false
+	if self.recipe then
+	    self:Close()
+	end
 end
 
 
@@ -139,7 +174,7 @@ function CraftSlot:Refresh(recipename)
             image = PORK_ICONS[imagename] .. ".tex"
         end   
 
-        self.tile:SetVisual(self.recipe.atlas, image)
+        self.tile:SetVisual(self.recipe:GetAtlas(), image)
         self.tile:Show()
 
         if self.fgimage then

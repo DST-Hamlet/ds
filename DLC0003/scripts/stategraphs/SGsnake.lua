@@ -7,6 +7,7 @@ end
 local actionhandlers =
 {
 	ActionHandler(ACTIONS.EAT, "eat"),
+	ActionHandler(ACTIONS.HARVEST, "eat"),
 	ActionHandler(ACTIONS.LAVASPIT, "spit"),
 	ActionHandler(ACTIONS.GOHOME, "gohome"),
 }
@@ -283,7 +284,13 @@ local states=
         name = "emerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
+        onenter = function(inst, noanim)
+			if noanim then
+                inst.AnimState:SetBank("snake")
+                inst.sg:GoToState("taunt") -- Default State.
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then
@@ -308,7 +315,13 @@ local states=
         name = "submerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
+        onenter = function(inst, noanim)
+			if noanim then
+                inst.AnimState:SetBank("snake_water")
+                inst.sg:GoToState("taunt") -- Default State.
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then

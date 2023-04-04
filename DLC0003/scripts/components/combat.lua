@@ -585,6 +585,7 @@ function Combat:GetAttacked(attacker, damage, weapon, stimuli)
             self.inst.SoundEmitter:PlaySound(redirect_combat.hurtsound)
         end		
  		blocked = true
+		
     end	
 		
 	local boating = false 
@@ -627,14 +628,14 @@ function Combat:GetAttacked(attacker, damage, weapon, stimuli)
 			if attacker.components.combat and attacker.components.combat.onhitotherfn then
 				attacker.components.combat.onhitotherfn(attacker, self.inst, damage, stimuli)
 			end
-			if poisonAttack then 
+			if poisonAttack and not boating then 
 				if self.inst.components.poisonable then
 					self.inst.components.poisonable:Poison()
 				end
 			end
 		end
 	else
-		self.inst:PushEvent("blocked", {attacker = attacker, weapon = weapon})		
+		self.inst:PushEvent("blocked", {attacker = attacker, weapon = weapon, redirected=redirect_combat ~= nil})		
 	end
 
 	return not blocked
@@ -745,6 +746,10 @@ function Combat:StartAttack()
 	self.laststartattacktime = GetTime()
 end
 
+function Combat:HasTarget()
+    return self.target ~= nil
+end
+
 function Combat:CanTarget(target)
 	
 	return target and 
@@ -827,20 +832,36 @@ function Combat:ForceAttack()
 	end
 end
 
-
 function Combat:GetWeapon()
-	if self.inst.components.inventory then
-		local item = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
-		if item and item.components.weapon then
-			return item
-		end
-        item = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD)
-        if item and item.components.weapon then
-            return item
-        end		
-	end
-end
+    if self.inst.components.inventory then
+        local weapon = nil
 
+        local item = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+
+        if item and item.components.weapon then
+            weapon = item
+        else        
+            item = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HEAD)
+            if item and item.components.weapon then
+                weapon = item
+            end
+        end       
+
+        if not (
+            self.inst.components.rider ~= nil and self.inst.components.rider:IsRiding()
+        )
+        or (
+            weapon and (
+                weapon:HasTag("rangedweapon")
+                or (weapon.components.weapon and weapon.components.weapon:CanRangedAttack())
+                or weapon.components.complexprojectile
+                or weapon.components.projectile
+            )
+        ) then
+            return weapon
+        end
+    end
+end
 
 function Combat:CalcDamage(target, weapon, multiplier)
 
@@ -872,6 +893,7 @@ function Combat:CalcDamage(target, weapon, multiplier)
             local mount = self.inst.components.rider:GetMount()
             if mount and mount.components.combat then
                 basedamage = mount.components.combat.defaultdamage
+                multiplier = mount.components.combat:GetDamageModifier()
                 bonus = mount.components.combat.damagebonus or 0
             end
             local saddle = self.inst.components.rider:GetSaddle()
@@ -1035,12 +1057,6 @@ function Combat:DoAttack(target_override, weapon, projectile, stimuli, instancem
 			self:DoAreaAttack(epicentre, self.areahitrange, weapon, nil, stimuli)
 		end
 	end
-	if weapon and weapon:HasTag("Shockwhenwet") then
-		if self.inst.components.moisture:GetMoisture()>0 then
-			self:GetAttacked(nil, TUNING.HEALING_MEDSMALL, nil, "electric")
-		end
-	end
-
 end
 
 function Combat:DoAreaAttack(target, range, weapon, validfn, stimuli)

@@ -28,6 +28,7 @@ local function fn(Sim)
 	
 
 	inst:AddTag("herd")
+	inst:AddTag("NOBLOCK")
 	
 	-- inst:AddComponent("herd")
 	-- inst.components.herd:SetMemberTag("doydoy")

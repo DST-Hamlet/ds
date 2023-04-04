@@ -139,12 +139,18 @@ function Controls:ShowStatusNumbers()
 	self.status.brain.num:Show()
 	self.status.stomach.num:Show()
 	self.status.heart.num:Show()
+
+	if self.status.moisturemeter.active then
+		self.status.moisturemeter.num:Show()
+	end
 end
 
 function Controls:HideStatusNumbers()
 	self.status.brain.num:Hide()
 	self.status.stomach.num:Hide()
 	self.status.heart.num:Hide()
+
+	self.status.moisturemeter.num:Hide()
 end
 
 function Controls:SetDark(val)

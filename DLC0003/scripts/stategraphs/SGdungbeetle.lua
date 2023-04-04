@@ -423,7 +423,7 @@ local states=
 			inst.AnimState:PlayAnimation("death")
 			inst.Physics:Stop()
 			RemovePhysicsColliders(inst)        
-			inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))            
+			inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
 		end,
 	
 	timeline=
@@ -501,18 +501,18 @@ local states=
 				ball.Transform:SetPosition(inst.Transform:GetWorldPosition())
 				ball.AnimState:PlayAnimation("idle")
 			end
-			
-			if dead then
-				inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/dungbeetle/death")
-			end
 
+			
 			inst.Physics:Stop()
 			inst:ClearBufferedAction()
 			inst.AnimState:PlayAnimation( "fall_off_pre" )
 			inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/dungbeetle/crash")
 			inst.components.locomotor.runspeed = -TUNING.DUNG_BEETLE_RUN_SPEED
 			inst.components.locomotor:RunForward()
-
+			
+			if dead then
+				inst.sg:GoToState("death")
+			end
 		end,
 
 		events=
@@ -710,7 +710,14 @@ local states=
 		
 		events=
 		{   
-			EventHandler("onthaw", function(inst) inst.sg:GoToState("thaw") end ),        
+			EventHandler("onthaw", function(inst) inst.sg:GoToState("thaw") end ),
+			EventHandler("unfreeze", function(inst)
+                if inst.sg.sg.states.hit then
+                    inst.sg:GoToState("hit")
+                else
+                    inst.sg:GoToState("idle")
+                end
+            end),     
 		}
 	},
 
@@ -742,5 +749,5 @@ local states=
 
 }
   
-return StateGraph("rabbit", states, events, "idle", actionhandlers)
+return StateGraph("dungbeetle", states, events, "idle", actionhandlers)
 

@@ -35,8 +35,8 @@ local function fn(Sim)
     inst:AddComponent("weapon")
     inst.components.weapon:SetDamage(TUNING.WATHGRITHR_SPEAR_DAMAGE)
     
-    inst:AddComponent("characterspecific")
-    inst.components.characterspecific:SetOwner("wathgrithr")
+    --inst:AddComponent("characterspecific")
+    --inst.components.characterspecific:SetOwner("wathgrithr")
 
     -------
     

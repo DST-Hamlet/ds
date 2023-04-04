@@ -98,8 +98,8 @@ function Dryer:StartDrying(dryable)
 	if self:CanDry(dryable) then
 	    self.ingredient = dryable.prefab
 	    if self.onstartcooking then
-	    	local build = dryable.components.dryable:GetOverrideSymbol()
-		    self.onstartcooking(self.inst, build)
+	    	self.build = dryable.components.dryable:GetOverrideSymbol()
+		    self.onstartcooking(self.inst, self.build)
 	    end
 	    local cooktime = dryable.components.dryable:GetDryingTime()
 	    self.product = dryable.components.dryable:GetProduct()
@@ -158,7 +158,13 @@ function Dryer:OnSave()
 		data.product = self.product
 		data.paused = self.paused
 		data.time = self:GetTimeToDry()
+		
+		if self.build and self.build ~= self.ingredient then
+			data.build = self.build
+		end
+
 		return data
+
     elseif self:IsDone() then
 		local data = {}
 		data.product = self.product
@@ -176,12 +182,14 @@ function Dryer:OnLoad(data)
     if data.cooking then
 		self.product = data.product
 		self.ingredient = data.ingredient
+		self.build = data.build
 		if self.oncontinuecooking then
 			-- data.ingredient can be nil (wut?). Workaround for now
 			if not data.ingredient then
 				data.time = 0
 			end
-			self.oncontinuecooking(self.inst, self.ingredient or "")
+
+			self.oncontinuecooking(self.inst, self.build or self.ingredient or "")
 			self.paused = data.paused
 			if self.paused then
 				self.remainingtime = data.time

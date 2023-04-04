@@ -36,6 +36,10 @@ end
 local function OnLoad(inst, data)
 	inst.jointLayerShown = data.jointLayerShown
 	inst.pipeLayerShown = data.pipeLayerShown
+
+	HideLayers(inst.AnimState)
+	inst.AnimState:Show(inst.jointLayerShown)
+	inst.AnimState:Show(inst.pipeLayerShown)
 end
 
 local function fn()
@@ -47,6 +51,9 @@ local function fn()
 	anim:SetBank("sprinkler_pipes")
 	anim:SetBuild("sprinkler_pipes")
 	anim:PlayAnimation("place")
+
+	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	anim:SetOrientation(ANIM_ORIENTATION.OnGround)
 	anim:SetLayer(LAYER_BACKGROUND)

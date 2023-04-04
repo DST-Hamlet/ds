@@ -63,7 +63,7 @@ local function fn(Sim)
     inst:AddComponent("deployable")
     inst.components.deployable.test = test_ground
     inst.components.deployable.ondeploy = ondeploy
-    
+    inst.components.deployable.deploydistance = 1.5
 
     return inst
 end

@@ -92,8 +92,17 @@ end
 
 local function CanTakeAmmo(inst, ammo, giver)
     return (ammo.components.inventoryitem ~= nil) and
-            inst.components.trader.enabled and ((inst.components.weapon.projectile == nil or inst.components.weapon.projectile == ammo.prefab))
-            and not ammo.components.health and not ammo:HasTag("irreplaceable")
+    inst.components.trader.enabled and
+    (
+        inst.components.weapon.projectile == nil or
+        (
+            inst.components.weapon.projectile == ammo.prefab and 
+            inst.components.inventory:GetItemInSlot(1).components.stackable and
+            not inst.components.inventory:GetItemInSlot(1).components.stackable:IsFull()
+        )
+    ) and
+    not ammo.components.health and
+    not ammo:HasTag("irreplaceable")
 end
 
 local function SetAmmoDamageAndRange(inst, ammo)
@@ -253,6 +262,12 @@ local function OnProjectileLaunch(inst, attacker, target, proj)
     end
 end
 
+local function onremove(inst)
+    local item = inst.components.inventory:RemoveItemBySlot(1)
+    local owner  = inst.components.inventoryitem.owner or inst 
+    inst.components.inventory:DropItem(item, true, true, owner:GetPosition())
+end
+
 local function fn()
     local inst = CreateEntity()
     local trans = inst.entity:AddTransform()
@@ -263,7 +278,7 @@ local function fn()
     inst.MiniMapEntity:SetIcon( "trusty_shooter.png" )    
 
     MakeInventoryPhysics(inst)
-    inst:AddTag("gun")
+
     inst:AddTag("hand_gun")
     inst:AddTag("irreplaceable")
 
@@ -274,6 +289,7 @@ local function fn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetCanAttack(CanAttack)
     --inst.components.weapon:SetAttackCallback(OnAttack)
     inst.components.weapon:SetOnProjectileLaunch(OnProjectileLaunch)
@@ -311,9 +327,12 @@ local function fn()
 
     inst:ListenForEvent("trade", OnTakeAmmo)
 
+    inst:ListenForEvent("onremove", onremove)
+
     inst.CanTakeItem = CanTakeAmmo
 
     inst:AddComponent("trader")
+    inst.components.trader.acceptnontradable = true
     inst.components.trader.deleteitemonaccept = true
     inst.components.trader:SetAcceptTest(CanTakeAmmo)
     inst.components.trader.enabled = true
@@ -337,7 +356,8 @@ local function fn()
         end
     end)
 
-    inst:DoTaskInTime(0, function() if not GetPlayer() or GetPlayer().prefab ~= "wheeler" then inst:Remove() end end)
+    inst:AddComponent("characterspecific")
+    inst.components.characterspecific:SetOwner("wheeler")
 
     return inst
 end

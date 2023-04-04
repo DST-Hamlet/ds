@@ -21,12 +21,14 @@ local function fn()
 		end)
 	end)
 
-	inst:AddTag("fx")
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 
 	inst.AnimState:SetBloomEffectHandle("shaders/anim.ksh")
+	
 	inst.persists = false
-
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
 	return inst
 end

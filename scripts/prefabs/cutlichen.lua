@@ -18,7 +18,8 @@ local function fn(Sim)
 	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 
     inst:AddComponent("inspectable")
-    
+    inst:AddComponent("tradable")
+
     inst:AddComponent("inventoryitem")
     inst.components.inventoryitem:ChangeImageName("algae")
 

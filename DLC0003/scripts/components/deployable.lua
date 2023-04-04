@@ -4,7 +4,7 @@ local Deployable = Class(function(self, inst)
     self.inst = inst
     self.min_spacing = 2
     self.quantizefn = nil 
-    self.deploydistance = 0
+    self.deploydistance = 1
 end)
 
 
@@ -68,10 +68,10 @@ function Deployable:CanDeploy(pt, atdeploy)
    	end 
 end
 
-function Deployable:Deploy(pt, deployer)
-    if not self.test or self.test(self.inst, pt, deployer) then
+function Deployable:Deploy(pt, deployer, rot)
+    if not self.test or self.test(self.inst, pt, deployer, rot) then
 		if self.ondeploy then
-	        self.ondeploy(self.inst, pt, deployer)
+	        self.ondeploy(self.inst, pt, deployer, rot)
 		end
         if self.inst:HasTag("plant") and deployer:HasTag("plantkin") then
             if deployer.growplantfn then
@@ -88,6 +88,7 @@ function Deployable:CollectPointActions(doer, pos, actions, right)
     	if self.inst:HasTag("boat") then
         	table.insert(actions, ACTIONS.LAUNCH)
         else
+            --DEPLOY_AT_RANGE is deprecated, ACTIONS.DEPLOY now has deploy distance = 1
             if self.deployatrange then
                 table.insert(actions, ACTIONS.DEPLOY_AT_RANGE)
             else

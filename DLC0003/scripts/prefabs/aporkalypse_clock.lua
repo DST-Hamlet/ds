@@ -53,10 +53,6 @@ local function make_clock_fn(bank, build, sort_order, mult, speed)
 	    inst.AnimState:SetBuild(build)
 	    inst.AnimState:PlayAnimation("off_idle")
 	    
-	    inst:AddComponent("inspectable")
-	    inst.components.inspectable.nameoverride = "aporkalypse_clock"
-	    inst.name = STRINGS.NAMES.APORKALYPSE_CLOCK
-
 	    return inst
 	end
 	
@@ -169,7 +165,7 @@ local function make_master_fn()
 
 	inst.plates = {}
 	inst.clocks = {}
-	
+
 	local function playclockanimation(anim)
 		for i,v in ipairs(inst.clocks) do
 	   		v.AnimState:PlayAnimation(anim .. "_shake", false)
@@ -180,14 +176,22 @@ local function make_master_fn()
 	inst:DoTaskInTime(0, function()
 		CleanupAllOrphans(inst)
 		SpawnChildren(inst)
+		
+		inst.highlightchildren = {}
+
+		for child, _ in pairs(inst.children) do
+			table.insert(inst.highlightchildren, child)
+		end
 
 		local aporkalypse = GetAporkalypse()
+
 		if aporkalypse and aporkalypse:IsActive() then
 		   	inst.AnimState:PlayAnimation("idle_on")
 			playclockanimation("on")
 		end
-
 	end)
+
+	inst:AddComponent("inspectable")
 
 	-- total rotations for each disc in a full aporkalypse cycle
 	inst.rotation_speeds = { 1, 60, 2 }
@@ -323,7 +327,7 @@ local function make_common_plate()
     inst.components.creatureprox:SetOnPlayerNear(on_pressure_plate_near)
     inst.components.creatureprox:SetOnPlayerFar(on_pressure_plate_far)
 
-    inst.components.creatureprox:SetTestfn(function(testing) return not testing:HasTag("flying") end)
+    inst.components.creatureprox:SetTestfn(function(testing) return not testing:HasTag("flying") and not testing:HasTag("notraptrigger") end)
     
     inst.components.creatureprox:SetDist(0.8, 0.9)
     inst.components.creatureprox.inventorytrigger = true

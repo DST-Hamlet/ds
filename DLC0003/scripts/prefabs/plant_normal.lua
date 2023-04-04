@@ -58,6 +58,10 @@ local function OnLoadPostPass(inst)
     end
 end
 
+local function digup(inst, digger)
+    inst.components.crop:ForceHarvest()
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -100,7 +104,12 @@ local function fn(Sim)
             end
             inst.components.crop:StartGrowing("carrot", TUNING.SEEDS_GROW_TIME, inst,1)
         end
-    end)    
+    end)
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
 
     return inst
 end

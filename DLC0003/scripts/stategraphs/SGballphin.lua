@@ -232,6 +232,9 @@ local states=
 			inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/balphin/death")
 			inst.AnimState:PlayAnimation("death")
 			inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
+			
+            inst.components.locomotor:Stop()
+			RemovePhysicsColliders(inst)
 		end,
 
 	},

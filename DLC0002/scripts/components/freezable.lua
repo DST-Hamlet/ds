@@ -99,16 +99,19 @@ function Freezable:GetDebugString()
 end
 
 function Freezable:AddColdness(coldness, freezetime)
-    self.coldness = self.coldness + coldness
-    if self.coldness < 0 then self.coldness = 0 end
-    self:UpdateTint()
-    if self.coldness > self.resistance or self:IsFrozen() then
-        self:Freeze(freezetime)
-    elseif self.coldness == self.resistance then
-        self:Freeze(freezetime)
-    else
-        self:StartWearingOff()
+    self.coldness = math.max(0, self.coldness + coldness)
+
+    if coldness > 0 then
+        if self.coldness > self.resistance or self:IsFrozen() then
+            self:Freeze(freezetime)
+        elseif self.coldness == self.resistance then
+            self:Freeze(freezetime)
+        else
+            self:StartWearingOff()
+        end
     end
+    
+    self:UpdateTint()
 end
 
 function Freezable:StartWearingOff(wearofftime)

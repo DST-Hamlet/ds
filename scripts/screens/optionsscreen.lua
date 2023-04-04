@@ -21,6 +21,8 @@ local text_font = UIFONT--NUMBERFONT
 
 local enableDisableOptions = { { text = STRINGS.UI.OPTIONS.DISABLED, data = false }, { text = STRINGS.UI.OPTIONS.ENABLED, data = true } }
 local enableScreenFlashOptions = { { text = STRINGS.UI.OPTIONS.DEFAULT, data = 1 }, { text = STRINGS.UI.OPTIONS.DIM, data = 2 } , { text = STRINGS.UI.OPTIONS.DIMMEST, data = 3 } }
+local integratedbackpackOptions = { { text = STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_DISABLED, data = false }, { text = STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_ENABLED, data = true } }
+
 local spinnerFont = { font = BUTTONFONT, size = 30 }
 
 local function GetResolutionString( w, h )
@@ -128,6 +130,7 @@ local OptionsScreen = Class(Screen, function(self, in_game)
 		screenshake = Profile:IsScreenShakeEnabled(),
 		hudSize = Profile:GetHUDSize(),
 		screenflash = Profile:GetScreenFlash(),
+		integratedbackpack = Profile:GetIntegratedBackpack(),
 		netbookmode = TheSim:IsNetbookMode(),
 		vibration = Profile:GetVibrationEnabled(),
 		sendstats = Profile:GetAgreementsSetting(),
@@ -228,6 +231,8 @@ local OptionsScreen = Class(Screen, function(self, in_game)
 
 	self:InitializeSpinners()
 	self:ShowPage()
+
+	self:RefreshControls()
 
 	self.default_focus = self.grid
 end)
@@ -345,6 +350,10 @@ function OptionsScreen:Save(cb)
 	Profile:SetHUDSize( self.options.hudSize )
 
 	Profile:SetScreenFlash( self.options.screenflash )
+
+	if self.integratedbackpackSpinner:IsEnabled() then
+		Profile:SetIntegratedBackpack( self.options.integratedbackpack )
+	end
 
 	Profile:SetVibrationEnabled( self.options.vibration )
 	Profile:SetAgreementsSetting( self.options.sendstats )
@@ -496,6 +505,10 @@ function OptionsScreen:Apply( )
 	if IsDLCInstalled(REIGN_OF_GIANTS) then Profile:SetWathgrithrFontEnabled( self.working.wathgrithrfont ) end
 	TheSim:SetNetbookMode(self.working.netbookmode)
 	TheSim:SetSetting("graphics","dynamic_loading_level",self.working.dynamic_loading or "0")
+
+	if self.integratedbackpackSpinner:IsEnabled() then
+		Profile:SetIntegratedBackpack( self.working.integratedbackpack )
+	end
 end
 
 function OptionsScreen:Close()
@@ -543,12 +556,28 @@ function OptionsScreen:UpdateMenu()
 	if TheInput:ControllerAttached() then return end
 	if self:IsDirty() then
 		self.menu.horizontal = true
-		self.menu:AddItem(STRINGS.UI.OPTIONS.APPLY, function() self:ApplyChanges() end, Vector3(50, 0, 0))
-		self.menu:AddItem(STRINGS.UI.OPTIONS.REVERT, function() self:RevertChanges() end,  Vector3(-50, 0, 0))
+		self.menu:AddItem(STRINGS.UI.OPTIONS.APPLY, function() self:ApplyChanges() end, Vector3(50, -90, 0))
+		self.menu:AddItem(STRINGS.UI.OPTIONS.REVERT, function() self:RevertChanges() end,  Vector3(-50, -90, 0))
 	else
 		self.menu.horizontal = false
-		self.menu:AddItem(STRINGS.UI.OPTIONS.CLOSE, function() self:Accept() end)
+		self.menu:AddItem(STRINGS.UI.OPTIONS.CLOSE, function() self:Accept() end,  Vector3(0, -90, 0))
 	end
+end
+
+function OptionsScreen:RefreshControls()
+	if IsConsole() then
+		return
+	end
+
+	if TheInput:ControllerAttached() then
+		self.integratedbackpackSpinner:Disable()
+		self.integratedbackpackSpinner:UpdateText(STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_ENABLED)
+	else
+		self.integratedbackpackSpinner:Enable()
+		self.integratedbackpackSpinner:SetSelectedIndex(self.integratedbackpackSpinner.selectedIndex)
+	end
+	
+	self:UpdateMenu()
 end
 
 function OptionsScreen:DataCollectionPopup()
@@ -848,6 +877,14 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 
+	self.integratedbackpackSpinner = Spinner( integratedbackpackOptions ) 
+	self.integratedbackpackSpinner.OnChanged =
+		function( _, data )
+			this.working.integratedbackpack = data
+			--this:Apply()
+			self:UpdateMenu()
+		end
+
 	self.vibrationSpinner = Spinner( enableDisableOptions )
 	self.vibrationSpinner.OnChanged =
 		function( _, data )
@@ -894,8 +931,9 @@ function OptionsScreen:DoInitMainPage()
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.MUSIC, self.musicVolume } )
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.AMBIENT, self.ambientVolume } )
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.HUDSIZE, self.hudSize} )
-		table.insert( right_spinners, { STRINGS.UI.OPTIONS.SCREEN_FLASH_INTENSITY, self.screenFlashSpinner} )		
+		table.insert( right_spinners, { STRINGS.UI.OPTIONS.SCREEN_FLASH_INTENSITY, self.screenFlashSpinner} )
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.VIBRATION, self.vibrationSpinner} )
+		table.insert( right_spinners,  { STRINGS.UI.OPTIONS.BACKPACKMODE, self.integratedbackpackSpinner} )
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.SENDSTATS, self.sendstatsSpinner} )
 		if IsDLCInstalled(REIGN_OF_GIANTS) then
 			table.insert( left_spinners, { STRINGS.UI.OPTIONS.WATHGRITHRFONT, self.wathgrithrfontSpinner} )
@@ -906,8 +944,9 @@ function OptionsScreen:DoInitMainPage()
 		table.insert( left_spinners, { STRINGS.UI.OPTIONS.DISTORTION, self.distortionSpinner } )
 		table.insert( left_spinners, { STRINGS.UI.OPTIONS.SCREENSHAKE, self.screenshakeSpinner } )
 		table.insert( left_spinners, { STRINGS.UI.OPTIONS.HUDSIZE, self.hudSize} )
-		table.insert( left_spinners, { STRINGS.UI.OPTIONS.SCREEN_FLASH_INTENSITY, self.screenFlashSpinner} )			
+		table.insert( left_spinners, { STRINGS.UI.OPTIONS.SCREEN_FLASH_INTENSITY, self.screenFlashSpinner} )
 		table.insert( left_spinners, { STRINGS.UI.OPTIONS.VIBRATION, self.vibrationSpinner} )
+		table.insert( left_spinners, { STRINGS.UI.OPTIONS.BACKPACKMODE, self.integratedbackpackSpinner} )
 
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.FX, self.fxVolume } )
 		table.insert( right_spinners, { STRINGS.UI.OPTIONS.MUSIC, self.musicVolume } )
@@ -973,6 +1012,7 @@ function OptionsScreen:InitializeSpinners()
 	self.hudSize:SetSelectedIndex( self.working.hudSize or 5)
 
 	self.screenFlashSpinner:SetSelectedIndex( self.working.screenflash or 1)
+	self.integratedbackpackSpinner:SetSelectedIndex(EnabledOptionsIndex(self.working.integratedbackpack))
 	self.vibrationSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.vibration ) )
 	self.sendstatsSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.sendstats ) )
 	if IsDLCInstalled(REIGN_OF_GIANTS) then self.wathgrithrfontSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.wathgrithrfont ) ) end

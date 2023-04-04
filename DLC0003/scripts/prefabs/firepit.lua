@@ -40,6 +40,16 @@ local function onextinguish(inst)
     end
 end
 
+local function OnSave(inst, data)
+    data.queued_charcoal = inst.queued_charcoal or nil
+end
+
+local function OnLoad(inst, data)
+    if data ~= nil and data.queued_charcoal then
+        inst.queued_charcoal = true
+    end
+end
+
 local function fn(Sim)
 
 	local inst = CreateEntity()
@@ -101,14 +111,27 @@ local function fn(Sim)
         
     inst.components.fueled:SetSectionCallback( function(section)
         if section == 0 then
-            inst.components.burnable:Extinguish() 
+            inst.components.burnable:Extinguish()
+
+            if inst.queued_charcoal then
+                local charcoal = inst.components.lootdropper:SpawnLootPrefab("charcoal")
+                inst.queued_charcoal = nil
+
+                local interior = GetInteriorSpawner():getPropInterior(inst)
+                if interior then
+                    GetInteriorSpawner():AddPrefabToInterior(charcoal, interior)
+                end
+            end
         else
             if not inst.components.burnable:IsBurning() then
                 inst.components.burnable:Ignite()
             end
             
             inst.components.burnable:SetFXLevel(section, inst.components.fueled:GetSectionPercent())
-            
+
+            if section == inst.components.fueled.sections then
+                inst.queued_charcoal = true
+            end
         end
     end)
         
@@ -133,16 +156,9 @@ local function fn(Sim)
         inst.SoundEmitter:PlaySound("dontstarve/common/fireAddFuel")
     end)
 
-    --[[
-    inst:AddComponent("blowinwindgust")
-    inst.components.blowinwindgust:SetWindSpeedThreshold(TUNING.FIRE_WINDBLOWN_SPEED)
-    inst.components.blowinwindgust:SetGustStartFn(function(inst, windspeed)
-        if inst and inst.components.burnable and inst.components.burnable:IsBurning() and math.random() < TUNING.FIRE_BLOWOUT_CHANCE then
-            inst.components.burnable:Extinguish()
-        end
-    end)
-    inst.components.blowinwindgust:Start()
-    ]]
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
+
     return inst
 end
 

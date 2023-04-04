@@ -48,17 +48,24 @@ local events=
 
 local function destroystuff(inst)
     local pt = inst:GetPosition()
-    local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 3)
+    local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 3, nil, {"INLIMBO"})
     for k,v in pairs(ents) do
-        if v and v.components.workable and v.components.workable.workleft > 0 then
-            SpawnPrefab("collapse_small").Transform:SetPosition(v:GetPosition():Get())        
-            v.components.workable:Destroy(inst)
+        if v and v.components.workable and v.components.workable.workleft > 0 and 
+		not table.contains({ACTIONS.NET, ACTIONS.FISH}, v.components.workable:GetWorkAction()) then
+        	if v.components.workable.undestroyable or v.components.workable.destroyed then
+        		v.components.workable:WorkedBy(inst,1)
+        	else
+            	SpawnPrefab("collapse_small").Transform:SetPosition(v:GetPosition():Get())        
+            	v.components.workable:Destroy(inst)
+        	end
         end
-        
+
         if v and v.components.hackable and v.components.hackable.hacksleft > 0 then
+
         	SpawnPrefab("collapse_small").Transform:SetPosition(v:GetPosition():Get())        
         	v.components.hackable:Hack(inst, v.components.hackable.hacksleft)
-        end           
+
+        end        
 
         if v and v.components.health and not v.components.health:IsDead() 
         and v ~= inst.WINDSTAFF_CASTER and v.components.combat then

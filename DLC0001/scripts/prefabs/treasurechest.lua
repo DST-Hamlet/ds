@@ -101,6 +101,14 @@ for y = 2, 0, -1 do
 		table.insert(slotpos, Vector3(80*x-80*2+80, 80*y-80*2+80,0))
 	end
 end
+
+local minotaur_slotpos = {}
+
+for y = 2.5, -0.5, -1 do
+	for x = 0, 2 do
+		table.insert(minotaur_slotpos, Vector3(75*x-75*2+75, 75*y-75*2+75,0))
+	end
+end
 		
 local function chest(style)
 	local fn = function(Sim)
@@ -147,6 +155,14 @@ local function chest(style)
 
 		inst.OnSave = onsave 
         inst.OnLoad = onload
+
+		if style == "minotaur_chest" then
+			inst.components.container:SetNumSlots(#minotaur_slotpos, true)
+			inst.components.container.widgetslotpos = minotaur_slotpos
+			inst.components.container.widgetpos = Vector3(0, 200, 0)
+		    inst.components.container.widgetanimbank = "ui_chester_shadow_3x4"
+		    inst.components.container.widgetanimbuild = "ui_chester_shadow_3x4"			
+		end
 
 		return inst
 	end

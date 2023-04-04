@@ -12,7 +12,7 @@ local function fn(Sim)
     
     inst.AnimState:SetBank("foliage")
     inst.AnimState:SetBuild("foliage")
-    inst.AnimState:PlayAnimation("anim")
+    inst.AnimState:PlayAnimation("idle")
     
     inst:AddComponent("stackable")
 	inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM

@@ -56,7 +56,8 @@ local function fn(Sim)
 	light:SetFalloff(2.5)
 	light:SetColour(255/255,84/255,61/255)
 
-	inst:AddTag("FX")
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 	inst:AddTag("NOCLICK")
 
 	inst.OnEntitySleep = OnEntitySleep

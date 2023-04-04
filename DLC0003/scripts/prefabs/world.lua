@@ -220,6 +220,10 @@ local function OnSave(inst, data)
 	data.fixedPlayerInteriorGridError = inst.fixedPlayerInteriorGridError
 	data.fixedPlayerInteriorGridDuplication = inst.fixedPlayerInteriorGridDuplication
 	data.movedInteriorSpawnOrigin = inst.movedInteriorSpawnOrigin
+
+	if inst.cave_regenerator_retrofitted then
+		data.cave_regenerator_retrofitted = true
+	end
 end
 
 local function OnLoad(inst, data)
@@ -230,7 +234,17 @@ local function OnLoad(inst, data)
 		inst.fixedPlayerInteriorGridError = data.fixedPlayerInteriorGridError
 		inst.fixedPlayerInteriorGridDuplication = data.fixedPlayerInteriorGridDuplication
 		inst.movedInteriorSpawnOrigin = data.movedInteriorSpawnOrigin
+
+		if data.cave_regenerator_retrofitted then
+			inst.cave_regenerator_retrofitted = true
+		end
 	end
+end
+
+local function IsWorldGenOptionNever(inst, prefab)
+	local option = inst:getworldgenoptions()[prefab]
+
+	return option and option == "never"
 end
 
 local function fn(Sim)
@@ -238,6 +252,8 @@ local function fn(Sim)
 	
 	inst:AddTag( "ground" )
 	inst:AddTag( "NOCLICK" )
+	inst:AddTag( "NOBLOCK" )
+
 	inst.entity:SetCanSleep(false)
 	inst.persists = false
 
@@ -312,6 +328,7 @@ local function fn(Sim)
 	inst.OnRemoveEntity = onremove
 
 	inst.getworldgenoptions = getworldgenoptions
+	inst.IsWorldGenOptionNever = IsWorldGenOptionNever
 
 	inst.OnSave = OnSave
 	inst.OnLoad = OnLoad

@@ -187,7 +187,7 @@ local function MakeFish(name, has_seeds)
 		
 		inst.AnimState:SetBank(name)
 		inst.AnimState:SetBuild(name)
-		inst.AnimState:PlayAnimation("idle")
+		inst.AnimState:PlayAnimation("dead")
 
 	   -- inst.build = rodbuild --This is used within SGwilson, sent from an event in fishingrod.lua
         
@@ -196,7 +196,11 @@ local function MakeFish(name, has_seeds)
         inst:AddTag("catfood")
         inst:AddTag("packimfood")       
 
-		MakeInventoryFloatable(inst, "idle_water", "idle")	    
+		MakeInventoryFloatable(inst, "idle_water", "dead")
+		MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.MEDIUM, TUNING.WINDBLOWN_SCALE_MAX.MEDIUM)
+  
+        inst:AddComponent("appeasement")
+        inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_TINY
 
 		inst:AddComponent("edible")
 		inst.components.edible.healthvalue = ROE_FISH[name].health
@@ -256,7 +260,11 @@ local function MakeFish(name, has_seeds)
 		inst.AnimState:SetBuild(ROE_FISH[name].cooked_build)
 		inst.AnimState:PlayAnimation(ROE_FISH[name].cooked_state)
 
-		MakeInventoryFloatable(inst, "cooked_water", "cooked")	    
+		MakeInventoryFloatable(inst, "cooked_water", "cooked")
+		MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.MEDIUM, TUNING.WINDBLOWN_SCALE_MAX.MEDIUM)
+  
+        inst:AddComponent("appeasement")
+        inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_TINY   
 
 		inst:AddTag("meat")
 		inst:AddTag("fishmeat")

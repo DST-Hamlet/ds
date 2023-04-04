@@ -22,7 +22,8 @@ local function commonfn(Sim)
 
 	inst.OnEntitySleep = OnEntitySleep
 
-	inst:ListenForEvent( "animover", function(inst) inst:Remove() end )
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
 
 	return inst	
 end

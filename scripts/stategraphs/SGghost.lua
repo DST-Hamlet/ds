@@ -97,6 +97,8 @@ local states=
         onenter = function(inst)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("dissipate")
+            inst.components.aura:Enable(false)
+            
             if inst:HasTag("girl") then
                 inst.SoundEmitter:PlaySound("dontstarve/ghost/ghost_girl_howl")
             else

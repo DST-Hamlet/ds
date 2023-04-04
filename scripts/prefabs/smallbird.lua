@@ -66,7 +66,7 @@ local function OnGetItemFromPlayer(inst, giver, item)
     end
 
     --I eat food
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         if inst.components.combat.target and inst.components.combat.target == giver then
             inst.components.combat:SetTarget(nil)
         end

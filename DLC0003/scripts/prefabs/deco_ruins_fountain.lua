@@ -41,13 +41,14 @@ local function loadpostpass(inst,ents, data)
 end
 
 local function ShouldAcceptItem(inst, item)
+    if item:HasTag("irreplaceable") then return false end
 
     if not inst:HasTag("vortex") then
-        local can_accept = item.components.currency or item.prefab == "goldnugget" or item.prefab == "dubloon" --and (Prefabs[seed_name] or item.prefab == "seeds" or item.components.edible.foodtype == "MEAT") 
+        local can_accept = item.components.currency or item.prefab == "goldnugget"
     
         return can_accept 
     else
-        return true         
+        return true
     end
 end
 
@@ -171,6 +172,7 @@ local function decofn(build, bank, animframe, data )
         end
 
         inst:AddComponent("trader")
+        inst.components.trader.acceptnontradable = true
         inst.components.trader:SetAcceptTest(ShouldAcceptItem)
         inst.components.trader.onaccept = OnGetItemFromPlayer
         inst.components.trader.onrefuse = OnRefuseItem

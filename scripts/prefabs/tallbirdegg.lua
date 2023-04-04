@@ -132,7 +132,9 @@ local function OnHatchState(inst, state)
             inst.AnimState:PlayAnimation("toocold")
         end
         
-        inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+        inst.persists = false
+        inst:ListenForEvent("animover", inst.Remove)
+        inst:ListenForEvent("entitysleep", inst.Remove)
     end
 end
 

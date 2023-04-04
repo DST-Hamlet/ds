@@ -85,8 +85,6 @@ local states=
         tags = {"busy"},
 
         onenter = function(inst)
-
-			-- inst.SoundEmitter:KillSound("buzz")
 			inst.SoundEmitter:PlaySound(inst.sounds.death)
 
             if inst:HasTag("cocoon") then
@@ -97,15 +95,11 @@ local states=
 
 			inst.Physics:Stop()
 			RemovePhysicsColliders(inst)
+            
 			if inst.components.lootdropper then
 				inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
 			end
         end,
-
-		events=
-        {
-            EventHandler("animover", function(inst) inst:Remove() end),
-        },
     },
 
     State{
@@ -159,8 +153,7 @@ local states=
         name = "idle",
         tags = {"idle", "canrotate"},
 
-        onenter = function(inst)           
-        print("AT IDLE")
+        onenter = function(inst)
             inst.Physics:Stop()
             if inst:HasTag("cocoon") then
                 inst.AnimState:PlayAnimation("cocoon_idle_loop", true) 
@@ -248,7 +241,8 @@ local states=
         onenter = function(inst)           
             inst.Physics:Stop()
             spawnRabidBeetle(inst)
-            inst.AnimState:PlayAnimation("cocoon_idle_pst")            
+            inst.AnimState:PlayAnimation("cocoon_idle_pst")
+            inst.persists = false
         end,
         
         events=
@@ -262,7 +256,8 @@ local states=
         tags = {"cocoon","busy"},
 
         onenter = function(inst)           
-            inst.AnimState:PlayAnimation("cocoon_idle_pst")            
+            inst.AnimState:PlayAnimation("cocoon_idle_pst")
+            inst.persists = false
         end,
         
         events=
@@ -289,10 +284,9 @@ local states=
 
     State{
         name = "cocoon_death",
-        tags = {"cocoon","busy"},
+        tags = {"cocoon", "busy"},
 
         onenter = function(inst)
-            
             inst.AnimState:PlayAnimation("cocoon_death")
 
             RemovePhysicsColliders(inst)
@@ -300,11 +294,6 @@ local states=
                 inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
             end
         end,
-
-        events=
-        {
-            EventHandler("animover", function(inst) inst:Remove() end),
-        },
     },
 }
 --[[

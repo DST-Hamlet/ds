@@ -30,6 +30,7 @@ local function fn(Sim)
     anim:PlayAnimation("idle")
 
     inst:AddTag("herd")
+    inst:AddTag("NOBLOCK")
     
     inst:AddComponent("herd")
     inst.components.herd:SetMemberTag("mossling")

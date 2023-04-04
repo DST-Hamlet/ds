@@ -14,13 +14,17 @@ local prefabs =
 	"firesplash_fx",
 	"firering_fx",
 	"dragoonfire",
-	"dragonfly_fx",
 	"dragoonspit",
 	"dragoonheart",
 	"dragoon_charge_fx",
 }
 
-
+SetSharedLootTable( 'dragoon',
+{
+    {'monstermeat',  1.0},
+    {'monstermeat',  1.0},
+    {'dragoonheart', .25},
+})
 
 local WAKE_TO_FOLLOW_DISTANCE = 8
 local SHARE_TARGET_DIST = TUNING.DRAGOON_KEEP_TARGET_DIST
@@ -115,7 +119,7 @@ local function fn(Sim)
 	inst:AddTag("lavaspitter")
 	inst:AddTag("dragoon")
 	
-	MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst, "hound_body")
 	MakeCharacterPhysics(inst, 10, .5)
 
 	inst.last_spit_time = nil
@@ -149,10 +153,8 @@ local function fn(Sim)
 	inst.components.combat:SetRange(2,2)
 
 	inst:AddComponent("lootdropper")
-	inst.components.lootdropper:AddLoot("monstermeat")
-	inst.components.lootdropper:AddChanceLoot("dragoonheart", .1)
+	inst.components.lootdropper:SetChanceLootTable("dragoon")
 
-	
 	inst:AddComponent("inspectable")
 	
 	inst:AddComponent("sleeper")

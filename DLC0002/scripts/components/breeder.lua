@@ -1,3 +1,5 @@
+local PREDATOR_SPAWN_DIST = 30
+
 local Breeder = Class(function(self, inst)
     self.inst = inst
     self.crops = {}
@@ -9,12 +11,8 @@ local Breeder = Class(function(self, inst)
     self.croppoints = {}
     self.growrate = 1
 
-
     self.inst:AddTag("breeder")
-    
 end)
-
-
 
 function Breeder:IsEmpty()
     return self.volume == 0
@@ -29,120 +27,99 @@ function Breeder:OnSave()
         harvested = self.harvested,
     }
 
-    if self.breedTask then     
-        data.breedtasktime = GetTaskRemaining(self.breedTask)     
-    end
-
-    if self.luretask then
-        data.luretasktime = GetTaskRemaining(self.luretask) 
+    if self.breedTask then
+        data.breedtasktime = GetTaskRemaining(self.breedTask)
     end
 
     return data
 end    
 
-function Breeder:OnLoad(data, newents)    
-	self.volume = data.volume
+function Breeder:OnLoad(data, newents)
+    self.volume = data.volume
     self.seeded = data.seeded
     self.harvestable = data.harvestable
-    self.product = data.product   
-    self.harvested= data.harvested         
-    --self.inst:AddTag("NOCLICK")    
+    self.product = data.product
+    self.harvested= data.harvested
 
-    if data.breedtasktime then        
-        self.breedTask = self.inst:DoTaskInTime(data.breedtasktime,function() self:checkVolume() end)
+    if data.breedtasktime then
+        self.breedTask = self.inst:DoTaskInTime(data.breedtasktime, function() self:CheckVolume() end)
     end
 
-    if data.luretasktime then
-        self.lureTask = self.inst:DoTaskInTime(data.luretask,function() self:checkLure() end)
-    end
-
-    self.inst:DoTaskInTime(0, function() self.inst:PushEvent("onVisChange", {}) end )
+    self.inst:DoTaskInTime(0, function(inst) inst:PushEvent("onVisChange") end)
 end
 
-function Breeder:checkSeeded()
-    if self.volume < 1 and not self.harvestable then        
+function Breeder:CheckSeeded()
+    if self.volume < 1 and not self.harvestable then
         self:StopBreeding()
     end 
-    self.inst:PushEvent("onVisChange", {})
+    self.inst:PushEvent("onVisChange")
 end
 
-function Breeder:updatevolume(delta)
-    self.volume = math.min(math.max(self.volume + delta,0),self.max_volume)
-    self:checkSeeded()
+function Breeder:UpdateVolume(delta)
+    self.volume = math.clamp(self.volume + delta, 0, self.max_volume)
+    self:CheckSeeded()
 end
 
-
-local function SpawnPredatorPrefab(inst)
-
-    local sm = GetSeasonManager()
+function Breeder:GetPredatorPrefab(pt)
     local prefab = "crocodog"
 
-    local world = GetWorld()
-    local x, y, z = inst.Transform:GetWorldPosition()
-    local tile, tileinfo = inst:GetCurrentTileType(x, y, z)
+    if SaveGameIndex:IsModePorkland() then
+        prefab = "snake_amphibious"
 
-    if tile == GROUND.OCEAN_DEEP or tile == GROUND.OCEAN_MEDIUM then
-        if math.random() < 0.7 then
-            prefab = "swordfish"
+    elseif math.random() < 0.7 then
+        local tile, tileinfo = self.inst:GetCurrentTileType(pt:Get())
+    
+        if tile == GROUND.OCEAN_DEEP or tile == GROUND.OCEAN_MEDIUM then
+            prefab = "sharx"
         end
     end
 
-    local pt = Vector3(inst.Transform:GetWorldPosition())
-    local predators = TheSim:FindEntities(pt.x, pt.y, pt.z, 10, {"crocodog","swordfish"}, nil)
+    return prefab
+end
+
+function Breeder:GetPredatorSpawnPoint(pt)
+    local theta = math.random() * 2 * PI
+    local radius = PREDATOR_SPAWN_DIST
+    
+    local wateroffset =	FindWaterOffset(pt, theta, radius, 36, false)
+
+    if wateroffset then
+        local pos = pt + wateroffset
+        return pos
+    end
+end
+
+function Breeder:SummonPredator(harvester)
+    local pt = self.inst:GetPosition()
+    
+    local predators = TheSim:FindEntities(pt.x, pt.y, pt.z, 15, {"breederpredator"})
 
     if #predators > 2 then
         return nil
     end
-    print("PREDATORS SPAWNING")
-    return SpawnPrefab(prefab)
-end
 
-
-function Breeder:summonpredator()
-    local spawn_pt = Vector3(self.inst.Transform:GetWorldPosition())
-
+    local spawn_pt = self:GetPredatorSpawnPoint(pt)
 
     if spawn_pt then
-        local predator = SpawnPredatorPrefab(self.inst)
+        local predator = SpawnPrefab(self:GetPredatorPrefab(pt))
 
         if predator then
-          --  local ptp = spawn_pt:Get()
-            local radius = 30 
-            local base = spawn_pt
-            local theta = math.random() * 2 * PI
-            local offset = Vector3(0,0,0)
-
-            if self.inst:GetDistanceSqToInst(GetPlayer()) < radius * radius then
-               offset = Vector3(radius * math.cos( theta ), 0, -radius * math.sin( theta ))            
-               base = Vector3(GetPlayer().Transform:GetWorldPosition())
-            end
-
-            predator.Physics:Teleport(base.x+ offset.x, base.y+offset.y, base.z+offset.z)
-            predator.components.combat:SuggestTarget(GetPlayer())
+            predator.Physics:Teleport(spawn_pt:Get())
+            predator:FacePoint(pt)
+            predator.components.combat:SuggestTarget(harvester)
+            predator:AddTag("attackingbreeder")
         end
     end
 end
 
-function Breeder:checkLure()
-    if self.volume > 0 then
-        if math.random()*120/math.pow(self.volume,1.5) <=1 then
-            self:summonpredator()
-        end
-    end
-    self.lureTask = self.inst:DoTaskInTime(TUNING.FISH_FARM_LURE_TEST_TIME,function() self:checkLure() end)
-end
-
-function Breeder:checkVolume()
+function Breeder:CheckVolume()
     if self.seeded then
-     --[[   if self.volume > 0 and not self.harvestable then
-            self.harvestable = true    
-        else]]
-            self:updatevolume(1)            
-        --end
-        self.inst:PushEvent("onVisChange", {})
+        self:UpdateVolume(1)
+
+        self.inst:PushEvent("onVisChange")
         local time = math.random(TUNING.FISH_FARM_CYCLE_TIME_MIN,TUNING.FISH_FARM_CYCLE_TIME_MAX)
 
-        self.breedTask = self.inst:DoTaskInTime(time, function() self:checkVolume() end)
+        self.breedTask = self.inst:DoTaskInTime(time, function() self:CheckVolume() end)
     end
 end
 
@@ -156,51 +133,61 @@ function Breeder:Seed(item)
     
     local prefab = nil
     if item.components.seedable.product and type(item.components.seedable.product) == "function" then
-		prefab = item.components.seedable.product(item)
+        prefab = item.components.seedable.product(item)
     else
-		prefab = item.components.seedable.product or item.prefab
-	end
+        prefab = item.components.seedable.product or item.prefab
+    end
+
     self.product = prefab
 
     self.seeded = true
 
     local time = math.random(TUNING.FISH_FARM_CYCLE_TIME_MIN,TUNING.FISH_FARM_CYCLE_TIME_MAX)
 
-    self.breedTask = self.inst:DoTaskInTime(time,function() self:checkVolume() end)
-
-    self.lureTask = self.inst:DoTaskInTime(TUNING.FISH_FARM_LURE_TEST_TIME,function() self:checkLure() end)
+    self.breedTask = self.inst:DoTaskInTime(time, function() self:CheckVolume() end)
 
     if self.onseedfn then
-		self.onseedfn(item)
+        self.onseedfn(item)
     end
-    self.inst:PushEvent("onVisChange", {})
-	item:Remove()    
-	
+    self.inst:PushEvent("onVisChange")
+    item:Remove()
+    
     return true
 end
 
+function Breeder:CanBeHarvested(doer)
+    return self.volume > 0 and doer.components.inventory ~= nil
+end
+
 function Breeder:CollectSceneActions(doer, actions)
-    if self.volume > 0 and doer.components.inventory then
+    if self:CanBeHarvested(doer) then
         table.insert(actions, ACTIONS.HARVEST)
     end
 end
 
-
-
 function Breeder:Harvest(harvester)
+    if harvester == nil or not self:CanBeHarvested(harvester) then return end
 
     self.inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/seacreature_movement/splash_small")
     self.inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/fish_farm/harvest")
 
     self.harvestable = false
     self.harvested = true
+
     if harvester.components.inventory then
         local product = SpawnPrefab(self.product)
-        harvester.components.inventory:GiveItem(product)
+        harvester.components.inventory:GiveItem(product, nil, Vector3(TheSim:GetScreenPos(self.inst.Transform:GetWorldPosition())))
+
+        if math.random() <= TUNING.BREEDER_PREDATOR_SPAWN_CHANGE then
+            self:SummonPredator(harvester)
+        end
     else
-        harvester.components.lootdropper:SpawnLootPrefab(self.product)
+        if not harvester:HasTag("breederpredator") then
+            harvester.components.lootdropper:SpawnLootPrefab(self.product)
+        end
     end
-    self:updatevolume(-1)   
+
+    self:UpdateVolume(-1)
 
     return true
 end
@@ -213,14 +200,9 @@ function Breeder:Reset()
     self.harvested = false
     self.seeded = false
     self.harvestable = false
-    self.volume = 0   
-    self.product = nil 
-    self.inst:PushEvent("onVisChange", {})
-
-    if self.lureTask then
-        self.lureTask:Cancel()
-        self.lureTask = nil
-    end
+    self.volume = 0
+    self.product = nil
+    self.inst:PushEvent("onVisChange")
 end
 
 function Breeder:StopBreeding()

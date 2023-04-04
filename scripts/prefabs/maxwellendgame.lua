@@ -319,7 +319,7 @@ local function fn()
     inst.components.talker.offset = Vector3(0,-700,0)
 
     inst:AddComponent("named")
-    inst.components.named:SetName("Maxwell")
+    inst.components.named:SetName(STRINGS.NAMES.MAXWELL)
 
     inst:AddComponent("maxwelltalker")
     inst.components.maxwelltalker.speeches = SPEECH

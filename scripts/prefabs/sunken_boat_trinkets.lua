@@ -52,6 +52,10 @@ local function MakeTrinket(num)
 
         inst:AddTag("sunken_boat_special")
 
+        if num == 4 and GROUND.OCEAN_MEDIUM then
+            MakeInventoryFloatable(inst, "4_water", "4")
+        end
+
         inst.GiveCluefn = GiveClue
 
         return inst

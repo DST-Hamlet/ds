@@ -113,7 +113,7 @@ end
 
 local function GetWeaponMode(weapon)
 	local inst = weapon.components.inventoryitem.owner
-	if hasammo(inst) and (inst.components.combat.target and inst.components.combat.target == GetPlayer()) then
+	if not inst:HasTag("nightmare") and hasammo(inst) and (inst.components.combat.target and inst.components.combat.target == GetPlayer()) then
 		return weapon.components.weapon.modes["RANGE"]
 	else
 		return weapon.components.weapon.modes["MELEE"]

@@ -84,8 +84,13 @@ function BigPopupDialogScreen:OnUpdate( dt )
 end
 
 function BigPopupDialogScreen:OnControl(control, down)
-    if BigPopupDialogScreen._base.OnControl(self,control, down) then 
-        return true 
+    if BigPopupDialogScreen._base.OnControl(self,control, down) then return true end
+    
+    if control == CONTROL_CANCEL and not down then    
+        if #self.buttons > 1 and self.buttons[#self.buttons] then
+            self.buttons[#self.buttons].cb()
+            return true
+        end
     end
 end
 

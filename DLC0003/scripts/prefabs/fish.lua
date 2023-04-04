@@ -16,34 +16,34 @@ local prefabs =
 {
     "fish_cooked",
     "spoiled_food",
-    "tropical_fish_cooked",
 }
 
 local function stopkicking(inst)
-    inst.AnimState:PlayAnimation("dead")
+    if inst.components.floatable.landanim ~= "dead" then
+        inst.components.floatable:UpdateAnimations(nil, "dead")
+    end
 end
 
 local function makefish(bank_and_build, rodbuild, cooked_prod)
-
     local function commonfn()
-
-        if bank_and_build == "fish" and SaveGameIndex and SaveGameIndex:IsModePorkland() then
-            bank_and_build = "coi"
-        end       
-          
 	    local inst = CreateEntity()
 	    inst.entity:AddTransform()
         
         MakeInventoryPhysics(inst)
         MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.MEDIUM, TUNING.WINDBLOWN_SCALE_MAX.MEDIUM)
-        
+
+        if SaveGameIndex:IsModePorkland() and bank_and_build == "fish" then
+            inst.shelfart = "coi"
+            bank_and_build = "coi"
+        end
+
 	    inst.entity:AddAnimState()
 
         inst.AnimState:SetBank(bank_and_build)
         inst.AnimState:SetBuild(bank_and_build)
         
         inst.build = rodbuild --This is used within SGwilson, sent from an event in fishingrod.lua
-        
+
         inst:AddTag("meat")
 		inst:AddTag("fishmeat")
         inst:AddTag("catfood")
@@ -96,11 +96,9 @@ local function makefish(bank_and_build, rodbuild, cooked_prod)
         inst.components.dryable:SetProduct("smallmeat_dried")
         inst.components.dryable:SetDryTime(TUNING.DRY_FAST)
         inst:DoTaskInTime(5, stopkicking)
-        inst.components.inventoryitem:SetOnPickupFn(function(pickupguy) stopkicking(inst) end)
-        inst.OnLoad = function() stopkicking(inst) end
+        inst.components.inventoryitem:SetOnPickupFn(stopkicking)
+        inst.OnLoad = stopkicking
 
-        MakeInventoryFloatable(inst, "idle_water", "dead")
-        
         return inst
     end
 

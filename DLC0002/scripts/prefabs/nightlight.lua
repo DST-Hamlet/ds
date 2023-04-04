@@ -13,7 +13,7 @@ local prefabs =
 local function onhammered(inst, worker)
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
+    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_magic")
 	inst:Remove()
 end
 
@@ -60,6 +60,7 @@ local function fn(Sim)
 
     -----------------------
     inst:AddComponent("burnable")
+    inst.components.burnable.canlight = false
     inst.components.burnable:AddBurnFX("nightlight_flame", Vector3(0,0,0), "fire_marker")
     inst:ListenForEvent("onextinguish", onextinguish)
     

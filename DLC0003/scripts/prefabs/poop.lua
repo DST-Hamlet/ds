@@ -28,7 +28,7 @@ local function FuelTaken(inst, taker)
 end
 
 local function OnEntityWake(inst)
-    if inst.components.inventoryitem and not inst:HasTag("thrown") then 
+    if inst.components.inventoryitem and inst.components.inventoryitem:IsHeld() and not inst:HasTag("thrown") then 
         inst.components.inventoryitem:OnStartFalling()
     end
 end
@@ -51,29 +51,39 @@ local function MakeEquippable(inst)
     end
 
     local onthrown = function(inst, thrower, pt)
-
+        inst.flies:Remove()
+        inst:RemoveComponent("inventoryitem")
+    
         inst:AddTag("thrown")
+        inst:AddTag("projectile")
+    
         inst.AnimState:SetBank("monkey_projectile")
         inst.AnimState:SetBuild("monkey_projectile")
         inst.AnimState:PlayAnimation("idle", true)
-
+    
         inst.Physics:SetFriction(.2)
-
+    
         inst.GroundTask = inst:DoPeriodicTask(FRAMES, function()
             local pos = inst:GetPosition()
             if pos.y <= 0.5 then
                 local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 1.5, nil, {"FX", "NOCLICK", "DECOR", "INLIMBO"})
-
+    
                 for k,v in pairs(ents) do
                     if v.components.combat then
-                        v.components.combat:GetAttacked(thrower, TUNING.POOP_THROWN_DAMAGE)
+                        v.components.combat:GetAttacked(thrower, TUNING.POOP_THROWN_DAMAGE, inst)
                     end
                 end
-
+    
+                local fx = "poop_splat"
+    
+                if inst:GetIsOnWater() then
+                    inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/item_sink")
+                    fx =  "splash_water_sink"
+                end
+    
                 local pt = inst:GetPosition()
-                local other = SpawnPrefab("poop_splat")
-                other.Transform:SetPosition(pt:Get())
-
+                SpawnPrefab(fx).Transform:SetPosition(pt:Get())
+    
                 inst:Remove()
             end
         end)

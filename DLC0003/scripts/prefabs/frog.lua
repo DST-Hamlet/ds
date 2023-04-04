@@ -49,14 +49,17 @@ local sounds = {
 local function OnWaterChange(inst, onwater)
 	if onwater then
 		inst.onwater = true
-		inst.sg:GoToState("submerge")
 		inst.DynamicShadow:Enable(false)
-			inst.components.locomotor.walkspeed = 3
+		inst.components.locomotor.walkspeed = 3
 	else
 		inst.onwater = false		
-		inst.sg:GoToState("emerge")
 		inst.DynamicShadow:Enable(true)
-			inst.components.locomotor.walkspeed = 4
+		inst.components.locomotor.walkspeed = 4
+	end
+
+	if not inst.sg:HasStateTag("falling") then
+		local noanim = inst:GetTimeAlive() < 1
+		inst.sg:GoToState(onwater and "submerge" or "emerge", noanim)
 	end
 end
 
@@ -83,7 +86,12 @@ local function retargetpoisonfrogfn(inst)
 end
 
 local function ShouldSleep(inst)
-	return false -- frogs either go to their home, or just sit on the ground.
+    if inst.components.knownlocations:GetLocation("home") ~= nil or inst:HasTag("aporkalypse_cleanup") then
+        return false
+    end
+
+    -- Homeless frogs will sleep at night.
+    return GetClock():IsNight()
 end
 
 local function OnAttacked(inst, data)
@@ -106,6 +114,18 @@ end
 
 local function OnEntitySleep(inst)
 	inst.components.tiletracker:Stop()
+end
+
+local function OnSave(inst, data)
+    if inst:HasTag("aporkalypse_cleanup") then
+        data.aporkalypse_cleanup = true
+    end
+end
+
+local function OnLoad(inst, data) 
+	if data and data.aporkalypse_cleanup then
+		inst:AddTag("aporkalypse_cleanup")
+	end
 end
 
 local function commonfn(Sim)
@@ -183,6 +203,7 @@ local function poisonfn(Sim)
 	
 	inst:AddTag("duskok")
 	inst:AddTag("eatsbait")
+	inst:AddTag("scarytoprey")
 
 	inst.components.lootdropper:SetLoot({"froglegs_poison"})
 	inst.components.lootdropper:AddRandomLoot("venomgland", 0.5)
@@ -197,6 +218,9 @@ local function poisonfn(Sim)
 
 	inst.OnEntityWake = OnEntityWake
 	inst.OnEntitySleep = OnEntitySleep
+
+	inst.OnSave = OnSave
+	inst.OnLoad = OnLoad
 
 	return inst
 end

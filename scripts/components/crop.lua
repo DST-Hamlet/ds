@@ -135,7 +135,7 @@ function Crop:Harvest(harvester)
     
     if self.matured then
 		local product = SpawnPrefab(self.product_prefab)
-        harvester.components.inventory:GiveItem(product)
+        harvester.components.inventory:GiveItem(product, nil, Vector3(TheSim:GetScreenPos(self.inst.Transform:GetWorldPosition())))
         ProfileStatsAdd("grown_"..product.prefab) 
         
         self.matured = false
@@ -147,6 +147,71 @@ function Crop:Harvest(harvester)
         end
         
         return true
+    end
+end
+
+function Crop:ForceHarvest(harvester)
+    if self.matured or self.withered then
+        local product = nil
+        if self.grower and self.grower:HasTag("fire") or self.inst:HasTag("fire") then
+            local temp = SpawnPrefab(self.product_prefab)
+            if temp.components.cookable and temp.components.cookable.product then
+                product = SpawnPrefab(temp.components.cookable.product)
+            else
+                product = SpawnPrefab("seeds_cooked")
+            end
+            temp:Remove()
+        else
+            product = SpawnPrefab(self.product_prefab)
+        end
+
+    	local tookProduct = false
+    	if harvester and harvester.components.inventory then
+            harvester.components.inventory:GiveItem(product)
+    		tookProduct = true
+    	else
+    		if self.grower and self.grower:IsValid() then
+    			product.Transform:SetPosition(self.grower.Transform:GetWorldPosition())
+                if product.components.inventoryitem then
+    				product.components.inventoryitem:OnDropped(true)
+    			end
+     			tookProduct = true
+    		end
+        end
+
+    	if not tookProduct then
+    		-- nothing to do with our product. What a waste
+    		product:Remove()
+    	end
+
+        self.matured = false
+        self.growthpercent = 0
+        self.product_prefab = nil
+
+        if self.grower then
+            if self.grower.components.grower then
+                self.grower.components.grower:RemoveCrop(self.inst)
+            else
+               self.inst:Remove()
+            end
+            self.grower = nil
+        else 
+            self.inst:Remove()
+        end
+        
+        return true
+    else
+	    -- nothing to give up, but pretend we did
+        if self.grower then
+            if self.grower.components.grower then
+                self.grower.components.grower:RemoveCrop(self.inst)            
+            else
+            self.inst:Remove()
+            end
+            self.grower = nil
+        else 
+            self.inst:Remove()
+        end
     end
 end
 

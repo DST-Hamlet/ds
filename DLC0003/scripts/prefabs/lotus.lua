@@ -12,11 +12,15 @@ local prefabs =
 
 local function onpickedfn(inst)
     inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
-    inst.AnimState:PlayAnimation("picking")
-    inst.AnimState:PushAnimation("picked")
+
+    if not inst.closed then
+        inst.AnimState:PlayAnimation("picking")
+        inst.AnimState:PushAnimation("picked", true)
+    else
+        inst.AnimState:PlayAnimation("picked", true)
+    end
 
     local target = FindEntity(inst, 50, function(item) return item:HasTag("platapine") end)
-    print("TUNING.BILL_SPAWN_CHANCE",TUNING.BILL_SPAWN_CHANCE)
     if not target and math.random() < TUNING.BILL_SPAWN_CHANCE then 
         local x, y, z = inst.Transform:GetWorldPosition()
         local bill = SpawnPrefab("bill")
@@ -43,7 +47,7 @@ local function onregenfn(inst)
 end
 
 local function makeemptyfn(inst)
-	inst.AnimState:PlayAnimation("picked")
+	inst.AnimState:PlayAnimation("picked", true)
 end
 
 local function ongustpick(inst)
@@ -100,16 +104,17 @@ local function fn(Sim)
     inst:AddComponent("appeasement")
     inst.components.appeasement.appeasementvalue = TUNING.WRATH_SMALL
     
-	--MakeSmallBurnable(inst, TUNING.SMALL_FUEL)
-    --MakeSmallPropagator(inst)
-	MakeNoGrowInWinter(inst)    
+	MakeSmallBurnable(inst, TUNING.MED_BURNTIME)
+    MakeSmallPropagator(inst)
+
+	MakeNoGrowInWinter(inst)
     ---------------------   
 
     inst:ListenForEvent("dusktime", function()
         inst:DoTaskInTime(math.random()*10, function(inst) 
             if inst.components.pickable and inst.components.pickable.canbepicked then
                 anim:PlayAnimation("close")
-                anim:PushAnimation("idle_plant_close")
+                anim:PushAnimation("idle_plant_close", true)
                 inst.closed = true
             end
         end)
@@ -129,7 +134,8 @@ local function fn(Sim)
         if GetClock():IsDay() and inst.components.pickable and inst.components.pickable.canbepicked then
             anim:PlayAnimation("idle_plant", true)
         elseif inst.components.pickable and inst.components.pickable.canbepicked  then
-            anim:PlayAnimation("idle_plant_close")
+            anim:PlayAnimation("idle_plant_close", true)
+            inst.closed = true
         end
     end
 

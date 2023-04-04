@@ -20,14 +20,10 @@ local function onthrown(inst, thrower, pt, time_to_target)
     shadow.Transform:SetPosition(pt:Get())
     shadow:shrink(time_to_target, 2, 0.5)
 
-    local smoke =  SpawnPrefab("collapse_small")
-    local x, y, z = inst.Transform:GetWorldPosition()
-    y = y + 1
-
 	inst.UpdateTask = inst:DoPeriodicTask(FRAMES, function()
 		local pos = inst:GetPosition()
 		if pos.y <= 0.3 then
-		    local ents = TheSim:FindEntities(pos.x, 0, pos.z, TUNING.KNIGHTBOAT_RADIUS, nil, {"FX", "DECOR", "INLIMBO"})
+		    local ents = TheSim:FindEntities(pos.x, 0, pos.z, TUNING.KNIGHTBOAT_RADIUS, nil, inst.noTags)
 
 		    for k,v in pairs(ents) do
 	            if v.components.combat and v ~= inst then --For now I want knight boats to kill eachother
@@ -77,6 +73,8 @@ local function fn(Sim)
 
 	inst:AddTag("thrown")
 	inst:AddTag("projectile")
+
+	inst.noTags = {"FX", "DECOR", "INLIMBO", "shadow"}
 
 	inst:AddComponent("throwable")
 	inst.components.throwable.onthrown = onthrown

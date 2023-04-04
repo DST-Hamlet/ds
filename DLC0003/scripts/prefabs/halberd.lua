@@ -33,6 +33,7 @@ local function fn(Sim)
 	anim:PlayAnimation("idle")
 
 	inst:AddTag("halberd")
+	inst:AddTag("smeltable") -- Smelter
 
 	inst:AddTag("sharp")
 

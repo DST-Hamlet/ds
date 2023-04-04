@@ -23,7 +23,6 @@ local prefabs =
 	--"vomitfire_fx",
 	"firesplash_fx",
 	"firering_fx",
-	"dragonfly_fx",
 	"lavaspit",
 	"snakeoil",
 }
@@ -132,6 +131,7 @@ local function fn(Sim)
 	inst:AddTag("monster")
 	inst:AddTag("hostile")
 	inst:AddTag("snake")
+	inst:AddTag("canbetrapped")
 
 	MakeCharacterPhysics(inst, 10, .5)
 

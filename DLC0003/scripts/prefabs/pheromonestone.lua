@@ -2,6 +2,7 @@ local assets=
 {
 	Asset("ANIM", "anim/pheromone_stone.zip"),
 	Asset("ANIM", "anim/torso_amulets.zip"),
+	Asset("MINIMAP_IMAGE", "pheromone_stone"),
 }
 
 --[[ Each amulet has a seperate onequip and onunequip function so we can also
@@ -25,10 +26,13 @@ end
 
 local function makefn(inst)
     local inst = CreateEntity()
-    
+
+    local minimap = inst.entity:AddMiniMapEntity()
+    minimap:SetIcon( "pheromone_stone.png" )
+
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
-    MakeInventoryPhysics(inst)   
+    MakeInventoryPhysics(inst)
 
     inst.AnimState:SetBank("pheromone_stone")
     inst.AnimState:SetBuild("pheromone_stone")

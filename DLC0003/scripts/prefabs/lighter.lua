@@ -114,7 +114,7 @@ local function fn(Sim)
         onequip(inst, data.owner)
         end, inst)    
     -----------------------------------
-    inst:DoTaskInTime(0, function() if not GetPlayer() or GetPlayer().prefab ~= "willow" then inst:Remove() end end)
+
     return inst
 end
 

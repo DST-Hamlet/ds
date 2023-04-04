@@ -98,7 +98,7 @@ local function fn(Sim)
 	inst.Transform:SetScale(3, 3, 3)
 
 	MakeCharacterPhysics(inst, 1, 0.5)
-	MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst, "chest")
 
 	MakeSmallBurnableCharacter(inst, "chest")
 	MakeTinyFreezableCharacter(inst, "chest")

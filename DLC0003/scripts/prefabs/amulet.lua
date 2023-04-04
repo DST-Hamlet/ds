@@ -9,7 +9,7 @@ add and remove event listeners, or start/stop update functions here. ]]
 
 ---RED
 local function healowner(inst, owner)
-    if (owner.components.health and owner.components.health:IsHurt())
+    if (owner.components.health and owner.components.health:IsHurt() and not owner.components.health:IsDead())
     and (owner.components.hunger and owner.components.hunger.current > 5 )then
         owner.components.health:DoDelta(TUNING.REDAMULET_CONVERSION,false,"redamulet")
         owner.components.hunger:DoDelta(-TUNING.REDAMULET_CONVERSION)
@@ -112,57 +112,61 @@ local function onunequip_green(inst, owner)
     inst:RemoveEventCallback("consumeingredients", inst.onitembuild, owner)
 end
 
----ORANGE
-local function SpawnEffect(inst)
-    local pt = inst:GetPosition()
-    local fx = SpawnPrefab("small_puff")
-    fx.Transform:SetPosition(pt.x, pt.y, pt.z)
-    fx.Transform:SetScale(0.5,0.5,0.5)
+local function CanAcceptItem(inventory, _item)
+    if not inventory:IsFull() then
+        return true
+    end
+
+    if _item.components.stackable then
+        local found_item = inventory:FindItem(function(item) 
+            return (item.prefab == _item.prefab and
+                    not item.components.stackable:IsFull() and
+                    item ~= inventory.activeitem) 
+        end)
+
+        return found_item ~= nil
+    end
+
+    return false
 end
 
-local function getitem(player, amulet, item)
-    --Amulet will only ever pick up items one at a time. Even from stacks.
-    SpawnEffect(item)
-    amulet.components.finiteuses:Use(1)
-    
-    if item.components.stackable then
-        item = item.components.stackable:Get()
-    end
-    
-    if item.components.trap and item.components.trap:IsSprung() then
-        item.components.trap:Harvest(player)
+local ORANGE_PICKUP_MUST_TAGS = { "isinventoryitem" }
+local ORANGE_PICKUP_CANT_TAGS = {"sunken", "bookshelfed", "INLIMBO", "NOCLICK", "NOFORAGE", "catchable", "fire", "minesprung", "mineactive", "spider" }
+local function pickup(inst, owner)
+    if owner == nil or owner.components.inventory == nil then
         return
     end
-    
-    player.components.inventory:GiveItem(item, nil, Vector3(TheSim:GetScreenPos(item.Transform:GetWorldPosition())))
-end
 
-local function pickup(inst, owner)
-    local pt = owner:GetPosition()
-    local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, TUNING.ORANGEAMULET_RANGE,nil,{"INLIMBO", "NOFORAGE"})
+    local x, y, z = owner.Transform:GetWorldPosition()
+    local ents = TheSim:FindEntities(x, y, z, TUNING.ORANGEAMULET_RANGE, ORANGE_PICKUP_MUST_TAGS, ORANGE_PICKUP_CANT_TAGS)
+    local ba = owner:GetBufferedAction()
 
-    for k,v in pairs(ents) do
-        if v.components.inventoryitem and v.components.inventoryitem.canbepickedup and v.components.inventoryitem.cangoincontainer and not
-            v.components.inventoryitem:IsHeld() then
+    for i, v in ipairs(ents) do
+        if v.components.inventoryitem ~= nil and
+        v.components.inventoryitem.canbepickedup and
+        v.components.inventoryitem.cangoincontainer and
+        not v.components.inventoryitem:IsHeld() and
+        (ba == nil or ba.action ~= ACTIONS.PICKUP or ba.target ~= v) and
+        CanAcceptItem(owner.components.inventory, v) then
 
-            if not owner.components.inventory:IsFull() then
-                --Your inventory isn't full, you can pick something up.
-                getitem(owner, inst, v)
-                return
+            SpawnPrefab("sand_puff").Transform:SetPosition(v.Transform:GetWorldPosition())
 
-            elseif v.components.stackable then
-                --Your inventory is full, but the item you're trying to pick up stacks. Check for an exsisting stack.
-                --An acceptable stack should: Be of the same item type, not be full already and not be in the "active item" slot of inventory.
-                local stack = owner.components.inventory:FindItem(function(item) return (item.prefab == v.prefab and not item.components.stackable:IsFull()
-                    and item ~= owner.components.inventory.activeitem) end)
-                if stack then
-                    getitem(owner, inst, v)
-                    return
-                end
+            inst.components.finiteuses:Use(1)
+
+            local v_pos = v:GetPosition()
+            if v.components.stackable ~= nil then
+                v = v.components.stackable:Get()
             end
+
+            if v.components.trap ~= nil and v.components.trap:IsSprung() then
+                v.components.trap:Harvest(owner)
+            else
+                owner.components.inventory:GiveItem(v, nil, Vector3(TheSim:GetScreenPos(v_pos:Get())))
+            end
+
+            return
         end
     end
-    
 end
 
 local function onequip_orange(inst, owner) 
@@ -173,6 +177,10 @@ end
 local function onunequip_orange(inst, owner) 
     owner.AnimState:ClearOverrideSymbol("swap_body")
     if inst.task then inst.task:Cancel() inst.task = nil end
+end
+
+local function returntointeriorscene_yellow(inst)
+    inst.Light:Enable(false)
 end
 
 ---YELLOW
@@ -318,6 +326,12 @@ local function orange(inst)
     inst.components.finiteuses:SetMaxUses(TUNING.ORANGEAMULET_USES)
     inst.components.finiteuses:SetUses(TUNING.ORANGEAMULET_USES)
 
+    inst:AddComponent("repairable")
+    inst.components.repairable.repairmaterial = "nightmare"
+    inst.components.repairable.announcecanfix = false
+
+    inst:AddTag("repairshortaction")
+
     return inst
 end
 
@@ -342,6 +356,9 @@ local function yellow(inst)
     inst.components.fueled.fueltype = "NIGHTMARE"
     inst.components.fueled:InitializeFuelLevel(TUNING.YELLOWAMULET_FUEL)
     inst.components.fueled:SetDepletedFn(onfinished)
+
+    inst.returntointeriorscene = returntointeriorscene_yellow
+
     return inst
 end
 
@@ -349,6 +366,6 @@ end
 return Prefab( "common/inventory/amulet", red, assets),
 Prefab("common/inventory/blueamulet", blue, assets),
 Prefab("common/inventory/purpleamulet", purple, assets),
-Prefab("common/inventory/orangeamulet", orange, assets),
+Prefab("common/inventory/orangeamulet", orange, assets, {"sand_puff"}),
 Prefab("common/inventory/greenamulet", green, assets),
 Prefab("common/inventory/yellowamulet", yellow, assets)

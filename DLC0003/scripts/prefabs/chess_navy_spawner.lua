@@ -23,6 +23,7 @@ local function fn()
 	inst.entity:AddTransform()
 
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst.spawn_point_active = false
 	inst.OnEntitySleep = OnEntitySleep

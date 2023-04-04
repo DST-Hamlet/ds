@@ -426,6 +426,7 @@ return {
             OPEN = "To the underworld!",
         },
         CAVE_EXIT = "Back to the open skies!",
+		CAVE_REGENERATOR = "It wishes return to the entrance.",
 		MAXWELLPHONOGRAPH = "A mechanical songstress.",
 		BOOMERANG = "For flinging at foes!",
 		PIGGUARD = "He's battle ready, I can tell.",
@@ -1306,6 +1307,13 @@ return {
 		ICESTAFF = "A gift from Ullr!",
 		WATHGRITHRHAT = "The power of the unicorn is great.",
 		SPEAR_WATHGRITHR = "My comrade in arms!",
+
+		BOOK_BIRDS = "To rule the skies!",
+        BOOK_TENTACLES = "Knowledge grants great power!",
+        BOOK_GARDENING = "But can it tend the garden of mine soul?",
+        BOOK_SLEEP = "Where's the drama? The suspense?",
+        BOOK_BRIMSTONE = "This tome is brimming with Hel's fire!",
+		BOOK_METEOR = "Read a passage and call forth Ragnarok!",
 
 		--- CAPY DLC ------------------------------------------------------------------------------------------------
 
@@ -2666,6 +2674,7 @@ return {
     	HARDSHELL_TACOS = "Its crunchy shell delights me not!!!",
     	GUMMY_CAKE = "Meat cake! Prepare to be eaten!",
     	STEAMEDHAMSANDWICH = "Obviously grilled!",
+		MEATED_NETTLE = "This meat hath a strange texture within, but my sinuses art clear!",
 
     	ROC_NEST_DEBRIS1 = "A stick!",
     	ROC_NEST_DEBRIS2 = "Not more than a stick!",
@@ -2747,6 +2756,7 @@ return {
         BILL_QUILL = "A skewer from the skewerer.",
 
         ANTLER = "Calls upon the mighty bird beast!",
+        ANTLER_CORRUPTED = "Calls off the mighty bird beast.",
 
         PUGALISK_SKULL = "I have vanquished a mighty foe!",
         PUGALISK_CORPSE = "A token from the battlefield.",
@@ -2826,6 +2836,13 @@ return {
 		------------YOTP---------
 		FIRECRACKERS = "To strike fear into the hearts of mine enemies!",
 		REDLANTERN = "A lucky ward to guard against the night.",
+
+		-------------Wormwood Specific-------
+
+		COMPOSTWRAP = "Foul thing! Begone from my sight!",
+		POISONBALM = "Defense against poison.",
+		ARMOR_BRAMBLE = "Armor studded with fearsome thorns.",
+        TRAP_BRAMBLE = "A most clever trap for one's foes.",
 
 		-------rewards update-------
 

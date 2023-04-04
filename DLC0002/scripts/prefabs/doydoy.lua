@@ -37,7 +37,7 @@ local adultloot = {'meat', 'drumstick', 'drumstick', 'doydoyfeather', 'doydoyfea
 
 local babyfoodprefs = {"SEEDS"}
 local teenfoodprefs = {"SEEDS", "VEGGIE"}
-local adultfoodprefs = {"MEAT", "VEGGIE", "SEEDS", "ELEMENTAL", "WOOD"}
+local adultfoodprefs = {"MEAT", "VEGGIE", "SEEDS", "ELEMENTAL", "WOOD", "ROUGHAGE"}
 
 local babysounds = 
 {
@@ -71,6 +71,17 @@ local function StopTrackingInSpawner(inst)
 	local ground = GetWorld()
 	if ground and ground.components.doydoyspawner then
 		ground.components.doydoyspawner:StopTracking(inst)
+	end
+end
+
+local function InitAnimationFromPosition(inst)
+	if inst.components.inventoryitem.owner then return end
+
+	if inst:GetIsOnWater() then
+		inst.onwater = true
+		inst.components.inventoryitem.canbepickedup = true
+
+		inst.sg:GoToState("idle_water")
 	end
 end
 
@@ -122,6 +133,8 @@ local function SetTeen(inst)
 	inst.components.inventoryitem:ChangeImageName("doydoy_teen")
 
 	inst.components.named:SetName(STRINGS.NAMES["DOYDOYTEEN"])
+	
+	inst:DoTaskInTime(0, InitAnimationFromPosition)
 end
 
 local function SetFullyGrown(inst)
@@ -152,7 +165,7 @@ end
 local function OnEntityWake(inst)
 	inst:ClearBufferedAction()
 
-	if inst.needtogrowup then
+	if inst.needtogrowup and not (inst.components.inventoryitem and inst.components.inventoryitem.owner) then
 		local grown = SpawnPrefab("doydoy")
 		grown.Transform:SetPosition(inst.Transform:GetWorldPosition() )
 		grown.Transform:SetRotation(inst.Transform:GetRotation() )
@@ -171,8 +184,32 @@ local function OnInventory(inst)
 end
 
 local function OnDropped(inst)
-	inst.components.sleeper:GoToSleep()
+	local isbaby = inst:HasTag("baby")
+	local isteen = inst:HasTag("teen")
+
 	inst:AddTag("mating")
+
+	if not inst:GetIsOnWater() then
+		if not inst.components.sleeper then
+			inst:AddComponent("sleeper")
+		end
+
+		inst.components.sleeper:GoToSleep()
+
+		inst.onwater = false
+	else
+		if inst:HasTag("baby") then
+			local splash = SpawnPrefab("splash_water")
+			splash.Transform:SetPosition(inst.Transform:GetWorldPosition())
+			inst:Remove()
+		else
+			inst:RemoveComponent("sleeper")
+			inst.onwater = true
+			inst.components.inventoryitem.canbepickedup = true
+
+			inst.sg:GoToState("idle_water")
+		end
+	end
 end
 
 local function OnMate(inst, partner)
@@ -190,20 +227,22 @@ local function commonfn(Sim)
 	
 	inst.Transform:SetFourFaced()
 	
-	MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst, "mossling_body")
 	MakeCharacterPhysics(inst, 50, .5)
 
 	inst.AnimState:SetBank("doydoy")
+	inst.AnimState:AddOverrideBuild("doydoy")
 	inst.AnimState:SetBuild("doydoy_adult_build")
 	inst.AnimState:PlayAnimation("idle", true)
-	
+
 	inst:AddTag("doydoy")
 	inst:AddTag("companion")
-	inst:AddTag("animal")
+	inst:AddTag("animal")	
 	
 	inst:AddComponent("inventoryitem")
 	inst.components.inventoryitem.nobounce = true
 	inst.components.inventoryitem.canbepickedup = false
+	inst.components.inventoryitem.nosink = true
 	inst.components.inventoryitem.longpickup = true
 
 	inst:AddComponent("appeasement")
@@ -241,9 +280,11 @@ local function commonfn(Sim)
 	inst:ListenForEvent("onremove", StopTrackingInSpawner)
 
 	inst:ListenForEvent("gotosleep", function(inst) inst.components.inventoryitem.canbepickedup = true end)
-    inst:ListenForEvent("onwakeup", function(inst) 
-    	inst.components.inventoryitem.canbepickedup = false
-    	inst:RemoveTag("mating")
+    inst:ListenForEvent("onwakeup", function(inst)
+		if not inst.onwater then
+			inst.components.inventoryitem.canbepickedup = false
+			inst:RemoveTag("mating")
+		end
     end)
 
     inst:ListenForEvent("death", function(inst, data) 
@@ -318,8 +359,11 @@ local function adultfn(Sim)
 	inst.components.eater.foodprefs = adultfoodprefs
 	
 	inst:SetStateGraph("SGdoydoy")
+
 	local brain = require("brains/doydoybrain")
 	inst:SetBrain(brain)
+
+	inst:DoTaskInTime(0, InitAnimationFromPosition)
 
 	return inst
 end

@@ -1,6 +1,7 @@
 local Trader = Class(function(self, inst)
     self.inst = inst
     self.enabled = true
+    self.acceptnontradable = false
     self.deleteitemonaccept = true
 end)
 

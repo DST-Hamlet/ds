@@ -48,9 +48,10 @@ local events=
 
 local function destroystuff(inst)
     local pt = inst:GetPosition()
-    local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 3)
+    local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 3, nil, {"INLIMBO"})
     for k,v in pairs(ents) do
-        if v and v.components.workable and v.components.workable.workleft > 0 then
+        if v and v.components.workable and v.components.workable.workleft > 0 and 
+		not table.contains({ACTIONS.NET, ACTIONS.FISH}, v.components.workable:GetWorkAction()) then
             SpawnPrefab("collapse_small").Transform:SetPosition(v:GetPosition():Get())        
             v.components.workable:Destroy(inst)
         end

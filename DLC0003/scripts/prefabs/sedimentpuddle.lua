@@ -366,11 +366,13 @@ local function makeripple(speed)
 		anim:SetLayer( LAYER_BACKGROUND )
 		anim:SetSortOrder( 3 )
 
+		inst:AddTag("NOBLOCK")
+
 		anim:SetMultColour(1, 1, 1, 1)
     	
-    	inst.persists = false
-
-		inst:ListenForEvent("animover", function() inst:Remove() end)	
+		inst.persists = false
+		inst:ListenForEvent("animover", inst.Remove)
+		inst:ListenForEvent("entitysleep", inst.Remove)
 
 		return inst
 	end

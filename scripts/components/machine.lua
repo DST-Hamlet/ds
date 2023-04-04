@@ -85,4 +85,8 @@ function Machine:CollectInventoryActions(doer, actions)
 	end
 end
 
+function Machine:GetDebugString()
+	return string.format("Machine:   %s   Cooldown(%s, %2.2f)", self:IsOn() and "ON" or "OFF", tostring(self.oncooldown), self.cooldowntime)
+end
+
 return Machine

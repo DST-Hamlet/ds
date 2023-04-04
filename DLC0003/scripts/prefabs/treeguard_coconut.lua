@@ -25,7 +25,7 @@ local function onthrown(inst, thrower, pt, time_to_target)
 
 		if pos.y <= 0.3 then
 
-		    local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 1.5)
+		    local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 1.5, nil, inst.noTags)
 
 		    for k,v in pairs(ents) do
 	            if v.components.combat and v ~= inst and v.prefab ~= "treeguard" then
@@ -81,6 +81,8 @@ local function fn()
 
 	inst:AddTag("thrown")
 	inst:AddTag("projectile")
+
+	inst.noTags = {"FX", "DECOR", "INLIMBO", "shadow"}
 
 	inst:AddComponent("throwable")
 	inst.components.throwable.onthrown = onthrown

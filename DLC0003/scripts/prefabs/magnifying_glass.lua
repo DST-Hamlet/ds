@@ -59,6 +59,7 @@ local function fn(Sim)
 	
 	inst:AddComponent("lighter")
 	inst:AddTag("magnifying_glass")
+	inst:AddTag("smeltable") -- Smelter
 
 	inst.AnimState:SetBank("hand_lens")
 	inst.AnimState:SetBuild("hand_lens")

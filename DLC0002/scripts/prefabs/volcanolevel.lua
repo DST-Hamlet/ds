@@ -15,7 +15,6 @@ local volcano_prefabs =
     "elephantcactus",
     "coffeebush",
     "splash_lava_drop",
-    "splash_cloud_drop"
 }
 
 local assets =

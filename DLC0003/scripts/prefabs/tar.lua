@@ -163,7 +163,7 @@ end
 local function test_wall(inst, pt)
     local map = GetWorld().Map
     local tiletype = GetGroundTypeAtPosition(pt)
-    local ground_OK = tiletype ~= GROUND.IMPASSABLE and not map:IsWater(tiletype)
+    local ground_OK = tiletype ~= GROUND.IMPASSABLE and not map:IsWater(tiletype) and IsPointInInteriorBounds(pt, 2)
         
     if ground_OK then
         local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, 2, nil, {"NOBLOCK", "player", "FX", "INLIMBO","tar_trap"}) -- or we could include a flag to the search?
@@ -214,6 +214,8 @@ local function itemfn(Sim)
 
     inst.AnimState:SetBank("tar")
     inst.AnimState:SetBuild("tar")
+
+    inst:AddTag("tar")
 
     inst.AnimState:PlayAnimation("idle")
     

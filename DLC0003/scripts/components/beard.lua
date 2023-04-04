@@ -61,6 +61,10 @@ function Beard:Shave(who, withwhat)
             local speed = 1+ math.random()
             local angle = math.random()*360
             bit.Physics:SetVel(speed*math.cos(angle), 2+math.random()*3, speed*math.sin(angle))
+
+            if bit.components.inventoryitem then
+                bit.components.inventoryitem:OnLootDropped()
+            end
         end
         self:Reset()
     end

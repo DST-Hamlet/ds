@@ -70,10 +70,7 @@ local function MakeItem(inst)
 	    inst.components.inventoryitem.canbepickedup = true
         inst.components.inventoryitem:SetOnPickupFn(function(inst) inst.sg:GoToState("item") end)
         inst.components.inventoryitem:SetOnPutInInventoryFn(function(inst) inst.sg:GoToState("item") end)
-        inst.components.inventoryitem:SetOnDroppedFn(function(inst) 
-                                                         inst.sg:GoToState("item") 
-                                                         inst.components.inventoryitem:OnHitGround()
-                                                     end)
+        inst.components.inventoryitem:SetOnDroppedFn(function(inst) inst.sg:GoToState("item") end)
     end
     inst.components.floatable:UpdateAnimations("object_water", "object")
     
@@ -235,6 +232,8 @@ local function defaultfn()
     inst:AddComponent("cookable")
     inst.components.cookable.product = "cookedmandrake"
     inst.components.cookable:SetOnCookedFn(OnCooked)
+    
+    inst.OnBought = MakeItem
     
     ------------------------------------------
     

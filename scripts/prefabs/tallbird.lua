@@ -80,6 +80,29 @@ local function OnAttacked(inst, data)
     inst.components.combat:SuggestTarget(data.attacker)
 end
 
+local MAKE_NEST_EXCLUDE_TAGS = {"tallbird", "FX", "NOCLICK", "DECOR", "INLIMBO", "NOBLOCK"}
+local MAKE_NEST_VALID_TILES = {GROUND.ROCKY, GROUND.DIRT}
+
+local function CanMakeNewHome(inst)
+	if inst.components.homeseeker == nil and not inst.components.combat:HasTarget() then
+		local x, y, z = inst.Transform:GetWorldPosition()
+		local tile = GetWorld().Map:GetTileAtPoint(x, y, z)
+		return table.contains(MAKE_NEST_VALID_TILES, tile) and #TheSim:FindEntities(x, y, z, TUNING.TALLBIRD_MAKE_NEST_RADIUS, nil, MAKE_NEST_EXCLUDE_TAGS) == 0
+	end
+end
+
+local function MakeNewHome(inst)
+	if inst:CanMakeNewHome() then
+		local nest = SpawnPrefab("tallbirdnest")
+		nest.Transform:SetPosition(inst.Transform:GetWorldPosition())
+		nest.components.pickable:MakeEmpty()
+		nest.components.childspawner:TakeOwnership(inst)
+		nest.components.childspawner:SetMaxChildren(1)
+		nest:StartNesting()
+		return true
+	end
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	
@@ -105,7 +128,7 @@ local function fn(Sim)
     inst.AnimState:SetBuild("ds_tallbird_basic")
     inst.AnimState:PlayAnimation("idle")
     inst.AnimState:Hide("beakfull")
-    
+
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.walkspeed = 7
 
@@ -163,6 +186,9 @@ local function fn(Sim)
     ------------------
     
     inst:SetBrain(brain)
+
+    inst.CanMakeNewHome = CanMakeNewHome
+    inst.MakeNewHome = MakeNewHome
 
     inst:ListenForEvent("attacked", OnAttacked)
 

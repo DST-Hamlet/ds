@@ -10,6 +10,8 @@ local function fn(Sim)
 	inst.AnimState:SetBank("gridplacer")
 	inst.AnimState:SetBuild("gridplacer")
 	inst.AnimState:PlayAnimation("anim", true)
+
+	inst:AddTag("NOBLOCK")
 	
 	inst:AddComponent("placer")
 	inst.persists = false

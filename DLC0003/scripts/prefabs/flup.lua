@@ -89,11 +89,12 @@ local function fn()
 	inst:AddTag("flup")
     inst:AddTag("monster")
     inst:AddTag("hostile")
+	inst:AddTag("canbetrapped")
 
     inst:DoTaskInTime(1*FRAMES, function() inst.components.knownlocations:RememberLocation("home", inst:GetPosition(), true) end)
 
 	MakeTinyFreezableCharacter(inst)
-	MakeSmallBurnable(inst)
+	MakeSmallBurnableCharacter(inst, "flup_body")
 
 	inst:AddComponent("hiddendanger")
 

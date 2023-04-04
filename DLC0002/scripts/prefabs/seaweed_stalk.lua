@@ -17,7 +17,7 @@ local function ondeploy (inst, pt)
     local stalk = SpawnPrefab("seaweed_planted")
     stalk.Transform:SetPosition(pt:Get() ) 
     stalk.components.pickable:MakeEmpty()
-    stalk.AnimState:PlayAnimation("picked")
+    stalk.AnimState:PlayAnimation("picked", true)
 end
 
 local function stopgrowing(inst)

@@ -7,14 +7,6 @@ local assets =
 	Asset( "ANIM", "anim/wave_hurricane.zip" )
 }
 
-local function onSleep(inst)
-	inst:Remove()
-end
-
-local function animover(inst)
-	inst:Remove()
-end
-
 local function commonfn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -26,10 +18,11 @@ local function commonfn(Sim)
     anim:SetSortOrder(3)
 
 	inst:AddTag( "FX" )
-	inst:AddTag( "NOCLICK" )
-	inst.OnEntitySleep = onSleep    
-	--swap comments on these lines:
-	inst:ListenForEvent( "animover", animover )
+	inst:AddTag( "NOCLICK" )   
+
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
     return inst
 end

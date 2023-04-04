@@ -46,7 +46,7 @@ local function CanMate(doy)
 		return false
 	end
 
-	if doy.components.sleeper:IsAsleep() then
+	if not (doy.components.sleeper and not doy.components.sleeper:IsAsleep()) then
 		return false
 	end
 

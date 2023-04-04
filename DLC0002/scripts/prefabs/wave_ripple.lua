@@ -27,24 +27,36 @@ local function DebugDraw(inst)
 end
 
 local function wetanddamage(inst, other)
-    --get wet and take damage 
-    if other and other.components.moisture then
-        local hitmoisturerate = 1.0
-        if other.components.driver and other.components.driver.vehicle and other.components.driver.vehicle.components.drivable then
-            hitmoisturerate = other.components.driver.vehicle.components.drivable:GetHitMoistureRate()
-        end
-        local waterproofMultiplier = 1 
-        if other.components.inventory then 
-            waterproofMultiplier = 1 - other.components.inventory:GetWaterproofness()
-        end 
-        other.components.moisture:DoDelta(inst.hitmoisture * hitmoisturerate * waterproofMultiplier)
-    end 
+    -- Get wet and take damage
     if other and other.components.driver and other.components.driver.vehicle then 
         local vehicle = other.components.driver.vehicle
         if vehicle.components.boathealth then
             vehicle.components.boathealth:DoDelta(inst.hitdamage, "wave")
         end
     end 
+
+    if other and other.components.moisture then
+        if other.components.inventory and other.components.inventory:IsWaterproof() then
+            -- We are protected!
+            return
+        end
+
+        local hitmoisturerate, waterproofMultiplier = 1, 1
+         
+        if other.components.driver and other.components.driver.vehicle and other.components.driver.vehicle.components.drivable then
+            hitmoisturerate = other.components.driver.vehicle.components.drivable:GetHitMoistureRate()
+        end
+
+        if other.components.inventory then 
+            waterproofMultiplier = 1 - math.min(other.components.inventory:GetWaterproofness(), 1)
+        end
+
+        local delta = inst.hitmoisture * hitmoisturerate * waterproofMultiplier
+
+        if delta > 0 then
+            other.components.moisture:DoDelta(delta)
+        end
+    end
 end
 
 local function splash(inst)

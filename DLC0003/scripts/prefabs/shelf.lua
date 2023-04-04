@@ -102,19 +102,16 @@ end
 
 local function SetImage(inst, ent, slot)
     local src = ent 
-    local image = nil 
+    local image = nil
 
     if ent.shelfart then
-        image = ent.shelfart
+        image = ent.shelfart..".tex"
     elseif src ~= nil and src.components.inventoryitem ~= nil then
-        image = #(ent.components.inventoryitem.imagename or "") > 0 and
-            ent.components.inventoryitem.imagename or
-            ent.prefab
-    end 
+        image = ent.components.inventoryitem:GetImage()
+    end
 
     if image ~= nil then 
-        local texname = image..".tex"
-        inst.AnimState:OverrideSymbol(slot, GetInventoryItemAtlas(texname), texname)
+        inst.AnimState:OverrideSymbol(slot, GetInventoryItemAtlas(image), image)
         --inst.AnimState:OverrideSymbol("SWAP_SIGN", "store_items", image)
         inst.imagename = src ~=nil or ""
     else

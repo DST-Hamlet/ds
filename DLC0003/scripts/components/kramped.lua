@@ -40,7 +40,7 @@ function Kramped:onkilledother(victim)
 			if victim.components.follower and victim.components.follower.previousleader == GetPlayer() then
 				self:OnNaughtyAction(3)
 			end
-		elseif victim.prefab == "babybeefalo" then
+		elseif victim.prefab == "babybeefalo" or victim.prefab == "babyox" then
 			self:OnNaughtyAction(6)
 		elseif victim.prefab == "teenbird" then
 			self:OnNaughtyAction(2)
@@ -115,7 +115,7 @@ function Kramped:onkilledother(victim)
 			self:OnNaughtyAction(1) 			
 		elseif victim.prefab == "dungbeetle" then
 			self:OnNaughtyAction(3)
-		elseif victim:HasTag("shopkeep") then
+		elseif victim:HasTag("city_pig") then
 			self:OnNaughtyAction(6)	
 		elseif victim.prefab == "piko" then
 			self:OnNaughtyAction(1)	

@@ -61,6 +61,8 @@ local function makeemptyfn(inst)
 end
 
 local function makebarrenfn(inst)
+	if inst.AnimState:IsCurrentAnimation("idle_dead") then return end
+
 	if inst.components.pickable and inst.components.pickable.withered then
 		if not inst.components.pickable.hasbeenpicked then
 			inst.AnimState:PlayAnimation("full_to_dead")
@@ -382,8 +384,11 @@ local function coffeebushfn(Sim)
 
 	inst.components.pickable:SetUp("coffeebeans", TUNING.BERRY_REGROW_TIME)
 	inst.components.pickable:SetReverseSeasons(true)
-	inst.spawnsperd = false 
+	inst.components.pickable.highfertilizerconsumer = true
+	inst.spawnsperd = false
+
 	inst:AddTag("fire_proof")
+	inst:RemoveTag("bush")
 
 	return inst
 end

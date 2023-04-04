@@ -27,6 +27,8 @@ local function fn(Sim)
 	inst.entity:AddSoundEmitter()
     MakeInventoryPhysics(inst)
 
+    inst:AddTag("smeltable") -- Smelter
+
     anim:SetBank("ballpein_hammer")
     anim:SetBuild("ballpein_hammer")
     anim:PlayAnimation("idle")

@@ -25,7 +25,6 @@ local prefabs =
 	--"vomitfire_fx",
 	"firesplash_fx",
 	"firering_fx",
-	"dragonfly_fx",
 	"lavaspit",
 	"snakeoil",
 }
@@ -53,28 +52,24 @@ local sounds = {
 	},
 }
 
-
-local WAKE_TO_FOLLOW_DISTANCE = 8
-local SLEEP_NEAR_HOME_DISTANCE = 10
 local SHARE_TARGET_DIST = 30
-local HOME_TELEPORT_DIST = 30
-
-local NO_TAGS = {"FX", "NOCLICK","DECOR","INLIMBO"}
-
-local function ShouldWakeUp(inst)
-	return GetClock():IsNight()
-           or (inst.components.combat and inst.components.combat.target)
-           or (inst.components.homeseeker and inst.components.homeseeker:HasHome() )
-           or (inst.components.burnable and inst.components.burnable:IsBurning() )
-           or (inst.components.follower and inst.components.follower.leader)
-end
 
 local function ShouldSleep(inst)
-	return GetClock():IsDay()
-           and not (inst.components.combat and inst.components.combat.target)
-           and not (inst.components.homeseeker and inst.components.homeseeker:HasHome() )
-           and not (inst.components.burnable and inst.components.burnable:IsBurning() )
-           and not (inst.components.follower and inst.components.follower.leader)
+	local near_home_dist = 40
+	local has_home_near = inst.components.homeseeker and 
+					 inst.components.homeseeker.home and 
+					 inst.components.homeseeker.home:IsValid() and
+					 inst:GetDistanceSqToInst(inst.components.homeseeker.home) < near_home_dist*near_home_dist
+
+    return 
+		GetClock():IsDay()
+        and not (inst.components.combat and inst.components.combat.target)
+        and not (inst.components.burnable and inst.components.burnable:IsBurning() )
+        and not (inst.components.freezable and inst.components.freezable:IsFrozen() )
+        and not (inst.components.teamattacker and inst.components.teamattacker.inteam)
+        and not inst.sg:HasStateTag("busy")
+        and not has_home_near
+		and not inst:HasTag("attackingbreeder")
 end
 
 local function OnNewTarget(inst, data)
@@ -86,14 +81,14 @@ end
 
 local function retargetfn(inst)
 	local dist = TUNING.SNAKE_TARGET_DIST
-	local notags = {"FX", "NOCLICK","INLIMBO", "wall", "snake", "structure", "aquatic"}
+	local notags = {"FX", "NOCLICK","INLIMBO", "wall", "snake", "structure"}
 	return FindEntity(inst, dist, function(guy)
-		return  inst.components.combat:CanTarget(guy)
+		return  inst.components.combat:CanTarget(guy) and (not guy:HasTag("aquatic") or inst:HasTag("snake_amphibious"))
 	end, nil, notags)
 end
 
 local function KeepTarget(inst, target)
-	return inst.components.combat:CanTarget(target) and inst:GetDistanceSqToInst(target) <= (TUNING.SNAKE_KEEP_TARGET_DIST*TUNING.SNAKE_KEEP_TARGET_DIST) and not target:HasTag("aquatic")
+	return inst.components.combat:CanTarget(target) and inst:GetDistanceSqToInst(target) <= (TUNING.SNAKE_KEEP_TARGET_DIST*TUNING.SNAKE_KEEP_TARGET_DIST) and (not target:HasTag("aquatic") or inst:HasTag("snake_amphibious"))
 end
 
 local function OnAttacked(inst, data)
@@ -145,19 +140,14 @@ end
 local function OnWaterChange(inst, onwater)
     if onwater then
         inst.onwater = true
-        inst.sg:GoToState("submerge")
         inst.DynamicShadow:Enable(false)
-    --        inst.components.locomotor.walkspeed = 3
     else
-          
-        if inst.onwater then
-        	inst.sg:GoToState("emerge")
-    	end
-        inst.onwater = false      
+        inst.onwater = false
         inst.DynamicShadow:Enable(true)
-    --        inst.components.locomotor.walkspeed = 4
     end
 
+	local noanim = inst:GetTimeAlive() < 1
+	inst.sg:GoToState(onwater and "submerge" or "emerge", noanim)
 end
 
 local function OnEntityWake(inst)	
@@ -187,6 +177,7 @@ local function fn(Sim)
 	inst:AddTag("hostile")
 	inst:AddTag("snake")
 	inst:AddTag("animal")
+	inst:AddTag("canbetrapped")
 
 	MakeCharacterPhysics(inst, 10, .5)
 
@@ -241,8 +232,8 @@ local function fn(Sim)
 	inst.components.sleeper:SetNocturnal(true)
 	--inst.components.sleeper:SetResistance(1)
 	-- inst.components.sleeper.testperiod = GetRandomWithVariance(6, 2)
-	-- inst.components.sleeper:SetSleepTest(ShouldSleep)
 	-- inst.components.sleeper:SetWakeTest(ShouldWakeUp)
+	inst.components.sleeper:SetSleepTest(ShouldSleep)
 	inst:ListenForEvent("newcombattarget", OnNewTarget)
 
 	-- inst:ListenForEvent( "dusktime", function() OnNight( inst ) end, GetWorld())
@@ -318,6 +309,8 @@ local function amphibiousfn(Sim)
 
 	local shadow = inst.entity:AddDynamicShadow()
 	inst:AddTag("amphibious")
+	inst:AddTag("snake_amphibious")
+    inst:AddTag("breederpredator")
 	MakeAmphibiousCharacterPhysics(inst, 1, .5)
 	inst.AnimState:SetBuild("snake_scaly_build")
 

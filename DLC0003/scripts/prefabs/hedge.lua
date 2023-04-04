@@ -28,6 +28,11 @@ local function resolveanimtoplay(inst, percent)
     end
 end
 
+-- NOTES(DiogoW): Things that add walls to the path finder appear with a wrong visual rotation when
+-- entering/exiting interiors. I have no idea why.
+local function FixUpRotation(inst)
+    inst.Transform:SetRotation(inst.Transform:GetRotation())
+end
 
 function MakeHedgeType(data)
 
@@ -108,7 +113,7 @@ function MakeHedgeType(data)
 	local function test_wall(inst, pt)
 		local map = GetWorld().Map
 		local tiletype = GetGroundTypeAtPosition(pt)
-		local ground_OK = tiletype ~= GROUND.IMPASSABLE and not map:IsWater(tiletype)
+		local ground_OK = tiletype ~= GROUND.IMPASSABLE and not map:IsWater(tiletype) and IsPointInInteriorBounds(pt, 1)
 		
 
 		
@@ -374,9 +379,11 @@ function MakeHedgeType(data)
 
         inst:AddComponent("fixable")
         inst.components.fixable:AddRecinstructionStageData("broken","hedge","hedge"..data.hedgetype.."_build")
-        inst.components.fixable:SetPrefabName(data.name)
+        inst.components.fixable:SetPrefabName("hedge")
         inst.components.fixable.reconstructedanims ={play ="place", push = "growth1" }
         inst.components.fixable.reconstructionprefab = data.name
+
+        inst:ListenForEvent("entitywake", FixUpRotation)
 
 		inst.OnSave = onsave
 	    inst.OnLoad = onload
@@ -390,6 +397,10 @@ function MakeHedgeType(data)
 
 		inst.shave = shave
 		inst.setAgeTask = setAgeTask
+
+		MakeMediumBurnable(inst, nil, nil, true)
+        MakeMediumPropagator(inst)
+        inst:ListenForEvent("burntup", inst.Remove)
 
 		inst:AddComponent("shearable")
 		inst.components.shearable:SetProduct("clippings", 2)

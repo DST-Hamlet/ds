@@ -97,6 +97,9 @@ local assets =
     Asset("SOUND", "sound/DLC003_sfx.fsb"),
     Asset("SOUND", "sound/forest_stream.fsb"),
     --Asset("SOUND", "sound/amb_stream.fsb"),
+
+	Asset("SCRIPT", "scripts/prefabs/pig_trades_defs.lua"),
+	Asset("SCRIPT", "scripts/prefabs/pig_shop_defs.lua"),
 }
 
 local forest_prefabs = 
@@ -146,8 +149,7 @@ local forest_prefabs =
 	"maxwelllight",
 	"horizontal_maxwelllight",	
 	"vertical_maxwelllight",	
-	"quad_maxwelllight",	
-	"area_maxwelllight",	
+	"quad_maxwelllight",
 	"maxwelllock",
 	"maxwellphonograph",
 	"puppet_wilson",
@@ -173,7 +175,6 @@ local forest_prefabs =
 	"inventorygrave",
 	"flotsam",
 	"flotsam_debris",
-	"pighouse_trader",
 	"shop_spawner",
 	"batcavemanager",
 	"shop_trinket",
@@ -187,8 +188,7 @@ local forest_prefabs =
 	"test_interior_floor",
 	"test_interior_pole",
 	"pigthought",
-	"pigtrader", 
-	"pigshop",
+	"pigtrader",
 	"vampirebatcave_potential",
 	"peagawk",
 	"peekhen",
@@ -196,7 +196,6 @@ local forest_prefabs =
 	"peekhenspawner",
 	"peagawkfeather",
 	"peagawkfeather_prism",
-	"peagawk_bush",
 	"pig_palace",
 	
 	"shop_buyer", 
@@ -304,7 +303,6 @@ local forest_prefabs =
 	"relic_4",
 	"relic_5",	
 	"walkingstick",
-	"gasarea",
 	"lilypad",
 	"grass_water",
 	"reeds_water",
@@ -597,7 +595,6 @@ local forest_prefabs =
 
     "pig_ruins_dart_statue",
 
-    "house_door",
     "ancient_hulk",
 
 	"teleportato_hamlet_base",

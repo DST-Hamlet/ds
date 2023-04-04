@@ -13,7 +13,7 @@ function Fertilizer:CollectUseActions(doer, target, actions)
             table.insert(actions, ACTIONS.FERTILIZE)
         elseif target.components.grower and target.components.grower:IsEmpty() and not target.components.grower:IsFullFertile() then
             table.insert(actions, ACTIONS.FERTILIZE)
-        elseif target.components.pickable and not target.components.pickable.reverseseasons and target.components.pickable:CanBeFertilized() then
+        elseif target.components.pickable and not (target.components.pickable.reverseseasons or target.components.pickable.oceanic) and target.components.pickable:CanBeFertilized() then
             table.insert(actions, ACTIONS.FERTILIZE)
         elseif target.components.hackable and target.components.hackable:CanBeFertilized() then
             table.insert(actions, ACTIONS.FERTILIZE)

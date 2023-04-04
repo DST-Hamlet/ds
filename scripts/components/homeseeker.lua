@@ -7,7 +7,7 @@ local HomeSeeker = Class(function(self, inst)
 end)
 
 function HomeSeeker:HasHome()
-    return self.home and self.home:IsValid() and not self.home:HasTag("burned") and not (self.home.components.burnable and self.home.components.burnable:IsBurning())
+    return self.home and self.home:IsValid() and not self.home:HasTag("burned") and not self.home:HasTag("burnt") and not (self.home.components.burnable and self.home.components.burnable:IsBurning())
 end
 
 function HomeSeeker:GetDebugString()

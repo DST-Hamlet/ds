@@ -113,7 +113,9 @@ local function StartStep(inst)
 			if not GetInteriorSpawner():IsPlayerConsideredInside() then
 				inst:Show()
 				inst.AnimState:PlayAnimation("idle")
-				inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+				inst.persists = false
+				inst:ListenForEvent("animover", inst.Remove)
+				inst:ListenForEvent("entitysleep", inst.Remove)
 			end
 		end
 	end)

@@ -73,4 +73,8 @@ function FiniteUses:SetOnFinished(fn)
     self.onfinished = fn
 end
 
+function FiniteUses:Repair(repairvalue)
+    self:SetUses(math.min(self.current + repairvalue, self.total))
+end
+
 return FiniteUses

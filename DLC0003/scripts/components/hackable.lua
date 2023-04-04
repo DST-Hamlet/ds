@@ -37,6 +37,7 @@ local Hackable = Class(function(self, inst)
 
     self.hacksleft = 1
     self.maxhacks = 1
+	self.repeat_hack_cycle = false
 
     self.reverseseasons = nil
 
@@ -392,7 +393,7 @@ function Hackable:OnLoad(data)
 	self.max_cycles = data.max_cycles or self.max_cycles
 	self.hacksleft = self.hacksleft
 	
-	if data.picked or data.time then
+	if (data.picked or data.time) and not self.repeat_hack_cycle then
         if self.cycles_left == 0 and self.makebarrenfn then
 			self.makebarrenfn(self.inst)
         elseif self.makeemptyfn then
@@ -474,6 +475,7 @@ function Hackable:MakeBarren()
 	if not self.withered then 
 		self.cycles_left = 0
 	end
+
     self.canbehacked = false
 	self.inst:AddTag("stump")
     if self.task then
@@ -529,6 +531,8 @@ function Hackable:Hack(hacker, numworks, shear_mult, from_shears)
             self.onhackedfn(self.inst, hacker, self.hacksleft, from_shears)
         end
 
+		hacker:PushEvent("hacking", {target = self.inst})
+
         if(self.hacksleft <= 0) then         
 			if self.transplanted then
 				if self.cycles_left ~= nil then
@@ -543,10 +547,14 @@ function Hackable:Hack(hacker, numworks, shear_mult, from_shears)
 			end
 			
 			local loot = self:DropProduct(shear_mult)
-        
-	        self.canbehacked = false
-	        self.inst:AddTag("stump")
-	        self.hasbeenhacked = true
+			
+			if self.repeat_hack_cycle then
+				self.hacksleft = self.maxhacks
+			else
+				self.canbehacked = false
+				self.inst:AddTag("stump")
+				self.hasbeenhacked = true	
+			end
 	        
 	        if not self.paused and not self.withered and self.baseregentime and (self.cycles_left == nil or self.cycles_left > 0) then
 	        	self.regentime = self.baseregentime * self:GetGrowthMod()

@@ -179,12 +179,10 @@ function Banditmanager:GetLoot()
 	end
 
 	local final = math.random(1,range)
-	print("BANDIT MAP", range,final)
 	range = 0
 	for i,set in ipairs(treasurelist) do
 
 		range = range + set.weight
-		print("range",range)
 		if range >= final then
 			for p,n in pairs(set.loot) do
 				if not temploot[p] then
@@ -258,7 +256,6 @@ function Banditmanager:GenerateTreasure(bandit)
 	local offset = FindGroundOffset(pos, math.random() * 2 * math.pi, math.random(120, 200), 18)
 
 	if offset then
-		print("OFFSET FOUND")
 		local spawn_pos = pos + offset
 	    local tile = GetVisualTileType(spawn_pos:Get())
 		local is_water = GetMap():IsWater(tile)
@@ -311,7 +308,6 @@ function Banditmanager:spawnbandit()
 	local ents = TheSim:FindEntities(x,y,z, 40,{"bandit_cover"})
 
 	if #ents > 0 then
-		print("FINDING COVER")
 		local cover = ents[math.random(1,#ents)]
 		--[[
 		local cover = nil
@@ -366,7 +362,6 @@ function Banditmanager:OnPeriodicUpdate(dt)
 		if self.deathtime > 0 then
 			local time = dt or self.tickperiod
 			self.deathtime = self.deathtime - self.tickperiod
-			print("DEATH TIME REMAINING",self.deathtime)
 		else 
 			if not self.banditactive then
 				local player = GetPlayer()
@@ -423,7 +418,6 @@ function Banditmanager:OnPeriodicUpdate(dt)
 
 					local roll = math.random()
 					chance = chance * self.diffmod
-					print("CHANCE", chance, roll, value)
 					if roll < chance then
 						self:spawnbandit()				
 					end

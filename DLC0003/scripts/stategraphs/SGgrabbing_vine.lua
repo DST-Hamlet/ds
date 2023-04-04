@@ -86,6 +86,7 @@ local states=
         onenter = function(inst, playanim)
             inst.Physics:Stop()                                        
             inst.AnimState:PlayAnimation("away_idle", true)
+            inst:shadowoff()
         end,
         
         ontimeout= function(inst)

@@ -81,22 +81,28 @@ local function MakeShadowCreature(data)
         inst:AddTag("shadowcreature")
     	
         MakeCharacterPhysics(inst, 10, 1.5)
-        RemovePhysicsColliders(inst)
-	    inst.Physics:SetCollisionGroup(COLLISION.SANITY)
-	    inst.Physics:CollidesWith(COLLISION.SANITY)      
-         
+        inst.Physics:ClearCollisionMask()
+        inst.Physics:SetCollisionGroup(COLLISION.SANITY)
+        inst.Physics:CollidesWith(COLLISION.SANITY)
+        inst.Physics:CollidesWith(COLLISION.GROUND)
+
         anim:SetBank(bank)
         anim:SetBuild(build)
         anim:PlayAnimation("idle_loop")
         anim:SetMultColour(1, 1, 1, 0.5)
+
         inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
         inst.components.locomotor.walkspeed = data.speed
+        inst.components.locomotor:SetTriggersCreep(false)
+        inst.components.locomotor.pathcaps = { ignorecreep = true }
+
         inst.sounds = sounds
         inst:SetStateGraph("SGshadowcreature")
 
         inst:AddTag("monster")
 	    inst:AddTag("hostile")
         inst:AddTag("shadow")
+        inst:AddTag("windspeedimmune")
         inst:AddTag("notraptrigger")
 
         local brain = require "brains/nightmarecreaturebrain"

@@ -111,6 +111,7 @@ local function fn(Sim)
 	inst:AddComponent("inventory")
 
 	inst:AddComponent("trader")
+	inst.components.trader.acceptnontradable = true
 	inst.components.trader.onaccept = function(reciever, giver, item)
 		-- pass this on to our better half
 		reciever.components.inventory:DropItem(item)

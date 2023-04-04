@@ -33,7 +33,9 @@ local function fn(Sim)
 	inst:AddTag( "NOCLICK" )
 	inst.OnEntitySleep = onSleep
 	--swap comments on these lines:
-	inst:ListenForEvent( "animover", function(inst) inst:Remove() end )
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
 	-- inst.SetAnim = SetAnim
 

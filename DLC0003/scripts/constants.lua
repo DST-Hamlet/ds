@@ -312,7 +312,8 @@ SW_ICONS =
 }
 
 PORK_ICONS = 
-{
+{	
+	["cutgrass"] = "cutgrass_green",
 	["log"] = "log_rainforest",
 	["snakeskin"] = "snakeskin_scaly",
 	["snake"] = "snake_scaly",
@@ -337,6 +338,7 @@ CHARACTER_GENDERS =
 		"wathgrithr",
 		"walani",
 		"wheeler",
+		"wilba"
 	},
 	MALE = {
 		"wilson",
@@ -839,6 +841,48 @@ ROAD_PARAMETERS =
 	WIDTH_JITTER_SCALE=1,
 }
 
+BG_LOADING_IMAGES = {
+	MAIN_GAME = {
+		"loading_wagstaff",
+		"loading_maxwell",
+		"loading_newhorizons",
+		"loading_wendy",
+		"loading_wickerbottom",
+		"loading_wolfgang",
+		"loading_woodie2_trailer",
+		"loading_woodie_trailer",
+		"loading_night",
+	},
+
+	DLCS = {
+		-- RoG
+		{
+			"loading_webber",
+			"loading_wigfrid",
+		},
+		-- SW
+		{
+			"loading_ballphins",
+			"loading_volcano",
+			"loading_warly",
+			"loading_wilson_boat",
+			"loading_wilson_escape",
+			"loading_wilson_seamonster",
+		},
+		-- HAM
+		{
+			"loading_aporkalypse",
+			"loading_ironlord",
+			"loading_citypigs",
+			"loading_werewilba",
+			"loading_wheeler",
+			"loading_wilson_E3",
+			"loading_wormwood2_trailer",
+			"loading_wormwood_trailer",
+		},
+	},
+}
+
 BGCOLOURS =
 {
 	RED = {255/255, 89/255, 46/255},
@@ -893,7 +937,7 @@ VIBRATION_CAMERA_SHAKE = 0
 VIBRATION_BLOOD_FLASH = 1
 VIBRATION_BLOOD_OVER = 2
 
-NUM_SAVE_SLOTS = 5
+NUM_SAVE_SLOTS = 10
 
 SAVELOAD = 
 {    

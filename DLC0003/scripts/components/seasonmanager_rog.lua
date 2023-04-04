@@ -1802,6 +1802,8 @@ function SeasonManager:IsLushSeason()
 	return false
 end
 
-
+function SeasonManager:IsAporkalypse()
+	return false
+end
 
 return SeasonManager

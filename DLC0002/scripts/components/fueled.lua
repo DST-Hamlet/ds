@@ -123,7 +123,7 @@ function Fueled:TakeFuelItem(item)
         end
         
         if self.ontakefuelfn then
-            self.ontakefuelfn(self.inst)
+            self.ontakefuelfn(self.inst, item)
         end
         
         return true

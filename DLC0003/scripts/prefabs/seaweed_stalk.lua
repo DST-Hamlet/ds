@@ -17,7 +17,7 @@ local function ondeploy (inst, pt)
     local stalk = SpawnPrefab("seaweed_planted")
     stalk.Transform:SetPosition(pt:Get() ) 
     stalk.components.pickable:MakeEmpty()
-    stalk.AnimState:PlayAnimation("picked")
+    stalk.AnimState:PlayAnimation("picked", true)
 end
 
 local function stopgrowing(inst)
@@ -87,7 +87,9 @@ local function fn(Sim)
     inst.AnimState:SetBank("seaweed_seed")
     inst.AnimState:SetBuild("seaweed_seed")
     inst.AnimState:PlayAnimation("idle")
-    
+
+    inst:AddTag("plant")
+
     MakeInventoryFloatable(inst, "idle_water", "idle")
 
     inst:AddComponent("tradable")

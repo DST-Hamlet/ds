@@ -22,7 +22,7 @@ local prefabs_poison =
 
 local function oneaten(inst, eater)
     if eater.components.poisonable and eater:HasTag("poisonable") then
-        eater.components.poisonable:Poison()
+        eater.components.poisonable:Poison(nil, nil, nil, true)
     end 
 end
 

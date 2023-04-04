@@ -29,7 +29,9 @@ local function fn(Sim)
     anim:SetBank("pig_scepter")
     anim:SetBuild("pig_scepter")
     anim:PlayAnimation("idle")
-    
+
+    MakeInventoryFloatable(inst, "idle_water", "idle")
+
     inst:AddComponent("inspectable")
     
     inst:AddComponent("inventoryitem")

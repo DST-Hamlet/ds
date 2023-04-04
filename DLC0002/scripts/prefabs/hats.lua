@@ -216,8 +216,8 @@ function MakeHat(name)
 		end)
 	end
 
-	local function tryproc(inst, owner)
-		if not inst.active and math.random() < --[[ Chance to proc ]] TUNING.ARMOR_RUINSHAT_PROC_CHANCE then
+	local function tryproc(inst, owner, data)
+		if not inst.active and math.random() < TUNING.ARMOR_RUINSHAT_PROC_CHANCE and not data.redirected then
 		   ruinshat_proc(inst, owner)
 		end
 	end
@@ -246,7 +246,7 @@ function MakeHat(name)
 		
 		owner.AnimState:Show("HEAD")
 		owner.AnimState:Hide("HEAD_HAIR")
-		inst.procfn = function() tryproc(inst, owner) end
+		inst.procfn = function(owner, data) tryproc(inst, owner, data) end
 		owner:ListenForEvent("attacked", inst.procfn)
 	end
 
@@ -620,8 +620,8 @@ function MakeHat(name)
 		inst:AddComponent("waterproofer")
 		inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_SMALL)
 
-		inst:AddComponent("characterspecific")
-		inst.components.characterspecific:SetOwner("wathgrithr")
+		--inst:AddComponent("characterspecific")
+		--inst.components.characterspecific:SetOwner("wathgrithr")
 
 		return inst
 	end
@@ -1183,8 +1183,10 @@ function MakeHat(name)
 			owner.components.builder.jellybrainhat = true
 			owner:PushEvent("techlevelchange")
     		owner:PushEvent("unlockrecipe")
-    		inst.brainjelly_onbuild = function()
-    			inst.components.finiteuses:Use(1)
+    		inst.brainjelly_onbuild = function(owner, data)
+				if data.used_jellybrainhat == nil or data.used_jellybrainhat then
+    				inst.components.finiteuses:Use(1)
+				end
     		end
     		owner:ListenForEvent("builditem", inst.brainjelly_onbuild)
     		owner:ListenForEvent("bufferbuild", inst.brainjelly_onbuild)
@@ -1218,14 +1220,15 @@ function MakeHat(name)
 	end
 
 	local function woodlegs_spawntreasure(new_sec, old_sec, inst, isload)
-		if isload then
+		-- OnLoad and when repaired.
+		if isload or new_sec > old_sec then
 			return
 		end
 
 		local equipper = inst and inst.components.equippable and inst.components.equippable.equipper
 
-		if equipper and not equipper:HasTag("player") and math.random() > 0.66 then
-			--don't always give treasure if not the player.
+		if equipper and not equipper:HasTag("pirate") and math.random() > 0.66 then
+			-- Don't always give a treasure if it's not used by Woodlegs.
 			return
 		end
 
@@ -1241,7 +1244,7 @@ function MakeHat(name)
     		treasure.Transform:SetPosition(spawn_pos:Get())
     		treasure:SetRandomTreasure()
 
-    		if equipper then
+    		if equipper and equipper:HasTag("pirate") then
     			inst.components.equippable.equipper:PushEvent("treasureuncover")
     		end
 		end
@@ -1257,8 +1260,8 @@ function MakeHat(name)
 		inst.components.fueled:SetSections(TUNING.WOODLEGSHAT_TREASURES)
 		inst.components.fueled:SetSectionCallback(woodlegs_spawntreasure)
 
-        inst:AddComponent("characterspecific")
-        inst.components.characterspecific:SetOwner("woodlegs")
+        --inst:AddComponent("characterspecific")
+        --inst.components.characterspecific:SetOwner("woodlegs")
 
 		return inst
 	end

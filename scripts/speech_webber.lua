@@ -440,9 +440,11 @@ return {
 		BOOK_GARDENING = "Why should we read about flowers when we can just pick them?",
 		BOOK_SLEEP = "It's... beddy-bye time...",
 		BOOK_BRIMSTONE = "We don't like how this one ends!",
+		BOOK_METEOR = "I'm not a good reader, but he is!",
 		LUCY = "If we talks to it will it talk back?",
 		BALLOONS_EMPTY = "Is there going to be a party?!",
 		SPEAR_WATHGRITHR = "Pointy ouchies!",
+		WATHGRITHRHAT = "Haha! It's way too big for us!",
 		WAXWELLJOURNAL = "I don't think we should play with that...",
 
 		ABIGAIL_FLOWER = 
@@ -486,6 +488,8 @@ return {
             GENERIC = "We like it down here.",
             OPEN = "It leads back to the light.",
         },
+
+        CAVE_REGENERATOR = "We should bring it back to the opening! We have a feeling!",
 
 		MAXWELLPHONOGRAPH = "We could listen to that forever!",
 		BOOMERANG = "Boomerangarangarang!",
@@ -2791,6 +2795,7 @@ return {
     	HARDSHELL_TACOS = "Yummy and crunchy!",
     	GUMMY_CAKE = "Hehe. It makes our tummy jiggle.",
     	STEAMEDHAMSANDWICH = "These are just hamburgers.",
+		MEATED_NETTLE = "They're more yummy this way",
 
     	ROC_NEST_DEBRIS1 = "It's a stick.",
     	ROC_NEST_DEBRIS2 = "Do we want another stick?",
@@ -2869,6 +2874,7 @@ return {
         BILL_QUILL = "Watch it! It's sharp.",
 
         ANTLER = "Now we can sing to that big friendly birdie.",
+        ANTLER_CORRUPTED = "The big birdie doesn't like the sounds it makes.",
 
         PUGALISK_SKULL = "Kinda creepy.",
         PUGALISK_CORPSE = "We could probably make something out of these bones.",
@@ -2949,6 +2955,13 @@ return {
         FIRECRACKERS = "Don't worry, we'll be careful.",
         REDLANTERN = "Our own personal night light!",
 
+		-------------Wormwood Specific-------
+
+		COMPOSTWRAP = "Double doodoo.",
+		POISONBALM = "It's icky, but it helps us when we feel sick.",
+        ARMOR_BRAMBLE = "We're ready to let spikes fly!",
+        TRAP_BRAMBLE = "It's a very pointy planty trap!",
+
         -------rewards update-------
 
 		TURF_DEEPRAINFOREST_NOCANOPY = "Some ground that we dug up.",
@@ -2960,10 +2973,10 @@ return {
         PIG_SHOP_TINKER =
         {
             GENERIC = "Cool! Maybe they have blueprints for toys in there!",
-            BURNING = "Aw...We liked that place.",
+            BURNING = "Aw... we liked that place.",
         },
-        ARMORVORTEXCLOAK = "Kinda like a security blanket. But also kinda scary.",    
-        ANCIENT_REMNANT = "Wow. There's a lot of space in there!",
+        ARMORVORTEXCLOAK = "Wow. There's a lot of space in there!",
+        ANCIENT_REMNANT = "Kinda like a security blanket. But also kinda scary.",    
 
         GOGGLESNORMALHAT = "Haha! It makes us see all funny.",
         GOGGLESHEATHAT = "Is this what a frog sees?",

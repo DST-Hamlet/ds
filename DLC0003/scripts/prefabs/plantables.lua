@@ -186,7 +186,7 @@ local plantables =
     {name="bambootree", minspace = 2, bank = "bambootree", build = "bambootree_build", testfn=test_nobeach },
     {name="bush_vine", minspace = 2, bank = "bush_vine", build = "bush_vine", testfn=test_nobeach },
 	{name="coffeebush", bank = "coffeebush", build = "coffeebush", anim="idle_dead", minspace=2, testfn=test_volcano, noburn=true},
-	{name="elephantcactus", bank = "cactus_volcano", build = "cactus_volcano", anim="idle_dead", minspace=2, testfn=test_volcano, noburn=true, deployatrange=true},
+	{name="elephantcactus", bank = "cactus_volcano", build = "cactus_volcano", anim="idle_dead", minspace=2, testfn=test_volcano, noburn=true},
 	{name="nettle", minspace=2},
 	--"reeds",
 }

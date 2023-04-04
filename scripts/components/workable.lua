@@ -22,6 +22,10 @@ function Workable:SetWorkAction(act)
     self.action = act
 end
 
+function Workable:CanBeWorked()
+    return self.workleft > 0
+end
+
 function Workable:Destroy(destroyer)
     if not self.destroyed then
         self:WorkedBy(destroyer, self.workleft)
@@ -50,6 +54,10 @@ function Workable:SetMaxWork(work)
     self.maxwork = work
 end
 
+function Workable:GetWorkAction()
+    return self.action
+end
+
 function Workable:OnSave()    
     if self.savestate then
         return 
@@ -71,6 +79,14 @@ function Workable:OnLoad(data)
 end
 
 function Workable:WorkedBy(worker, numworks)
+
+    if -- Net and Fish Actions need an inventory!
+        table.contains({ACTIONS.NET, ACTIONS.FISH}, self:GetWorkAction())
+        and worker.components.inventory == nil
+    then
+        return
+    end
+
     numworks = numworks or 1
     self.workleft = self.workleft - numworks
 

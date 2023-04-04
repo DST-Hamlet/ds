@@ -196,17 +196,6 @@ local states=
             EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
         },
     },
-
-    State {
-		name = "frozen",
-		tags = {"busy"},
-		
-        onenter = function(inst)
-            inst.AnimState:PlayAnimation("frozen")
-            inst.Physics:Stop()
-            --inst.components.highlight:SetAddColour(Vector3(82/255, 115/255, 124/255))
-        end,
-    },
     
     State{
         name = "death",
@@ -577,11 +566,16 @@ CommonStates.AddRunStates(states,
 		TimeEvent(10*FRAMES, PlayFootstep ),
 
         TimeEvent(11*FRAMES, function(inst) 
-                -- PlayFootstep(inst) 
-                if inst:HasTag("guard") then
-                   inst.SoundEmitter:PlaySound("dontstarve_DLC003/movement/iron_armor/foley")
-                end
-            end ),
+            -- PlayFootstep(inst) 
+            if inst:HasTag("guard") then
+                inst.SoundEmitter:PlaySound("dontstarve_DLC003/movement/iron_armor/foley")
+            end
+
+            -- Prevents shopkeepers from getting stuck on pedestals while restocking items, which is quite common.
+            if inst:HasTag("shopkeep") and inst.changestock then
+                inst.components.locomotor:ResetPath()
+            end
+        end ),
 	},
 })
 

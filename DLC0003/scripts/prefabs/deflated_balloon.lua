@@ -81,9 +81,6 @@ local function balloonfn()
     local trans = inst.entity:AddTransform()
     local anim = inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
-    local minimap = inst.entity:AddMiniMapEntity()
-
-    minimap:SetIcon("balloon_wreckage.png")
 
     MakeObstaclePhysics(inst, 1.0, 1)
 

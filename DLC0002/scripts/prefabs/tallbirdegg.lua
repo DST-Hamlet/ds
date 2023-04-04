@@ -106,7 +106,9 @@ local function OnHatchState(inst, state)
         inst:DoTaskInTime(30*FRAMES, DropLoot)
         inst.AnimState:PlayAnimation("idle_cold_water")
 
-        inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+        inst.persists = false
+        inst:ListenForEvent("animover", inst.Remove)
+        inst:ListenForEvent("entitysleep", inst.Remove)
     end
 
     if state == "crack" then
@@ -146,7 +148,9 @@ local function OnHatchState(inst, state)
             inst.AnimState:PlayAnimation("toocold")
         end
         
-        inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+        inst.persists = false
+        inst:ListenForEvent("animover", inst.Remove)
+        inst:ListenForEvent("entitysleep", inst.Remove)
     end
 end
 

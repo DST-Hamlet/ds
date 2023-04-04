@@ -71,6 +71,7 @@ local function fn(Sim)
 	inst.components.explosive.explosiverange = TUNING.REDBARREL_RANGE
 	inst.components.explosive.explosivedamage = TUNING.REDBARREL_DAMAGE
 	inst.components.explosive.buildingdamage = 0
+	inst:ListenForEvent("onextinguish", function(inst) inst.SoundEmitter:KillSound("hiss") end)
 
 	inst:AddComponent("appeasement")
 	inst.components.appeasement.appeasementvalue = TUNING.WRATH_LARGE * 2

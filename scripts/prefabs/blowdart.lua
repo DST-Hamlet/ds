@@ -49,6 +49,7 @@ local function common()
     inst:AddTag("sharp")
     
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     

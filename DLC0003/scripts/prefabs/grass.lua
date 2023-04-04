@@ -70,6 +70,15 @@ local function makeemptyfn(inst)
 end
 
 local function makebarrenfn(inst)
+	if inst.AnimState:IsCurrentAnimation("idle_dead") then
+		if inst.inwater then 
+			inst.Physics:SetCollides(true)
+			inst.AnimState:SetLayer(LAYER_WORLD)
+			inst.AnimState:SetSortOrder(0)
+		end
+		return
+	end
+
 	if inst.components.pickable and inst.components.pickable.withered then
 
 		if inst.inwater then 

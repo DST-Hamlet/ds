@@ -163,12 +163,18 @@ local function CalcSanityAura(inst, observer)
 	return 0
 end
 
+local function OnGasChange(inst, onGas)
+	if onGas and inst.components.poisonable then
+		inst.components.poisonable:Poison(true, nil, true)
+	end
+end
+
 local function ShouldAcceptItem(inst, item)
     if inst.components.sleeper:IsAsleep() then
         return false
     end
 
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         
         if (item.components.edible.foodtype == "MEAT" or item.components.edible.foodtype == "HORRIBLE")
            and inst.components.follower.leader
@@ -186,7 +192,7 @@ local function ShouldAcceptItem(inst, item)
             local wanteditems = econ:GetTradeItems(econprefab)
             local wantitem = false
             for i,wanted in ipairs(wanteditems or {})do
-                if wanted == item.prefab then            
+                if wanted == item.prefab then
                     wantitem = true
                     break
                 end
@@ -480,6 +486,11 @@ local function callGuards(inst, attacker)
         guard:PushEvent("attacked", {attacker = attacker, damage = 0, weapon = nil})
         if attacker then
             attacker:AddTag("wanted_by_guards")
+        end
+
+        local interior = GetInteriorSpawner():getPropInterior(inst)
+        if interior then
+            GetInteriorSpawner():injectprefab(guard, interior)
         end
     end
 end
@@ -884,6 +895,10 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
                 data.paytax = true 
             end
 
+            if inst.daily_gift then
+                data.daily_gift = inst.daily_gift
+            end
+
             if data.children and #data.children > 0 then
                 return data.children
             end    
@@ -912,13 +927,19 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
 
                 if data.angryatplayer then
                     inst:AddTag("angry_at_player") 
-                end 
+                end
+
                 if data.recieved_trinket then
                     inst:AddTag("recieved_trinket")
-                end  
+                end
+
                 if data.paytax then
                     inst:AddTag("paytax")
-                end              
+                end
+
+                if data.daily_gift then
+                    inst.daily_gift = data.daily_gift
+                end
     		end
         end           
         
@@ -960,6 +981,10 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
         inst:AddTag("emote_nocurtsy")
         inst:AddTag("guard")
         inst:AddTag("extinguisher")
+
+        inst:AddComponent("tiletracker")
+        inst.components.tiletracker:SetOnGasChangeFn(OnGasChange)
+        inst.components.tiletracker:Start()
 
         inst.components.burnable:SetBurnTime(2)
 
@@ -1060,7 +1085,7 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
             end)
 
         inst.components.inspectable.getstatus = function(inst)
-            if inst:IsAsleep() then
+            if inst.components.sleeper:IsAsleep() then
                 return "SLEEPING"            
             end
         end
@@ -1130,10 +1155,32 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
         return inst
     end
 
+    local function make_mayor()
+        local inst = make_common()
+        inst.components.named:SetName(STRINGS.NAMES.PIGMAN_MAYOR)
+
+        return inst
+    end
+
+    local function make_mayor_shopkeeper()
+        local inst = make_shopkeeper()
+        inst.components.named:SetName(STRINGS.NAMES.PIGMAN_MAYOR)
+
+        return inst
+    end
+
     --------------------------------------------------------------------------
 
     if name == "pigman_queen" then
         return make_queen
+    end
+
+    if name == "pigman_mayor" then
+        return make_mayor
+    end
+
+    if name == "pigman_mayor_shopkeep" then
+        return make_mayor_shopkeeper
     end
 
     if name == "pigman_mechanic" then

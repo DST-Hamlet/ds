@@ -150,6 +150,7 @@ local function fn(Sim)
 
     inst:AddTag("laser_immune")    
     inst:AddTag("ancient_robot")
+    inst:AddTag("dontteleporttointerior")
     inst:AddTag("mech")
     inst:AddTag("monster")
 

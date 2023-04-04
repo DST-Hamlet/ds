@@ -1,3 +1,7 @@
+function GetWorldCollision()
+    return COLLISION.WORLD
+end
+
 function DefaultIgniteFn(inst)
 	if inst.components.burnable then inst.components.burnable:Ignite() end 
 end

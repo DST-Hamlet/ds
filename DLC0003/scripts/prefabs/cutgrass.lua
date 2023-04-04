@@ -13,7 +13,7 @@ local function fn(Sim)
     MakeInventoryFloatable(inst, "idle_water", "idle")
     MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.LIGHT, TUNING.WINDBLOWN_SCALE_MAX.LIGHT)
 
-    if SaveGameIndex:IsModeShipwrecked() then
+    if SaveGameIndex:IsModeShipwrecked() or SaveGameIndex:IsModePorkland() then
         inst.AnimState:SetBank("cutgrass")
         inst.AnimState:SetBuild("cutgrassgreen")
     else

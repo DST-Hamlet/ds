@@ -664,8 +664,8 @@ RECIPETABS=
     REFINE = {str = "REFINE", sort=8, icon = "tab_refine.tex"},
     MAGIC = {str = "MAGIC", sort=9, icon = "tab_arcane.tex"},
     DRESS = {str = "DRESS", sort=10, icon = "tab_dress.tex"},
-    ANCIENT = {str = "ANCIENT", sort = 10, icon = "tab_crafting_table.tex"},
-    OBSIDIAN = {str = "OBSIDIAN", sort = 11, icon = "tab_obsidian.tex"}   
+    ANCIENT = {str = "ANCIENT", sort = 11, icon = "tab_crafting_table.tex"},
+    OBSIDIAN = {str = "OBSIDIAN", sort = 12, icon = "tab_obsidian.tex"}   
 }
 
 
@@ -724,6 +724,37 @@ ROAD_PARAMETERS =
 	WIDTH_JITTER_SCALE=1,
 }
 
+BG_LOADING_IMAGES = {
+	MAIN_GAME = {
+		"loading_wagstaff",
+		"loading_maxwell",
+		"loading_newhorizons",
+		"loading_wendy",
+		"loading_wickerbottom",
+		"loading_wolfgang",
+		"loading_woodie2_trailer",
+		"loading_woodie_trailer",
+		"loading_night",
+	},
+
+	DLCS = {
+		-- RoG
+		{
+			"loading_webber",
+			"loading_wigfrid",
+		},
+		-- SW
+		{
+			"loading_ballphins",
+			"loading_volcano",
+			"loading_warly",
+			"loading_wilson_boat",
+			"loading_wilson_escape",
+			"loading_wilson_seamonster",
+		},
+	},
+}
+
 BGCOLOURS =
 {
 	RED = {255/255, 89/255, 46/255},
@@ -768,7 +799,7 @@ VIBRATION_CAMERA_SHAKE = 0
 VIBRATION_BLOOD_FLASH = 1
 VIBRATION_BLOOD_OVER = 2
 
-NUM_SAVE_SLOTS = 5
+NUM_SAVE_SLOTS = 10
 
 SAVELOAD = 
 {    

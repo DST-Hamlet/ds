@@ -33,6 +33,8 @@ local function fn(Sim)
     
     anim:SetFinalOffset(2)
 
+    inst.persists = false
+
     return inst
 end
 

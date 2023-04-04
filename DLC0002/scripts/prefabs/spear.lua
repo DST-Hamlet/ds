@@ -179,6 +179,9 @@ local function needlefn(Sim)
 
 	inst.components.equippable:SetOnEquip( onequipneedle )
 
+	MakeSmallBurnable(inst, TUNING.SMALL_BURNTIME)
+	MakeSmallPropagator(inst)
+
 	return inst
 end
 
@@ -204,6 +207,9 @@ local function peglegfn(Sim)
 	inst.components.weapon:SetDamage(TUNING.PEG_LEG_DAMAGE)
 	inst.components.finiteuses:SetMaxUses(TUNING.PEG_LEG_USES)
 	inst.components.finiteuses:SetUses(TUNING.PEG_LEG_USES)
+
+	MakeSmallBurnable(inst, TUNING.MED_BURNTIME)
+	MakeSmallPropagator(inst)
 
 	return inst
 end

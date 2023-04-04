@@ -1,10 +1,10 @@
 
 
-local function MakeFx(name, bank, build, anim, sound, sounddelay, tint, tintalpha, transform, sound2, sounddelay2, fnc, fntime)
+local function MakeFx(t)
     local assets = 
-    {
-        Asset("ANIM", "anim/"..build..".zip")
-    }
+        {
+            Asset("ANIM", "anim/"..t.build..".zip")
+        }
 
     local function fn()
         --print ("SPAWN", debugstack())
@@ -12,54 +12,80 @@ local function MakeFx(name, bank, build, anim, sound, sounddelay, tint, tintalph
     	inst.entity:AddTransform()
     	inst.entity:AddAnimState()
 
-        inst.Transform:SetFourFaced()
-
-        if type(anim) ~= "string" then
-            anim = anim[math.random(#anim)]
+        if not t.twofaced then
+            inst.Transform:SetFourFaced()
+        else
+            inst.Transform:SetTwoFaced()
         end
 
-        if sound or sound2 then
+        if type(t.anim) ~= "string" then
+            t.anim = t.anim[math.random(#t.anim)]
+        end
+
+        if t.sound or t.sound2 then
             inst.entity:AddSoundEmitter()
         end
         
-        if fnc and fntime then
-            inst:DoTaskInTime(fntime, fnc)
+        if t.fnc and t.fntime then
+            inst:DoTaskInTime(t.fntime, t.fnc)
         end
 
-        if sound then
-            inst:DoTaskInTime(sounddelay or 0, function() inst.SoundEmitter:PlaySound(sound) end)
+        if t.sound then
+            inst:DoTaskInTime(t.sounddelay or 0, function() inst.SoundEmitter:PlaySound(t.sound) end)
         end
 
-        if sound2 then
-            inst:DoTaskInTime(sounddelay2 or 0, function() inst.SoundEmitter:PlaySound(sound2) end)
+        if t.sound2 then
+            inst:DoTaskInTime(t.sounddelay2 or 0, function() inst.SoundEmitter:PlaySound(t.sound2) end)
         end
 
-
-        inst.AnimState:SetBank(bank)
-        inst.AnimState:SetBuild(build)
-        inst.AnimState:PlayAnimation(anim)
-        if tint or tintalpha then
-            inst.AnimState:SetMultColour((tint and tint.x) or (tintalpha or 1),(tint and tint.y)  or (tintalpha or 1),(tint and tint.z)  or (tintalpha or 1), tintalpha or 1)
+        inst.AnimState:SetBank(t.bank)
+        inst.AnimState:SetBuild(t.build)
+        inst.AnimState:PlayAnimation(t.anim, false)
+        if t.tint or t.tintalpha then
+            inst.AnimState:SetMultColour((t.tint and t.tint.x) or (t.tintalpha or 1),(t.tint and t.tint.y)  or (t.tintalpha or 1),(t.tint and t.tint.z)  or (t.tintalpha or 1), t.tintalpha or 1)
         end
         --print(inst.AnimState:GetMultColour())
-        if transform then
-            inst.AnimState:SetScale(transform.x, transform.y, transform.z)
+        if t.transform then
+            inst.AnimState:SetScale(t.transform:Get())
+        end
+
+        if t.nameoverride then
+            inst:AddComponent("inspectable")
+            inst.components.inspectable.nameoverride = t.nameoverride
+            inst.name = t.nameoverride
+        end
+
+        if t.description then
+            if not inst.components.inspectable then inst:AddComponent("inspectable") end
+            inst.components.inspectable.description = t.description
+        end
+
+        if t.bloom then
+            inst.bloom = true
+            inst.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
         end
 
         inst:AddTag("FX")
+        inst:AddTag("NOBLOCK")
         inst.persists = false
-        inst:ListenForEvent("animover", function() inst:Remove() end)
+        inst:ListenForEvent("animover", function() 
+            if inst.bloom then inst.AnimState:ClearBloomEffectHandle() end
+            inst:Remove() 
+        end)
+
+        if t.fn then
+            t.fn(inst)
+        end
 
         return inst
     end
-    return Prefab("common/"..name, fn, assets)
+    return Prefab("common/fx/"..t.name, fn, assets)
 end
 
 local prefs = {}
 local fx = require("fx") 
-
 for k,v in pairs(fx) do
-    table.insert(prefs, MakeFx(v.name, v.bank, v.build, v.anim, v.sound, v.sounddelay, v.tint, v.tintalpha, v.transform, v.sound2, v.sounddelay2, v.fn, v.fntime))
+    table.insert(prefs, MakeFx(v))
 end
 
 return unpack(prefs)

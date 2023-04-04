@@ -36,6 +36,7 @@ local function fn(Sim)
     inst:AddComponent("weapon")
     inst.components.weapon:SetDamage(TUNING.SHEARS_DAMAGE)
     inst:AddTag("shears")
+    inst:AddTag("smeltable") -- Smelter
 
     ---------------------------------------------------------------
     inst:AddComponent("tool")

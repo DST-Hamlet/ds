@@ -13,6 +13,7 @@ Action = Class(function(self, data, priority, instant, rmb, distance, crosseswat
 	self.distance = distance or nil
 	self.crosseswaterboundary = crosseswaterboundary or false
 	self.mount_enabled = data.mount_enabled or false
+	self.valid_hold_action = data.valid_hold_action or false
 	self.overrides_direct_walk = overrides_direct_walk
 end)
 
@@ -20,7 +21,7 @@ ACTIONS=
 {
 	FIX = Action({},nil, nil, nil, 2), -- for pigs reparing broken pig town structures
 	REPAIR = Action({mount_enabled=true}),
-	REPAIRBOAT = Action({},nil, nil, nil, 3),
+	REPAIRBOAT = Action({valid_hold_action=true},nil, nil, nil, 3),
 	READ = Action({mount_enabled=true}),
 	READMAP = Action({mount_enabled=true}),
 	DROP = Action({mount_enabled=true},-1),
@@ -29,18 +30,18 @@ ACTIONS=
 	ATTACK = Action({mount_enabled=true},2, true),
 	WHACK = Action({mount_enabled=true},2, true),
 	FORCEATTACK = Action({mount_enabled=true},2, true),
-	EAT = Action({mount_enabled=true}),
-	PICK = Action({}),
-	PICKUP = Action({},2),
+	EAT = Action({mount_enabled=true, valid_hold_action=true}),
+	PICK = Action({mount_enabled=true}),
+	PICKUP = Action({mount_enabled=true},2),
 	MINE = Action({}),
 	DIG = Action({},nil, nil, true),
-	GIVE = Action({mount_enabled=true}),
-	COOK = Action({},2),
+	GIVE = Action({mount_enabled=true, valid_hold_action=true}),
+	COOK = Action({valid_hold_action=true},2),
 	DRY = Action({}),
-	ADDFUEL = Action({mount_enabled=true},0.5),
+	ADDFUEL = Action({mount_enabled=true, valid_hold_action=true},0.5),
 	SHOP = Action({}), 	
-	ADDWETFUEL = Action({mount_enabled=true}),
-	LIGHT = Action({},-4),
+	ADDWETFUEL = Action({mount_enabled=true, valid_hold_action=true}),
+	LIGHT = Action({}, -4, nil, nil, 1.5),
 	EXTINGUISH = Action({},0),
 	LOOKAT = Action({mount_enabled=true},-3, true),
 	TALKTO = Action({mount_enabled=true},3, true),
@@ -51,17 +52,17 @@ ACTIONS=
 	BUILD = Action({mount_enabled=true}),
 	PLANT = Action({}),
 	PLANTONGROWABLE = Action({}),
-	HARVEST = Action({}), 
+	HARVEST = Action({valid_hold_action=true}), 
 	GOHOME = Action({}),
 	SLEEPIN = Action({}),
 	EQUIP = Action({mount_enabled=true},0,true),
 	UNEQUIP = Action({mount_enabled=true},-2,true),
 	--OPEN_SHOP = Action(),
 	SHAVE = Action({mount_enabled=true}),
-	STORE = Action({}),
+	STORE = Action({valid_hold_action=true}),
 	RUMMAGE = Action({mount_enabled=true},1,nil,true,2),
 	DEPLOY = Action({},0),
-	DEPLOY_AT_RANGE = Action({},0, nil, nil, 1),
+	DEPLOY_AT_RANGE = Action({},0, nil, nil, 1), --DEPLOY_AT_RANGE is deprecated, ACTIONS.DEPLOY now has deploy distance = 1
 	LAUNCH = Action({},nil, nil, nil, 3, true),
 	RETRIEVE = Action({},1, nil, nil, 3, true),
 	PLAY = Action({mount_enabled=true}),
@@ -71,11 +72,11 @@ ACTIONS=
 	FISH = Action({}),
 	REEL = Action({},0, true),
 	POLLINATE = Action({}),
-	FERTILIZE = Action({},-1),
+	FERTILIZE = Action({valid_hold_action=true},-1),
 	BUILD_ROOM = Action({}),
 	DEMOLISH_ROOM = Action({}),
 	BUILD_ROOM = Action({}),
-	SMOTHER = Action({}),
+	SMOTHER = Action({mount_enabled=true}),
 	MANUALEXTINGUISH = Action({}),
 	RANGEDSMOTHER = Action({},0, true),
 	RANGEDLIGHT = Action({mount_enabled=true},-4, true),
@@ -87,19 +88,19 @@ ACTIONS=
 	RESETMINE = Action({},3),
 	ACTIVATE = Action({}),
 	MURDER = Action({mount_enabled=true},0),
-	HEAL = Action({mount_enabled=true}),
+	HEAL = Action({mount_enabled=true, valid_hold_action=true}),
 	CUREPOISON = Action({mount_enabled=true}),
 	INVESTIGATE = Action({mount_enabled=true}),
 	UNLOCK = Action({}),
 	TEACH = Action({mount_enabled=true}),
 	TURNON = Action({},2.5),
 	TURNOFF = Action({},2),
-	SEW = Action({mount_enabled=true}),
+	SEW = Action({mount_enabled=true, valid_hold_action=true}),
 	STEAL = Action({}),
 	USEITEM = Action({},1, true),
 	TAKEITEM = Action({}),
-	MAKEBALLOON = Action({mount_enabled=true}),
-	CASTSPELL = Action({mount_enabled=true},-1, false, true, 20),
+	MAKEBALLOON = Action({mount_enabled=true, valid_hold_action=true}),
+	CASTSPELL = Action({mount_enabled=true},-1, false, true, 20, true),
 	BLINK = Action({mount_enabled=true},10, false, true, 36),
 	PEER = Action({mount_enabled=true},0, false, true, 40, true),
 	COMBINESTACK = Action({mount_enabled=true}),
@@ -116,7 +117,7 @@ ACTIONS=
 	BURY = Action({},0, false, false),
 	FEED = Action({mount_enabled=true},0, false, true),
 	FAN = Action({mount_enabled=true},0, false, true),
-	UPGRADE = Action({},0, false, true),
+	UPGRADE = Action({valid_hold_action=true},0, false, true),
 	MOUNT = Action({},1, nil, nil, 6), 
 	SEARCH = Action({},1, nil, nil, 4), --  OLD unused SW action
 	DISMOUNT = Action({mount_enabled=true},1,nil, nil, 2.5),
@@ -162,7 +163,7 @@ ACTIONS=
 	BUNDLE = Action({},2, nil, true),
     BUNDLESTORE = Action({},nil, true ),
     WRAPBUNDLE = Action({},nil, true ),
-    UNWRAP = Action({},2, nil, true),
+    UNWRAP = Action({},3, nil, true),
     
     DRAW = Action({}),
     UNPIN = Action({}),	
@@ -422,7 +423,7 @@ ACTIONS.PICKUP.fn = function(act)
 		
 		item:AddTag("cost_one_oinc")
 		if not act.target.components.shelfer.shelf:HasTag("playercrafted") then
-			if act.doer.components.shopper:IsWatching(item) then 
+			if act.doer.components.shopper and act.doer.components.shopper:IsWatching(item) then 
 				if act.doer.components.shopper:CanPayFor(item) then 
 					act.doer.components.shopper:PayFor(item)
 				else 			
@@ -716,7 +717,9 @@ end
 
 ACTIONS.DROP.strfn = function(act)
 	if act.invobject and act.invobject.components.trap then
-		if act.invobject:GetIsOnWater(act.pos.x, act.pos.y, act.pos.z) then
+		act.pos = act.pos or act.doer and act.doer:GetPosition()
+
+		if act.pos and act.invobject:GetIsOnWater(act.pos.x, act.pos.y, act.pos.z) then
 			if act.invobject.components.trap.water then
 				return "SETTRAP"
 			end
@@ -810,7 +813,7 @@ ACTIONS.DEPLOY.fn = function(act)
 		local obj = (act.doer.components.inventory and act.doer.components.inventory:RemoveItem(act.invobject)) or 
 		(act.doer.components.container and act.doer.components.container:RemoveItem(act.invobject))
 		if obj then
-			if obj.components.deployable:Deploy(act.pos, act.doer) then
+			if obj.components.deployable:Deploy(act.pos, act.doer, act.rotation) then
 				return true
 			else
 				act.doer.components.inventory:GiveItem(obj)
@@ -820,41 +823,30 @@ ACTIONS.DEPLOY.fn = function(act)
 end
 
 ACTIONS.DEPLOY.strfn = function(act)
-	if act.invobject and act.invobject:HasTag("groundtile") then
-	return "GROUNDTILE"
-	elseif act.invobject and act.invobject:HasTag("wallbuilder") then
-		return "WALL"
-	elseif act.invobject and act.invobject:HasTag("eyeturret") then
-		return "TURRET"
-	elseif act.invobject and act.invobject:HasTag("boat") then
-		return "PLACE"
-	end
+	return act.invobject and (
+        (act.invobject:HasTag("eyeturret") and "TURRET") or
+        (act.invobject:HasTag("wallbuilder") and "WALL") or
+        (act.invobject:HasTag("groundtile") and "GROUNDTILE") or
+        (act.invobject:HasTag("gatebuilder") and "GATE") or 
+        (act.invobject:HasTag("fencebuilder") and "FENCE") or
+        (act.invobject:HasTag("portableitem") and "PLACE") or
+        (act.invobject:HasTag("boat") and "PLACE")
+	) or nil
 end
 
 ACTIONS.DEPLOY_AT_RANGE.fn = ACTIONS.DEPLOY.fn 
 
-
 ACTIONS.DEPLOY_AT_RANGE.strfn = ACTIONS.DEPLOY.strfn
 
+ACTIONS.TOGGLE_DEPLOY_MODE.strfn = ACTIONS.DEPLOY.strfn
 
-ACTIONS.TOGGLE_DEPLOY_MODE.strfn = function(act)
-	if act.invobject and act.invobject:HasTag("groundtile") then
-		return "GROUNDTILE"
-	elseif act.invobject and act.invobject:HasTag("wallbuilder") then
-		return "WALL"
-	elseif act.invobject and act.invobject:HasTag("eyeturret") then
-		return "TURRET"
-	elseif act.invobject and act.invobject:HasTag("boat") then
-		return "PLACE"
-	end
-end
 
 ACTIONS.LAUNCH.fn = function(act)
 	if act.invobject and act.invobject.components.deployable and act.invobject.components.deployable:CanDeploy(act.pos) then
 		local obj = (act.doer.components.inventory and act.doer.components.inventory:RemoveItem(act.invobject)) or 
 		(act.doer.components.container and act.doer.components.container:RemoveItem(act.invobject))
 		if obj then
-			if obj.components.deployable:Deploy(act.pos, act.doer) then
+			if obj.components.deployable:Deploy(act.pos, act.doer, act.rotation) then
 				return true
 			else
 				act.doer.components.inventory:GiveItem(obj)
@@ -958,7 +950,7 @@ ACTIONS.FERTILIZE.fn = function(act)
 			end
 
 			local obj = act.invobject
-			act.target.components.pickable:Fertilize(obj)
+			act.target.components.pickable:Fertilize(obj, act.doer)
 			return true		
 		elseif act.target.components.hackable and act.target.components.hackable:CanBeFertilized() then
 			local obj = act.invobject
@@ -1089,101 +1081,22 @@ end
 
 ACTIONS.DEMOLISH_ROOM.fn = function(act)
 	if act.invobject.components.roomdemolisher and act.target:HasTag("house_door") and act.target:HasTag("interior_door") then
-		
-
 		local interior_spawner = GetInteriorSpawner()
 		local target_interior = interior_spawner:GetInteriorByName(act.target.components.door.target_interior)
 		local index_x, index_y = interior_spawner:GetPlayerRoomIndex(target_interior.dungeon_name, target_interior.unique_name)
-		
-		-- inst.doorcanberemoved
-		-- inst.roomcanberemoved
 
 		if act.target.doorcanberemoved and act.target.roomcanberemoved and not (index_x == 0 and index_y == 0) then
-			local total_loot = {}
-
-			if target_interior.visited then
-				for _, object in pairs(target_interior.object_list) do
-				 	if object.components.inventoryitem then
-				 		
-				 		object:ReturnToScene()
-				 		object.components.inventoryitem:ClearOwner()
-					    object.components.inventoryitem:WakeLivingItem()
-					    object:RemoveTag("INTERIOR_LIMBO")
-
-				 		table.insert(total_loot, object)
-
-				 	else
-					 	if object.components.container then
-					 		local container_objs = object.components.container:RemoveAllItems()
-					 		for i,obj in ipairs(container_objs) do
-					 			table.insert(total_loot, obj)
-					 		end
-					 	end
-
-					 	if object.components.lootdropper then
-					 		local smash_loot = object.components.lootdropper:GenerateLoot()
-					 		for i,obj in ipairs(smash_loot) do
-					 			table.insert(total_loot, SpawnPrefab(obj))
-					 		end
-					 	end
-				 	end
-				end
-
-				-- Removes the found loot from the interior so it doesn't get deleted by the next for
-				for _, loot in ipairs(total_loot) do
-					print ("Removing ", loot.prefab)
-					interior_spawner:removeprefab(loot, target_interior.unique_name)
-				end
-
-				-- Deletes all of the interior with a reverse for
-				local obj_count = #target_interior.object_list
-				for i = obj_count, 1, -1 do
-
-					local current_obj = target_interior.object_list[i]
-					if current_obj and current_obj.prefab ~= "generic_wall_back" and current_obj.prefab ~= "generic_wall_side" then
-						
-						if current_obj:HasTag("house_door") then
-							local connected_door = interior_spawner:GetDoorInst(current_obj.components.door.target_door_id)
-							if connected_door and connected_door ~= act.target then
-								connected_door.DeactivateSelf(connected_door)
-							end
-						end
-
-						current_obj:Remove()
-					end
-				end
-			else
-				table.insert(total_loot, SpawnPrefab("oinc"))
-				if act.target.components.lootdropper then
-					local smash_loot = act.target.components.lootdropper:GenerateLoot()
-					for i,obj in ipairs(smash_loot) do
-			 			table.insert(total_loot, SpawnPrefab(obj))
-			 		end
-				end
-			end
-
-			for _, loot in ipairs(total_loot) do
-				local pos = Vector3(act.target.Transform:GetWorldPosition())
-				loot.Transform:SetPosition(pos:Get())
-				if loot.components.inventoryitem then
-					loot.components.inventoryitem:OnDropped(true)
-				end
-			end
-
-			act.target:DeactivateSelf(act.target)
-			interior_spawner:RemoveInterior(target_interior.unique_name)
-			interior_spawner:RemovePlayerRoom(target_interior.dungeon_name, target_interior.unique_name)
+			interior_spawner:DestroyInteriorByDoor(act.target)
 
 			SpawnPrefab("collapse_small").Transform:SetPosition(act.target.Transform:GetWorldPosition())
+
 		    if act.target.SoundEmitter then
 		        act.target.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
 		    end
 
-			GetWorld():PushEvent("roomremoved")
 			act.invobject:Remove()
-
 		else
-			GetPlayer().components.talker:Say(GetString(GetPlayer().prefab, "ANNOUNCE_ROOM_STUCK"))
+			act.doer.components.talker:Say(GetString(act.doer.prefab, "ANNOUNCE_ROOM_STUCK"))
 		end
 
 		return true
@@ -1481,6 +1394,12 @@ ACTIONS.ADDFUEL.fn = function(act)
 	end
 end
 
+ACTIONS.ADDFUEL.strfn = function(act)
+	if act.target:HasTag("fuelrepairable") then
+		return "REPAIR"
+	end
+end
+
 ACTIONS.SHOP.stroverridefn = function(act)
 	if not act.target or not act.target.costprefab or not act.target.components.shopdispenser:GetItem() then
 		return nil
@@ -1594,36 +1513,36 @@ ACTIONS.ADDWETFUEL.fn = function(act)
 	end
 end
 
+ACTIONS.ADDWETFUEL.strfn = ACTIONS.ADDFUEL.strfn
+
 ACTIONS.GIVE.fn = function(act)
-	print("TEST 1")
-	if act.invobject.components.tradable then
-		print("TEST 2")
-		if act.target.components.trader then
-			act.target.components.trader:AcceptGift(act.doer, act.invobject)
-			return true
-		end
+	if act.target.components.trader and (act.invobject.components.tradable or act.target.components.trader.acceptnontradable) then
+		act.target.components.trader:AcceptGift(act.doer, act.invobject)
+		return true
 	end
+
 	if act.invobject.components.inventoryitem then
-		print("TEST 3")
 		if act.target.components.shelfer then
 			act.target.components.shelfer:AcceptGift(act.doer, act.invobject)
 			return true
 		end
 	end 	
 	if act.invobject.components.appeasement then
-		print("TEST 4")
 		if act.target.components.appeasable then
 			act.target.components.appeasable:AcceptGift(act.doer, act.invobject)
 			return true
 		end 
 	end 
 	if act.invobject.components.currency then
-		print("TEST 5")
 		if act.target.components.payable then
 			act.target.components.payable:AcceptCurrency(act.doer, act.invobject)
 			return true
 		end 
-	end 
+	end
+	if act.invobject.components.usableitem then
+        act.invobject.components.usableitem:Use(act.doer, act.target)
+        return true
+    end
 end
 
 ACTIONS.GIVE.strfn = function(act)
@@ -1689,14 +1608,8 @@ end
 
 
 ACTIONS.BUILD.fn = function(act)
-	if act.doer.components.rider and act.doer.components.rider:IsRiding() then
-		return false, "MOUNTED"
-	else
-		if act.doer.components.builder then
-			if act.doer.components.builder:DoBuild(act.recipe, act.pos, act.rotation, act.modifydata) then
-				return true
-			end
-		end
+	if act.doer.components.builder then
+		return act.doer.components.builder:DoBuild(act.recipe, act.pos, act.rotation, act.modifydata)
 	end
 end
 
@@ -1783,7 +1696,6 @@ ACTIONS.HARVEST.strfn = function(act)
 		return "WITHERED"
 	end
 end
-
 
 ACTIONS.LIGHT.fn = function(act)
 	if act.invobject and act.invobject.components.lighter then
@@ -2146,12 +2058,17 @@ ACTIONS.CASTSPELL.fn = function(act)
 	--For use with magical staffs
 	local staff = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
-	if staff and staff.components.spellcaster and staff.components.spellcaster:CanCast(act.doer, act.target, act.pos) then
-		staff.components.spellcaster:CastSpell(act.target, act.pos)
-		return true
+	if staff then
+		if staff:HasTag("greenstaff") and act.target:HasTag("interior_door") and not act.target.doorcanberemoved then
+			act.doer.components.talker:Say(GetString(act.doer.prefab, "ANNOUNCE_ROOM_STUCK"))
+			return true
+
+		elseif staff.components.spellcaster and staff.components.spellcaster:CanCast(act.doer, act.target, act.pos) then
+			staff.components.spellcaster:CastSpell(act.target, act.pos)
+			return true
+		end
 	end
 end
-
 
 ACTIONS.BLINK.fn = function(act)
 	if act.invobject and act.invobject.components.blinkstaff then

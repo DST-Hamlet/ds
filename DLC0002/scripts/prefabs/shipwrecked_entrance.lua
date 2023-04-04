@@ -43,7 +43,7 @@ local function OnActivate(inst)
 				TheFrontEnd:PushScreen(NewIntegratedGameScreen(targetmode, SaveGameIndex:GetCurrentSaveSlot(), true, cancel))
 			end
 		else
-			TravelBetweenWorlds("shipwrecked_portal", 7.5, {"chester_eyebone", "packim_fishbone"})
+			TravelBetweenWorlds("shipwrecked_portal", 7.5, "dropontravel")
 		end
 	end
 

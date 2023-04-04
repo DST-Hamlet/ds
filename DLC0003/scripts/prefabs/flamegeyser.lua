@@ -7,6 +7,7 @@ local assets=
 
 local function StartBurning(inst)
     inst.Light:Enable(true)
+    inst.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
     
     inst.components.geyserfx:Ignite()
 end
@@ -80,7 +81,24 @@ end
 
 local function onFloodedEnd(inst)
     SetIgniteTimer(inst)
-end 
+end
+
+local function OnExploded(inst, data)
+    if not (data.explosive and data.explosive:HasTag("coconade")) then
+        return
+    end
+
+    local x, y, z = inst.Transform:GetWorldPosition()
+
+    local fx = SpawnPrefab("mining_fx")
+    if fx then
+        inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/dig_rockpile")
+        fx.Transform:SetPosition(x, y, z)
+        fx.Transform:SetScale(1.3, 1.3, 1.3)
+    end
+
+    inst:Remove()
+end
 
 local function fn(Sim)
 	local inst = CreateEntity()
@@ -119,7 +137,7 @@ local function fn(Sim)
     inst.components.floodable.onStopFlooded = onFloodedEnd
 
     inst.components.fueled:SetUpdateFn( function()
-        if not inst.components.fueled:IsEmpty() then
+        if not inst.components.fueled:IsEmpty() and not inst:IsAsleep() then
             inst.components.geyserfx:SetPercent(inst.components.fueled:GetPercent())
         end
     end)
@@ -170,6 +188,7 @@ local function fn(Sim)
         end 
     end)
 
+    inst:ListenForEvent("explosion", OnExploded)
 
     inst.OnIgnite = OnIgnite
     inst.OnErupt = OnErupt

@@ -1,6 +1,8 @@
 local assets=
 {
 	Asset("ANIM", "anim/cave_banana_tree.zip"),
+	Asset("MINIMAP_IMAGE", "cave_banana_tree_stump"),
+    Asset("MINIMAP_IMAGE", "cave_banana_tree_burnt"),
 }
 
 
@@ -50,6 +52,8 @@ local function setupstump(inst)
     inst.components.workable:SetWorkLeft(1)
     inst.components.workable:SetOnWorkCallback(dug)
 	inst.AnimState:PlayAnimation("idle_stump")
+
+	inst.MiniMapEntity:SetIcon("cave_banana_tree_stump.png")
 end
 
 local function chopped(inst)
@@ -113,6 +117,8 @@ local function makeburnt(inst)
 		inst.SoundEmitter:PlaySound("dontstarve/forest/treeCrumble")
     	inst.components.workable:SetWorkAction(ACTIONS.CHOP)
     	inst.components.workable:SetWorkLeft(1)
+
+		inst.MiniMapEntity:SetIcon("cave_banana_tree_burnt.png")
     end
 end
 

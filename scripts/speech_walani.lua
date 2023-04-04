@@ -1226,6 +1226,7 @@ return {
 			OPEN = "I've always wanted to try spelunking.",
 		},
 		CAVE_EXIT = "Time to bail!",
+		CAVE_REGENERATOR = "I wonder what would happen if I brought this to the entrance?",
 		CAVE_FERN = "Nature finds a way, even here.",
 		COCONUT_HALVED = "You get two for the price of one. Pfft.",
 		COFFEEBOT = "I could go for a cup of joe.",
@@ -1539,6 +1540,17 @@ return {
 		},
 		SHIPWRECKED_ENTRANCE = "Aloha, world!",
 		SHIPWRECKED_EXIT = "Aloha, world!",
+
+		BOOK_BIRDS = "I think I'll just look at real birds instead.",
+		BOOK_TENTACLES = "You know, I think I'm okay letting those things stay a mystery.",
+		BOOK_GARDENING = "Hmm. Sounds suspiciously like work.",
+		BOOK_SLEEP = "I don't need a book to fall asleep.",
+		BOOK_BRIMSTONE = "Gnarly.",
+		BOOK_METEOR = "I've got a bad feeling about this.",
+
+		WATHGRITHRHAT = "Aww, there's a little pony on it.",
+		SPEAR_WATHGRITHR = "Why can't we all just get along?",
+
 		SLURPER = "It's a little gross, but who am I to judge?",
 		SLURPERPELT = "Maybe it doubles as a blanket.",
 		SLURPER_PELT = "Maybe it doubles as a blanket.",
@@ -2199,9 +2211,9 @@ return {
 
         NETTLE =
         {
-        	WITHERED = "This soil is over-cooking it.",
-        	MOIST = "Ah, it's keeps moist with a marinade.",
-        	EMPTY = "I do hope it grows back.",
+        	WITHERED = "Nah. Not the right dirt for it.",
+        	MOIST = "Water really makes it happy.",
+        	EMPTY = "It'll grow back eventually.",
         	DEFAULT = "Whew! That's a strong smell.",
         },
 
@@ -2622,6 +2634,7 @@ return {
     	HARDSHELL_TACOS = "I prefer corn based tacos.",
     	GUMMY_CAKE = "It's cake!",
     	STEAMEDHAMSANDWICH = "It's fast food.",
+		MEATED_NETTLE = "The meat helps cover the medicine smell.",
 
     	ROC_NEST_DEBRIS1 = "Hey stick!",
     	ROC_NEST_DEBRIS2 = "How's it going, stick?",
@@ -2698,6 +2711,7 @@ return {
         BILL_QUILL = "Yeouch. Looks sharp!",
 
         ANTLER = "Here birdy birdy.",
+        ANTLER_CORRUPTED = "Bye birdy birdy.",
 
         PUGALISK_SKULL = "He deserved it.",
         PUGALISK_CORPSE = "Yeesh. Nasty.",
@@ -2782,6 +2796,13 @@ return {
 
         FIRECRACKERS = "Oh, I remember these!",
         REDLANTERN = "Looks like some kinda festival decoration.",
+
+		-------------Wormwood Specific-------
+
+		COMPOSTWRAP = "Nah, I'm good.",
+		POISONBALM = "Getting poisoned is such a bummer.",
+		ARMOR_BRAMBLE = "Aww, nature wants to protect me!",
+		TRAP_BRAMBLE = "Not very chill of you, nature.",
 
         -------reward update-------
 

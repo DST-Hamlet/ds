@@ -48,22 +48,10 @@ local function updateimage(inst)
 		inst.AnimState:SetBloomEffectHandle( "" )
 		if inst.components.cooldown:GetTimeToCharged() < TUNING.TOTAL_DAY_TIME then
 			inst.components.inventoryitem:ChangeImageName("abigail_flower2")
-			
             inst.components.floatable:UpdateAnimations("idle_2_water", "idle_2")
-            if inst.components.floatable.onwater then
-                inst.AnimState:PlayAnimation("idle_2_water")
-            else
-                inst.AnimState:PlayAnimation("idle_2")
-            end
 		else
 			inst.components.inventoryitem:ChangeImageName("abigail_flower")
-
             inst.components.floatable:UpdateAnimations("idle_1_water", "idle_1")
-            if inst.components.floatable.onwater then
-                inst.AnimState:PlayAnimation("idle_1_water")
-            else
-                inst.AnimState:PlayAnimation("idle_1")
-            end
 		end
 	end
 end
@@ -141,18 +129,7 @@ local function fn(Sim)
     inst:AddComponent("characterspecific")
     inst.components.characterspecific:SetOwner("wendy")
 
-
-    inst:DoTaskInTime(0, function() 
-		if not GetPlayer() or GetPlayer().prefab ~= "wendy" then inst:Remove() end 
-		
-		for k,v in pairs(Ents) do
-			if v.prefab == "abigail" then
-				v:Remove()
-			end
-		end
-		
-		updateimage(inst)
-	end)
+    inst:DoTaskInTime(0, updateimage)
 
     return inst
 end

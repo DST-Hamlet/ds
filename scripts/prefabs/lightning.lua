@@ -18,8 +18,9 @@ local function fn(Sim)
     inst.AnimState:SetBuild("lightning")
     inst.AnimState:PlayAnimation("anim")
     inst:AddTag("FX")
-    inst.persists = false
-    inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
     inst:DoTaskInTime(0, function()
 		GetClock():DoLightningLighting(.5)

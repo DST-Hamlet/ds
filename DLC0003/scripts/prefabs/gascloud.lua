@@ -33,15 +33,15 @@ local function dogasoff(inst)
 end
 
 local function die(inst)
-
 	inst.AnimState:PlayAnimation("disappear")
     inst:ListenForEvent("animover",function()
-			for i,ent in ipairs(inst.gassedents)do
+		for i,ent in ipairs(inst.gassedents)do
 
-				dogasoff(ent)
-			end
-		    inst:Remove() 
-    	end)
+			dogasoff(ent)
+		end
+		inst:Remove() 
+	end)
+	inst.persists = false
 end
 
 local function spawn(inst)
@@ -51,8 +51,8 @@ end
 
 local function onupdate(inst, dt)
 	local x,y,z = inst.Transform:GetWorldPosition()
-    local musthave = { "animal","character","monster" }
-    local nothave = {"INTERIOR_LIMBO","gas"}
+    local musthave = { "animal", "character", "monster", "insect" }
+    local nothave = {"INTERIOR_LIMBO", "gas"}
 	local ents = TheSim:FindEntities(x,y,z, START_RANGE, nil, nothave,  musthave )
 
 	local oldents = inst.gassedents --deepcopy(inst.gassedents)

@@ -42,11 +42,11 @@ local function OnKilled(inst)
 end
 
 local function OnIgniteFn(inst)
-	inst.AnimState:PlayAnimation("shake", true)
+    inst.AnimState:PlayAnimation("shake", true)
     inst.SoundEmitter:PlaySound("dontstarve/common/blackpowder_fuse_LP", "hiss")
+
     if inst.components.childspawner then
         inst.components.childspawner:ReleaseAllChildren()
-        inst:RemoveComponent("childspawner")
     end
 end
 
@@ -59,6 +59,11 @@ local function OnExplodeFn(inst)
     explode.Transform:SetPosition(pos.x, pos.y, pos.z)
     explode.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
     explode.AnimState:SetLightOverride(1)
+end
+
+local function onextinguish(inst, data)
+    inst.AnimState:PlayAnimation("idle", true)
+    inst.SoundEmitter:KillSound("hiss")
 end
 
 local function fn()
@@ -128,6 +133,9 @@ local function fn()
     inst.components.explosive.explosivedamage = 50
     inst.components.explosive.buildingdamage = 15
     inst.components.explosive.lightonexplode = false
+
+
+    inst:ListenForEvent("onextinguish", onextinguish)
 
     inst.OnEntitySleep = OnEntitySleep
     inst.OnEntityWake = OnEntityWake

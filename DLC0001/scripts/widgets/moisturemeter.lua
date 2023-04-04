@@ -14,7 +14,6 @@ local MoistureMeter = Class(Widget, function(self, owner)
     self.drops = {}
 
     self.moisture = 0
-    self.active = false
 
     self.anim = self:AddChild(UIAnim())
 	self.anim:GetAnimState():SetBank("wet")
@@ -45,12 +44,14 @@ function MoistureMeter:UpdateMeter()
 end
 
 function MoistureMeter:Activate()
+	self.active = true
 	self.anim:GetAnimState():PlayAnimation("open")
 	self.animTask = self.owner:DoPeriodicTask(.5, function() self:UpdateMeter() end)
 	self.owner.SoundEmitter:PlaySound("dontstarve_DLC001/common/HUD_wet_open")
 end
 
 function MoistureMeter:Deactivate()
+	self.active = false
 	if self.animTask then
 		self.animTask:Cancel()
 		self.animTask = nil

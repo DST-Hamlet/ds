@@ -21,6 +21,7 @@ CONSOLE_ENABLED = true
 SHOWLOG_ENABLED = true
 DEBUGRENDER_ENABLED = true
 SKIP_MAXWELL_INTRO = false
+ENABLE_BUG_REPORTER = false -- Notes(DW): Override the variable pushed by the engine.
 
 USE_SEASON_DSP = true
 
@@ -57,6 +58,12 @@ end
 
 function IsRail()
 	return PLATFORM == "WIN32_RAIL"
+end
+
+DEBUGGER_ENABLED = IsNotConsole() and CONFIGURATION ~= "PRODUCTION"
+
+if DEBUGGER_ENABLED then
+	Debuggee = require 'debuggee'
 end
 
 local servers =
@@ -317,6 +324,7 @@ local function ModSafeStartup()
 	TheGlobalInstance = CreateEntity()
 	TheGlobalInstance.entity:SetCanSleep( false )
 	TheGlobalInstance.entity:AddTransform()
+	TheGlobalInstance:AddTag("NOBLOCK")
 
 	if RUN_GLOBAL_INIT then
 		GlobalInit()

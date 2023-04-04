@@ -8,10 +8,8 @@ local prefabs =
 
 }
 
-local REBUILD_REACTION_TIME = TUNING.TOTAL_DAY_TIME /50
-local REBUILD_REACTION_VARIANCE = TUNING.SEG_TIME * 3 /50
-
-local CALL_WORKER_TIME = TUNING.SEG_TIME * 3 /50
+local REBUILD_REACTION_TIME = TUNING.SEG_TIME -- 30-60 seconds.
+local REBUILD_REACTION_VARIANCE = TUNING.SEG_TIME
 
 local OFF_SCREENDIST = 30 
 local AUTO_REPAIRDIST = 100
@@ -106,10 +104,9 @@ local function OnSave(inst, data)
         data.build = inst.saveartdata.build
         data.anim = inst.saveartdata.anim
         if inst.saveartdata.scale then
-            print("SCALE-X SAVE",inst.saveartdata.scale[1])
             data.scaleX = inst.saveartdata.scale[1]
             data.scaleY = inst.saveartdata.scale[2]
-            data.scaleX = inst.saveartdata.scale[3]
+            data.scaleZ = inst.saveartdata.scale[3]
         end
 
     end
@@ -118,9 +115,14 @@ local function OnSave(inst, data)
     data.construction_prefab = inst.construction_prefab 
     data.reconstructedanims = inst.reconstructedanims
 
+    if inst.nameoverride then
+        data.nameoverride = inst.nameoverride
+    end
+
     if inst.cityID then
         data.cityID = inst.cityID
     end
+
     if inst.interiorID then
         data.interiorID = inst.interiorID
     end
@@ -138,23 +140,32 @@ end
 
 local function OnLoad(inst, data)
     if data then
-        if data.bank then
-            inst.AnimState:SetBank(data.bank)
+        inst.saveartdata = {
+            bank = data.bank,
+            build = data.build,
+            anim = data.anim,
+        }
+
+        if inst.saveartdata.bank then
+            inst.AnimState:SetBank(inst.saveartdata.bank)
             inst:Show()
         end
-        if data.build then
-            inst.AnimState:SetBuild(data.build)
+
+        if inst.saveartdata.build then
+            inst.AnimState:SetBuild(inst.saveartdata.build)
             inst:Show()
         end
-        if data.anim then
-            inst.AnimState:PlayAnimation(data.anim,true)
+        
+        if inst.saveartdata.anim then
+            inst.AnimState:PlayAnimation(inst.saveartdata.anim, true)
             inst:Show()
-        end  
+        end
+
         if data.scaleX then
-            print("HAD SCALE-X",data.scaleX)
-            inst.AnimState:SetScale(data.scaleX,data.scaleY,data.scaleZ)
+            inst.saveartdata.scale = {data.scaleX, data.scaleY, data.scaleZ}
+            inst.AnimState:SetScale(data.scaleX, data.scaleY, data.scaleZ)
             inst:Show()
-        end  
+        end 
 
         if data.cityID then
             inst.cityID = data.cityID
@@ -168,6 +179,10 @@ local function OnLoad(inst, data)
         inst.reconstruction_stages = data.reconstruction_stages  
         inst.construction_prefab = data.construction_prefab 
         inst.reconstructedanims = data.reconstructedanims
+
+        if data.nameoverride then
+            inst:SetPrefabNameOverride(data.nameoverride)
+        end
 
         if data.childname then
             inst.spawnerdata = {
@@ -231,10 +246,9 @@ local function spawnFixer(inst)
     if inst:GetDistanceSqToInst(GetPlayer()) > AUTO_REPAIRDIST * AUTO_REPAIRDIST then
         fix(inst)        
     else
-
-        if not inst.fixer or inst.fixer.components.health:IsDead() then
+        if (not inst.fixer or inst.fixer.components.health:IsDead()) and inst.cityID then -- Spawn the pig only for city structures.
             inst.fixer = nil
-            if GetClock():IsDay() then                
+            if GetClock():IsDay() then
                 local x,y,z = inst.Transform:GetWorldPosition()
 
                 local ents = TheSim:FindEntities(x,y,z, 30, {"fixer"})
@@ -258,13 +272,19 @@ local function spawnFixer(inst)
         end
         inst.task:Cancel()
         inst.task = nil
-        inst.task = inst:DoTaskInTime(1,function() spawnFixer(inst) end)
+        inst.task = inst:DoTaskInTime(REBUILD_REACTION_TIME + (math.random() * REBUILD_REACTION_VARIANCE), spawnFixer)
     end
 end
 
 local function OnRemove(inst)
     inst.task:Cancel()
     inst.task = nil
+end
+
+local function DisplayNameFn(inst)
+    if inst.nameoverride then return end
+
+    return STRINGS.NAMES[string.upper(inst.construction_prefab)]
 end
 
 local function fn(Sim)
@@ -294,6 +314,8 @@ local function fn(Sim)
     
     inst:AddComponent("inspectable")
     inst.components.inspectable.getstatus = getstatus
+
+    inst.displaynamefn = DisplayNameFn
    
     inst.reconstruction_stage = 1
     inst.reconstruction_stages = {}
@@ -307,7 +329,7 @@ local function fn(Sim)
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
 
-    inst.task = inst:DoTaskInTime(REBUILD_REACTION_TIME +(math.random() *REBUILD_REACTION_VARIANCE), function() spawnFixer(inst) end)
+    inst.task = inst:DoTaskInTime(REBUILD_REACTION_TIME + (math.random() * REBUILD_REACTION_VARIANCE), spawnFixer)
     return inst
 end
 

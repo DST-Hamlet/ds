@@ -12,13 +12,36 @@ local actionhandlers =
 
 local events=
 {
-	CommonHandlers.OnSleep(),
-	CommonHandlers.OnFreeze(),
-	CommonHandlers.OnAttacked(),
-	CommonHandlers.OnDeath(),
+	EventHandler("gotosleep", function(inst)
+		if not inst.onwater and inst.components.health and inst.components.health:GetPercent() > 0 then
+			if inst.sg:HasStateTag("sleeping") then
+				inst.sg:GoToState("sleeping")
+			else
+				inst.sg:GoToState("sleep")
+			end
+		end
+	end),
+
+
+	EventHandler("freeze", function(inst)
+		if not inst.onwater and inst.components.health and inst.components.health:GetPercent() > 0 then
+			inst.sg:GoToState("frozen")
+		end
+	end),
+
+	
+	EventHandler("attacked", function(inst)
+		if not inst.onwater and inst.components.health and not inst.components.health:IsDead()
+			and (not inst.sg:HasStateTag("busy") or inst.sg:HasStateTag("frozen") ) then
+			inst.sg:GoToState("hit")
+		end
+	end),
+
+	EventHandler("death", function(inst)
+		inst.sg:GoToState("death")
+	end),
 
 	EventHandler("locomote", function(inst)
-
 		local is_moving = inst.sg:HasStateTag("moving")
 		local is_idling = inst.sg:HasStateTag("idle")
 		local should_move = inst.components.locomotor:WantsToMoveForward()
@@ -54,6 +77,28 @@ local states=
 				else
 					inst.sg:GoToState("idle")
 				end
+			end),
+		},
+	},
+
+	State{
+		name = "idle_water",
+		tags = {"busy", "invisible"},
+		onenter = function(inst)
+			inst.Physics:Stop()
+			inst.AnimState:PlayAnimation("idle_water")
+			inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/doy_doy/idle")
+			inst:AddTag("notarget")
+		end,
+
+		onexit = function(inst)
+			inst:RemoveTag("notarget")
+		end,
+	  
+		events=
+		{
+			EventHandler("animover", function(inst)
+				inst.sg:GoToState("idle_water")
 			end),
 		},
 	},
@@ -290,6 +335,10 @@ local states=
 				end
 			end),
 		},
+
+		onexit = function(inst)
+			inst.SoundEmitter:KillSound("mating_dance_LP")
+		end,
 	},
 
 	State{
@@ -298,8 +347,9 @@ local states=
 		
 		onenter = function(inst)
 			inst.Physics:ClearCollisionMask()
-			inst.Physics:CollidesWith(COLLISION.WORLD)
+			inst.Physics:CollidesWith(GetWorldCollision())
 			inst.Physics:CollidesWith(COLLISION.OBSTACLES)
+			inst.Physics:CollidesWith(COLLISION.INTWALL)
 
 			inst.AnimState:PlayAnimation("mate_pre")
 
@@ -371,10 +421,11 @@ local states=
 		
 		onexit = function(inst)
 			inst.Physics:ClearCollisionMask()
-			inst.Physics:CollidesWith(COLLISION.WORLD)
+			inst.Physics:CollidesWith(GetWorldCollision())
 			inst.Physics:CollidesWith(COLLISION.OBSTACLES)
 			inst.Physics:CollidesWith(COLLISION.CHARACTERS)
 			inst.Physics:CollidesWith(COLLISION.WAVES)
+			inst.Physics:CollidesWith(COLLISION.INTWALL)
 
 			inst:PerformBufferedAction()
 		end,

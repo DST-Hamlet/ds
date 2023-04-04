@@ -123,6 +123,7 @@ local states =
         
         onenter = function(inst)
             inst.Physics:Stop()
+            RemovePhysicsColliders(inst)
             local on_water = inst:GetIsOnWater()
             if on_water then
                 inst.AnimState:PlayAnimation("seal_death_water")

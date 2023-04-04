@@ -54,9 +54,7 @@ local function HasMonkeyBait(inst)
 end
 
 local function ShouldRunFn(inst, hunter)
-    if inst.components.combat.target then
-        return hunter == GetPlayer()
-    end
+    return inst.components.combat.target == hunter
 end
 
 local function GetPoop(inst)
@@ -393,7 +391,7 @@ function PrimeapeBrain:OnStart()
 
 
         --In combat (with the player)... Should only ever use poop throwing.
-        RunAway(self.inst, "character", RUN_AWAY_DIST, STOP_RUN_AWAY_DIST, function(hunter) return ShouldRunFn(self.inst, hunter) end),
+        RunAway(self.inst, "player", RUN_AWAY_DIST, STOP_RUN_AWAY_DIST, function(hunter) return ShouldRunFn(self.inst, hunter) end),
         
         WhileNode(function() return self.inst.components.combat.target == GetPlayer() and self.inst.HasAmmo(self.inst) end, "Attack Player", 
             ChaseAndAttack(self.inst, MAX_CHASE_TIME, MAX_CHASE_DIST)),

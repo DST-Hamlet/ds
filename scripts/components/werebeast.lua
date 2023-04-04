@@ -4,6 +4,7 @@ local WereBeast = Class(function(self, inst)
     self.onsetnormalfn = nil
     self.targettick = nil
     self.targettime = nil
+	self.byfullmoon = nil
     self.weretime = TUNING.SEG_TIME*4
     
     self.triggeramount = nil
@@ -16,13 +17,14 @@ local WereBeast = Class(function(self, inst)
 					GetClock():IsNight() then
 					return
 				end 
-				self:SetWere() 
+				self:SetWere()
+				self.byfullmoon = true
 			end)
 	    end
 	end, GetWorld())
 	
     self.inst:ListenForEvent("daytime", function(global, data)
-        if self:IsInWereState() and self.inst.entity:IsVisible() then
+        if self:IsInWereState() and self.inst.entity:IsVisible() and self.byfullmoon then
 	        self.inst:DoTaskInTime(GetRandomWithVariance(3, 2), function() self:SetNormal() end)
 	    end
     end, GetWorld())
@@ -75,9 +77,6 @@ function WereBeast:ResetTriggers()
 end
 
 function WereBeast:SetWere(time)
-
-
-
 	if self.onsetwerefn then
 		self.onsetwerefn(self.inst)
 	end
@@ -109,6 +108,7 @@ function WereBeast:SetNormal()
 	end
 	self.targettime = nil
 	self.targettick = nil
+	self.byfullmoon = nil
 end
 
 function WereBeast:IsInWereState()
@@ -118,13 +118,21 @@ end
 function WereBeast:OnSave()
     local time = GetTime()
     if self.targettime and self.targettime > time then
-        return {time = math.floor(self.targettime - time) }
+        return {
+			time = math.floor(self.targettime - time),
+			byfullmoon = self.byfullmoon
+		}
     end
 end   
    
 function WereBeast:OnLoad(data)
-    if data and data.time then
-		self:SetWere(data.time)
+    if data then
+		if data.time then
+			self:SetWere(data.time)
+		end
+		if data.byfullmoon then
+			self.byfullmoon = data.byfullmoon
+		end
     end
 end
 

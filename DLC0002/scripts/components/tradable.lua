@@ -4,13 +4,17 @@ local Tradable = Class(function(self, inst)
     self.dubloonvalue = 0
 end)
 
+-- Can only trade with inventory items, if mounted.
 function Tradable:CollectUseActions(doer, target, actions)
-	if not doer.components.rider or not doer.components.rider:IsRiding() then
-	    if target.components.trader and target.components.trader.enabled then
-	        table.insert(actions, ACTIONS.GIVE)
-	    end
+	if 	target.components.trader and
+		target.components.trader.enabled and
+		not (
+			doer.components.rider ~= nil and doer.components.rider:IsRiding() and
+			not (target.components.inventoryitem ~= nil and target.components.inventoryitem:IsGrandOwner(doer))
+		)
+	then
+		table.insert(actions, ACTIONS.GIVE)
 	end
 end
-
 
 return Tradable

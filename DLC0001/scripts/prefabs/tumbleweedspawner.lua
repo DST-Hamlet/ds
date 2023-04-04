@@ -31,6 +31,8 @@ local function fn()
 	inst.OnEntityWake = OnEntityWake
 	inst.OnEntitySleep = OnEntitySleep
 
+	inst:AddTag("NOBLOCK")
+
 	inst:AddComponent( "childspawner" )
 	inst.components.childspawner.childname = "tumbleweed"
 	inst.components.childspawner:SetSpawnedFn(OnSpawn)

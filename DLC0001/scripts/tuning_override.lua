@@ -789,7 +789,7 @@ local TUNING_OVERRIDES =
 										if data == "off" then
 											local ground = GetWorld()
 											if ground.WaveComponent then
-    											ground.WaveComponent:SetWaveSize(0, 0)
+    											ground.WaveComponent:SetMultColour(0,0,0,0)
 											end
 										end
 									end,

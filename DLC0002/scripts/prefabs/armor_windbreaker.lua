@@ -47,7 +47,7 @@ local function fn()
     inst.components.fueled:SetDepletedFn(onperish)
 
     inst:AddComponent("waterproofer")
-    inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_SMALL)
+    inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_MED)
 
     inst:AddComponent("windproofer")
     inst.components.windproofer:SetEffectiveness(TUNING.WINDPROOFNESS_ABSOLUTE)

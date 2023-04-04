@@ -58,7 +58,6 @@ local function raw()
 	inst:AddComponent("cookable")
 	inst.components.cookable.product = "mussel_cooked"
 
-	inst:AddTag("aquatic")
 	inst:AddComponent("bait")
 
 	return inst

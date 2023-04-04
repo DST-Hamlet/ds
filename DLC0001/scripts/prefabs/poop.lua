@@ -35,10 +35,7 @@ local function fn(Sim)
     inst.AnimState:SetBuild("poop")
     inst.AnimState:PlayAnimation("dump")
     inst.AnimState:PushAnimation("idle")
-    
-    
-    
-    
+
     inst:AddComponent("stackable")
  
     inst:AddComponent("inspectable")
@@ -51,8 +48,7 @@ local function fn(Sim)
     inst.components.fertilizer.withered_cycles = TUNING.POOP_WITHEREDCYCLES
 
     inst:AddComponent("smotherer")
-    
-    
+
     inst.components.inventoryitem:SetOnDroppedFn(function() inst.flies = inst:SpawnChild("flies") end )
     inst.components.inventoryitem:SetOnPickupFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end )
     inst.components.inventoryitem:SetOnPutInInventoryFn(function() if inst.flies then inst.flies:Remove() inst.flies = nil end end )

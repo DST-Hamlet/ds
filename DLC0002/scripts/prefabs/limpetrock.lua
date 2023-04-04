@@ -42,6 +42,8 @@ local function makeemptyfn(inst)
 end
 
 local function makebarrenfn(inst)
+	if inst.AnimState:IsCurrentAnimation("idle_dead") then return end
+
 	if inst.components.pickable and inst.components.pickable.withered then
 		if not inst.components.pickable.hasbeenpicked then
 			inst.AnimState:PlayAnimation("full_to_dead")
@@ -102,8 +104,8 @@ local function fn(Sim)
 	local minimap = inst.entity:AddMiniMapEntity()
 	inst.entity:AddSoundEmitter()
 
-
-	inst:AddTag("bush")
+	inst:AddTag("fire_proof")
+	
 	minimap:SetIcon( "limpetRock.png" )
 
 	MakeObstaclePhysics(inst, 1)

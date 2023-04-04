@@ -75,6 +75,7 @@ local function commonfn(Sim)
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
     
     inst:AddComponent("inspectable")
+    inst:AddComponent("tradable")
 	inst:AddComponent("waterproofer")
     inst:AddComponent("inventoryitem")
     
@@ -104,7 +105,7 @@ local function defaultfn(sim)
 
     inst:AddComponent("dryable")
     inst.components.dryable:SetProduct("seaweed_dried")
-    inst.components.dryable:SetDryTime(TUNING.DRY_FAST)
+    inst.components.dryable:SetDryTime(TUNING.DRY_SUPERFAST)
     inst.AnimState:PlayAnimation("idle_water", true)
 
     MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.MEDIUM, TUNING.WINDBLOWN_SCALE_MAX.MEDIUM)
@@ -143,7 +144,7 @@ local function driedfn(sim)
     inst.components.edible.foodstate = "DRIED"
     inst.components.edible.healthvalue = TUNING.HEALING_SMALL
     inst.components.edible.hungervalue = TUNING.CALORIES_SMALL
-    inst.components.edible.sanityvalue = 0--TUNING.SANITY_SMALL
+    inst.components.edible.sanityvalue = TUNING.SANITY_SMALL
     inst.components.perishable:SetPerishTime(TUNING.PERISH_PRESERVED)
     inst.AnimState:SetBank("meat_rack_food")
     inst.AnimState:SetBuild("meat_rack_food")

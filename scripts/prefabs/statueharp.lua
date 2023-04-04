@@ -22,7 +22,6 @@ local function fn()
 	local trans = inst.entity:AddTransform()
 	local anim = inst.entity:AddAnimState()
 	inst.entity:AddSoundEmitter()
-    inst.AnimState:SetRayTestOnBB(true) --TODO: remove this when artists adds a mouseover region
 
 	MakeObstaclePhysics(inst, 0.66)
 

@@ -135,6 +135,7 @@ local DynamicMusic = Class(function(self, inst)
     inst:ListenForEvent( "builditem", function(it, data) self:OnStartBusy() end)  
     inst:ListenForEvent( "buildstructure", function(it, data) self:OnStartBusy() end)  
     inst:ListenForEvent( "working", function(it, data) self:OnStartBusy() end)
+    inst:ListenForEvent( "hacking", function(it, data) self:OnStartBusy() end)
 
     inst:ListenForEvent("mountboat", function(it, data)
         if data and data.boat and data.boat.prefab == "surfboard" then
@@ -390,28 +391,25 @@ function DynamicMusic:StopPlayingTone(category)
 end
 
 function DynamicMusic:OnStartDanger()
-
-    print("HERE 1")
-
     if not self.enabled then return end
-    
+
     self.danger_timeout = 10
     if not self.playing_danger and not self.inst.SoundEmitter:PlayingSound("erupt") then
         local epic = GetClosestInstWithTag("epic", self.inst, 45)
         local soundpath = nil
-        
+
         if epic then
             if epic and epic:HasTag("ancient_herald") then
                 soundpath = "dontstarve_DLC003/music/aporkalypse"
             elseif epic and epic:HasTag("ancient_hulk") then
                 soundpath = "dontstarve_DLC003/music/fight_epic_4"
             elseif GetWorld():IsRuins() then
-				soundpath = "dontstarve/music/music_epicfight_ruins"
+                soundpath = "dontstarve/music/music_epicfight_ruins"
             elseif GetWorld():IsCave() then
-				soundpath = "dontstarve/music/music_epicfight_cave"
+                soundpath = "dontstarve/music/music_epicfight_cave"
             elseif GetSeasonManager():IsWinter() then
-				soundpath = "dontstarve/music/music_epicfight_winter"
-			elseif GetSeasonManager():IsSpring() then
+                soundpath = "dontstarve/music/music_epicfight_winter"
+            elseif GetSeasonManager():IsSpring() then
                 soundpath = "dontstarve_DLC001/music/music_epicfight_spring"
             elseif GetSeasonManager():IsSummer() then
                 soundpath = "dontstarve_DLC001/music/music_epicfight_summer"
@@ -429,18 +427,19 @@ function DynamicMusic:OnStartDanger()
                 soundpath = "dontstarve_DLC003/music/fight_epic_1"
             elseif GetSeasonManager():IsLushSeason() then
                 soundpath = "dontstarve_DLC003/music/fight_epic_1"
-            elseif GetSeasonManager().IsAporkalypse and GetSeasonManager():IsAporkalypse() then
+            elseif GetSeasonManager():IsAporkalypse() then
                 soundpath = "dontstarve_DLC003/music/fight_4"
             else
-				soundpath = "dontstarve/music/music_epicfight"
-			end
+                soundpath = "dontstarve/music/music_epicfight"
+            end
+
         elseif GetWorld():IsRuins() then
             soundpath = "dontstarve/music/music_danger_ruins"
         elseif GetWorld():IsCave() then
             soundpath = "dontstarve/music/music_danger_cave"
         elseif GetSeasonManager():IsWinter() then
-			soundpath = "dontstarve/music/music_danger_winter"
-		elseif GetSeasonManager():IsSpring() then
+            soundpath = "dontstarve/music/music_danger_winter"
+        elseif GetSeasonManager():IsSpring() then
             soundpath = "dontstarve_DLC001/music/music_danger_spring"
         elseif GetSeasonManager():IsSummer() then
             soundpath = "dontstarve_DLC001/music/music_danger_summer"
@@ -458,15 +457,17 @@ function DynamicMusic:OnStartDanger()
             soundpath = "dontstarve_DLC003/music/fight_2"
         elseif GetSeasonManager():IsLushSeason() then
             soundpath = "dontstarve_DLC003/music/fight_3"
+        elseif GetSeasonManager():IsAporkalypse() then
+            soundpath = "dontstarve_DLC003/music/fight_4"
         else
-			soundpath = "dontstarve/music/music_danger"
+            soundpath = "dontstarve/music/music_danger"
         end
 
         self.inst.SoundEmitter:PlaySound(soundpath, "danger")
         self:StopPlayingBusy()
         self:StopPlayingBoating()
         self:StopPlayingSurfing()
-        self:StopPlayingTone()         
+        self:StopPlayingTone()
         self.playing_danger = true
     end
 end

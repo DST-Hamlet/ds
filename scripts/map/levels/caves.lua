@@ -75,4 +75,8 @@ AddLevel(LEVELTYPE.CAVE, {
 			"Sacred2",
 		},
 
+		required_prefabs = {
+			"minotaur"
+		},
+
 	})

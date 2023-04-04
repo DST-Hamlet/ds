@@ -269,6 +269,7 @@ local function fn(Sim)
 
 	inst:AddTag("FX")
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst.tilegrid = {} --All possible positions for tiles within the max size 
 	inst.rootTiles = {} --The sources of the flood, water gets added to the system through these tiles 

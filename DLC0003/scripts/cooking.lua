@@ -64,8 +64,9 @@ AddIngredientValues(mushrooms, {veggie=.5}, true)
 
 AddIngredientValues({"meat"}, {meat=1}, true, true)
 AddIngredientValues({"monstermeat"}, {meat=1, monster=1}, true, true)
-AddIngredientValues({"froglegs", "drumstick"}, {meat=.5}, true)
+AddIngredientValues({"froglegs", "drumstick", "batwing"}, {meat=.5}, true)
 AddIngredientValues({"smallmeat"}, {meat=.5}, true, true)
+AddIngredientValues({"plantmeat"}, {meat=1}, true)
 
 AddIngredientValues({"fish", "eel", "tropical_fish"}, {meat=.5,fish=1}, true)
 
@@ -82,7 +83,7 @@ AddIngredientValues({"mole"}, {meat=.5})
 AddIngredientValues({"cactus_meat"}, {veggie=1}, true)
 AddIngredientValues({"watermelon"}, {fruit=1}, true)
 AddIngredientValues({"cactus_flower"}, {veggie=.5})
-AddIngredientValues({"acorn_cooked"}, {seed=1})
+AddIngredientValues({"acorn"}, {seed=1}, true)
 AddIngredientValues({"goatmilk"}, {dairy=1})
 -- AddIngredientValues({"seeds"}, {seed=1}, true)
 
@@ -102,7 +103,7 @@ AddIngredientValues({"foliage"}, {veggie=1}, true)
 local fish_med = {"fish_raw", "fish_med", "fish_med_cooked", "swordfish", "shark_fin", "fish3", "fish3_cooked", "fish4", "fish4_cooked", "fish5", "fish5_cooked", "roe", "roe_cooked"}
 AddIngredientValues(fish_med, {meat=0.5,fish=1})
 
-local jellyfish = {"jellyfish", "jellyfish_dead", "jellyfish_cooked", "jellyjerky"}
+local jellyfish = {"jellyfish", "jellyfish_dead", "jellyfish_cooked", "rainbowjellyfish", "rainbowjellyfish_dead", "rainbowjellyfish_cooked", "jellyjerky"}
 AddIngredientValues(jellyfish, {fish=1,jellyfish=1,monster=1})
 
 AddIngredientValues({"limpets", "mussel"}, {fish=.5}, true)
@@ -110,13 +111,11 @@ AddIngredientValues({"lobster"}, {fish=2}, true)
 AddIngredientValues({"crab"}, {fish=.5})
 AddIngredientValues({"fish_raw_small"}, {fish=0.5}, true)
 
-AddIngredientValues({"cutnettle"}, {antihistamine=1}, true)
-AddIngredientValues({"snake_bone"}, {bone=1}, true)
-AddIngredientValues({"piko_orange"}, {filter=1}, true)
-AddIngredientValues({"slugbug","slugbug_cooked"}, {bug=1}, true)
-AddIngredientValues({"weevole_carapace"}, {inedible=1}, true)
-
-
+AddIngredientValues({"cutnettle"}, {antihistamine=1})
+AddIngredientValues({"snake_bone"}, {bone=1})
+AddIngredientValues({"piko_orange"}, {filter=1})
+AddIngredientValues({"slugbug"}, {bug=1}, true)
+AddIngredientValues({"weevole_carapace"}, {inedible=1})
 
 --our naming conventions aren't completely consistent, sadly
 local aliases=

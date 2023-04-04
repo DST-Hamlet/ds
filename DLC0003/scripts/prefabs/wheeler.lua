@@ -67,6 +67,7 @@ local fn = function(inst)
 
     inst.components.reticule.ease = false
 
+    inst.components.inventory:GuaranteeItems(start_inv)
 
 	inst:DoTaskInTime(0, function() UpdateBonusSpeed(inst) end)
 end

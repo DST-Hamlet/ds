@@ -177,6 +177,8 @@ function MakeHat(name)
 		local inst = simple()
 		inst:AddComponent("armor")
 
+		inst:AddTag("smeltable") -- Smelter
+
 		inst:AddComponent("waterproofer")
 		inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_SMALL)
 		
@@ -270,6 +272,7 @@ function MakeHat(name)
 		inst.components.fueled.ontakefuelfn = candle_takefuel
 		inst.components.fueled.accepting = true
 
+		inst:AddTag("smeltable") -- Smelter
 
 		return inst
 	end
@@ -331,6 +334,8 @@ function MakeHat(name)
 	local function gasmask()
 		local inst = simple()
 		inst:AddTag("gasmask")
+		inst:AddTag("muffler")
+		
 		inst.components.equippable.dapperness = TUNING.CRAZINESS_SMALL
 		inst.components.equippable.poisongasblocker = true
 
@@ -353,12 +358,35 @@ function MakeHat(name)
 		return inst
 	end
 
+	local function antmask_onupdate(inst)
+		inst.components.armor:SetPercent(inst.components.fueled:GetPercent())
+	end
+
+	local function antmask_ontakedamage(inst, damage_amount, absorbed, leftover)
+		-- absorbed is the amount of durability that should be consumed
+		-- so that's what should be consumed in the fuel
+		local absorbedDamageInPercent = absorbed/inst.components.armor.maxcondition
+		if inst.components.fueled then
+			local percent = inst.components.fueled:GetPercent()
+			local newPercent = percent - absorbedDamageInPercent
+			inst.components.fueled:SetPercent(newPercent)
+		end
+	end
+
 	local function antmask()
 		local inst = simple()
 		inst:AddComponent("armor")
 		inst.components.armor:InitCondition(TUNING.ARMOR_FOOTBALLHAT, TUNING.ARMOR_FOOTBALLHAT_ABSORPTION)
-		--inst.components.armor:SetTags({"antmask"})
+		inst.components.armor.ontakedamage = antmask_ontakedamage
+
 		inst:AddTag("antmask")
+
+		inst:AddComponent("fueled")
+		inst.components.fueled.fueltype = "USAGE"
+		inst.components.fueled:InitializeFuelLevel(TUNING.ANTMASKHAT_PERISHTIME)
+		inst.components.fueled:SetDepletedFn(generic_perish)
+		inst.components.fueled:SetUpdateFn(antmask_onupdate)
+
 		return inst
 	end
 
@@ -447,8 +475,8 @@ function MakeHat(name)
 		end)
 	end
 
-	local function tryproc(inst, owner)
-		if not inst.active and math.random() < --[[ Chance to proc ]] TUNING.ARMOR_RUINSHAT_PROC_CHANCE then
+	local function tryproc(inst, owner, data)
+		if not inst.active and math.random() < TUNING.ARMOR_RUINSHAT_PROC_CHANCE and not data.redirected then
 		   ruinshat_proc(inst, owner)
 		end
 	end
@@ -479,7 +507,7 @@ function MakeHat(name)
 
 		owner.AnimState:Show("HEAD")
 		owner.AnimState:Hide("HEAD_HAIR")
-		inst.procfn = function() tryproc(inst, owner) end
+		inst.procfn = function(owner, data) tryproc(inst, owner, data) end
 		owner:ListenForEvent("attacked", inst.procfn)
 	end
 
@@ -882,8 +910,8 @@ function MakeHat(name)
 		inst:AddComponent("waterproofer")
 		inst.components.waterproofer:SetEffectiveness(TUNING.WATERPROOFNESS_SMALL)
 
-		inst:AddComponent("characterspecific")
-		inst.components.characterspecific:SetOwner("wathgrithr")
+		--inst:AddComponent("characterspecific")
+		--inst.components.characterspecific:SetOwner("wathgrithr")
 
 		return inst
 	end
@@ -1027,9 +1055,11 @@ function MakeHat(name)
 			local ccm = GetWorld().components.colourcubemanager
 			ccm:SetOverrideColourCube("images/colour_cubes/bat_vision_on_cc.tex", 1)
 
-			if owner.HUD and owner.HUD.batview then
-				owner.HUD.batview:StartSonar()
-			end
+			inst:DoTaskInTime(0, function()
+				if owner.HUD and owner.HUD.batview then
+					owner.HUD.batview:StartSonar()
+				end
+			end)
 		end
 	end
 
@@ -1414,6 +1444,8 @@ function MakeHat(name)
 	local function gas()
 		local inst = simple()
 
+		inst:AddTag("gasmask")
+
 		inst.components.equippable:SetOnEquip( onequip )
 		inst.components.equippable.poisongasblocker = true
 
@@ -1594,8 +1626,10 @@ function MakeHat(name)
 			owner.components.builder.jellybrainhat = true
 			owner:PushEvent("techlevelchange")
     		owner:PushEvent("unlockrecipe")
-    		inst.brainjelly_onbuild = function()
-    			inst.components.finiteuses:Use(1)
+    		inst.brainjelly_onbuild = function(owner, data)
+				if data.used_jellybrainhat == nil or data.used_jellybrainhat then
+    				inst.components.finiteuses:Use(1)
+				end
     		end
     		owner:ListenForEvent("builditem", inst.brainjelly_onbuild)
     		owner:ListenForEvent("bufferbuild", inst.brainjelly_onbuild)
@@ -1629,40 +1663,41 @@ function MakeHat(name)
 	end
 
 	local function woodlegs_spawntreasure(new_sec, old_sec, inst, isload)
-		if isload then
+		-- OnLoad and when repaired.
+		if isload or new_sec > old_sec then
 			return
 		end
 
 		local equipper = inst and inst.components.equippable and inst.components.equippable.equipper
 
-
 		if TheCamera.interior then
-			if equipper and equipper.components.talker then
+			if equipper and equipper:HasTag("pirate") then
 				equipper.components.talker:Say(GetString(equipper.prefab, "ANNOUNCE_WOODLEGSHAT_INDOORS"))
 			end
-		else
 
-			if equipper and not equipper:HasTag("player") and math.random() > 0.66 then
-				--don't always give treasure if not the player.
-				return
-			end
+			return
+		end
 
-			local pos = inst:GetPosition()
-			local offset = FindGroundOffset(pos, math.random() * 2 * math.pi, math.random(25, 30), 18)
+		if equipper and not equipper:HasTag("pirate") and math.random() > 0.66 then
+			-- Don't always give a treasure if it's not used by Woodlegs.
+			return
+		end
 
-			if offset then
-				local spawn_pos = pos + offset
-			    local tile = GetVisualTileType(spawn_pos:Get())
-	    		local is_water = GetMap():IsWater(tile)
-	    		local treasure = SpawnPrefab("buriedtreasure")
+		local pos = inst:GetPosition()
+		local offset = FindGroundOffset(pos, math.random() * 2 * math.pi, math.random(25, 30), 18)
 
-	    		treasure.Transform:SetPosition(spawn_pos:Get())
-	    		treasure:SetRandomTreasure()
+		if offset then
+			local spawn_pos = pos + offset
+		    local tile = GetVisualTileType(spawn_pos:Get())
+    		local is_water = GetMap():IsWater(tile)
+    		local treasure = SpawnPrefab("buriedtreasure")
 
-	    		if equipper then
-	    			inst.components.equippable.equipper:PushEvent("treasureuncover")
-	    		end
-			end
+    		treasure.Transform:SetPosition(spawn_pos:Get())
+    		treasure:SetRandomTreasure()
+
+    		if equipper and equipper:HasTag("pirate") then
+    			inst.components.equippable.equipper:PushEvent("treasureuncover")
+    		end
 		end
 	end
 
@@ -1676,8 +1711,8 @@ function MakeHat(name)
 		inst.components.fueled:SetSections(TUNING.WOODLEGSHAT_TREASURES)
 		inst.components.fueled:SetSectionCallback(woodlegs_spawntreasure)
 
-        inst:AddComponent("characterspecific")
-        inst.components.characterspecific:SetOwner("woodlegs")
+        --inst:AddComponent("characterspecific")
+        --inst.components.characterspecific:SetOwner("woodlegs")
 
 		return inst
 	end
@@ -1836,7 +1871,9 @@ function MakeHat(name)
 
 		--inst.components.inventoryitem.imagename = "featherhat"
 
-		inst:ListenForEvent("lightningstrike", function(inst, data) inst.components.fueled:DoDelta(-inst.components.fueled.maxfuel * 0.1) end)
+		inst:ListenForEvent("lightningstrike", function(inst, data)
+			inst.components.fueled:DoDelta(-inst.components.fueled.maxfuel * TUNING.THUNDERHAT_USAGE_PER_LIGHTINING_STRIKE)
+		end)
 
 		return inst
 	end

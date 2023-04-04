@@ -103,6 +103,10 @@ local states =
             inst.components.health:SetInvincible(true)
         end,
 
+        onexit = function(inst)
+            inst.components.health:SetInvincible(false)
+        end,
+
         events =
         {
             EventHandler("animover", function(inst) inst:Hide() end),
@@ -282,8 +286,7 @@ local states =
         tags = {"busy", "specialattack"},
 
         onenter = function(inst)
-
-            --print("Enter fall post (water)", GetTime())
+            inst.components.health:SetInvincible(true)
 
             inst.Physics:Stop()
             inst.components.locomotor.disable = false
@@ -295,8 +298,6 @@ local states =
         end,
 
          onexit = function(inst)
-           -- print("Exit fall post (water)", GetTime())
-
             local splash = SpawnPrefab("splash_water")
             local pos = inst:GetPosition()
             splash.Transform:SetPosition(pos.x, pos.y, pos.z)

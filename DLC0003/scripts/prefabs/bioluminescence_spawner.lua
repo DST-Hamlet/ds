@@ -41,6 +41,9 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
 	inst:DoTaskInTime(5*FRAMES, spawnchildren)
+
+	inst:AddTag("NOBLOCK")
+
     return inst
 end
 

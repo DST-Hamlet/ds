@@ -1,4 +1,5 @@
 local EndGameDialog = require("screens/endgamedialog")
+
 local assets =
 {
 	Asset("ANIM", "anim/maxwell_throne.zip"),
@@ -8,17 +9,16 @@ local assets =
 
 }
 
-local prefabs =
-{
+local prefabs = {
     "maxwellendgame",
-    "puppet_wilson",
-    "puppet_willow",
-    "puppet_wendy",
-    "puppet_wickerbottom",
-    "puppet_wolfgang",
-    "puppet_wx78",
-    "puppet_wes", 
 }
+
+local charlist = GetActiveCharacterList and GetActiveCharacterList() or MAIN_CHARACTERLIST
+for i, name in ipairs(charlist) do
+	if name ~= "unknown" and name ~= "waxwell" then
+		table.insert(prefabs, "puppet_"..name) 
+	end
+end
 
 local function SpawnPuppet(inst, name)
 
@@ -29,7 +29,6 @@ local function SpawnPuppet(inst, name)
     local puppet = SpawnPrefab(name)
 
     if not puppet then
-        print("THIS PUPPET DIDNT EXIST, USE MAXWELL")
         name = "maxwellendgame"
         puppet = SpawnPrefab(name)
         inst.isMaxwell = true
@@ -113,10 +112,6 @@ local function SpawnNewPuppet(inst)
         puppetToSpawn = "maxwellendgame" 
     end
     local puppet = SpawnPuppet(inst, puppetToSpawn)
-
-    if puppet.prefab == "maxwellendgame" then
-        puppetToSpawn = "maxwellendgame"
-    end
 
     if puppet.components.maxwelltalker then puppet:RemoveComponent("maxwelltalker") end    
     local pos = Vector3( inst.Transform:GetWorldPosition() )

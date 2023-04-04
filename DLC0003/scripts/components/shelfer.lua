@@ -78,19 +78,12 @@ function Shelfer:GiveGift()
 end
 
 function Shelfer:CanAccept( item , giver )
-    local frozen = false
-    if  self.inst.components.freezable and self.inst.components.freezable:IsFrozen() then
-        frozen = true        
-    end
-    
-    local inventortyitem = false
-    if  item.components.inventoryitem then
-        inventortyitem = true
-    end
-
+    local frozen = self.inst.components.freezable and self.inst.components.freezable:IsFrozen()
+    local inventortyitem = item.components.inventoryitem ~= nil
 	local item = self.shelf.components.container:GetItemInSlot(self.slotindex)
+    local player_to_shop = not self.shelf:HasTag("playercrafted") and giver and giver:HasTag("player")
 
-    return self.enabled and inventortyitem and not frozen and not item -- (not self.test or self.test(self.inst, item, giver))
+    return self.enabled and inventortyitem and not frozen and not item and not player_to_shop
 end
 
 function Shelfer:SetArt()

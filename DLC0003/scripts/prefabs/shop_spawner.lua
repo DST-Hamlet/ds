@@ -24,6 +24,8 @@ local function fn(Sim)
     inst.initInteriorPrefab = InitInteriorPrefab	
     inst.components.shopinterior.want_all = true
 
+    inst:AddTag("NOBLOCK")
+
     inst.OnSave = onsave 
     inst.OnLoad = onload
 

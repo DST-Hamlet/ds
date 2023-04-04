@@ -65,7 +65,7 @@ local function fn()
 	inst:AddTag("structure")
     inst:AddComponent("lootdropper")
     inst:AddComponent("workable")
-    inst.components.workable:SetWorkAction(nil)
+	inst.components.workable:SetWorkAction(ACTIONS.BLANK) -- To be breakable by the living artifact.
 	inst.components.workable:SetOnFinishCallback(onhammered)
 	inst.components.workable:SetOnWorkCallback(onhit)
 

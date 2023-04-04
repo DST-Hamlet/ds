@@ -112,6 +112,10 @@ local function OnLoad(inst, data)
     end        
 end
 
+local function test_ground(inst, pt, deployer)
+    return not inst:GetIsOnWater(pt:Get()) and IsPointInInteriorBounds(pt)
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -164,9 +168,13 @@ local function MakeItem(name, drawn)
 
         MakeInventoryPhysics(inst)
 
+        local animation = drawn and "item_drawn" or "item"
+        MakeInventoryFloatable(inst, animation.."_water", animation)
+
         inst.AnimState:SetBank("sign_mini")
         inst.AnimState:SetBuild("sign_mini")
-        inst.AnimState:PlayAnimation(drawn and "item_drawn" or "item")
+        
+        inst.AnimState:PlayAnimation(animation)
 
         if drawn then
             inst.displaynamefn = displaynamefn
@@ -194,14 +202,13 @@ local function MakeItem(name, drawn)
         inst:AddComponent("deployable")
         inst.components.deployable.ondeploy = ondeploy
         inst.components.deployable.min_spacing = 0
-        --inst.components.deployable:SetDeploySpacing(DEPLOYSPACING.NONE)
+        inst.components.deployable.test = test_ground
 
         MakeSmallBurnable(inst)
         MakeSmallPropagator(inst)
 
         inst:AddComponent("fuel")
         inst.components.fuel.fuelvalue = TUNING.MED_FUEL
-
 
         return inst
     end

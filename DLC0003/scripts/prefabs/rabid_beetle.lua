@@ -160,6 +160,12 @@ local function OnPickedUp(inst)
     inst.components.lootdropper:SetChanceLootTable('rabid_beetle_inventory')
 end
 
+local function OnGasChange(inst, onGas)
+	if onGas and inst.components.poisonable then
+		inst.components.poisonable:Poison(true, nil, true)
+	end
+end
+
 local function fncommon()
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -180,7 +186,7 @@ local function fncommon()
     inst:AddTag("smallcreature")
 	
     MakeCharacterPhysics(inst, 5, .5)
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "bottom")
 
     inst.Transform:SetScale(0.6,0.6,0.6)  
      
@@ -224,7 +230,11 @@ local function fncommon()
 
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetChanceLootTable('rabid_beetle')
-    
+
+    inst:AddComponent("tiletracker")
+	inst.components.tiletracker:SetOnGasChangeFn(OnGasChange)
+	inst.components.tiletracker:Start()
+
     inst:AddComponent("inspectable")
     
     inst:AddComponent("sleeper")

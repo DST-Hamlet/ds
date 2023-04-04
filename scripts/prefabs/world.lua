@@ -120,11 +120,25 @@ function onremove(inst)
     inst.minimap:Remove()
 end
 
+local function OnSave(inst, data)
+    if inst.cave_regenerator_retrofitted then
+        data.cave_regenerator_retrofitted = true
+    end
+end
+
+local function OnLoad(inst, data)
+    if data and data.cave_regenerator_retrofitted then
+        inst.cave_regenerator_retrofitted = true
+    end
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	
 	inst:AddTag( "ground" )
 	inst:AddTag( "NOCLICK" )
+	inst:AddTag( "NOBLOCK" )
+
     inst.entity:SetCanSleep(false)
     inst.persists = false
 
@@ -186,6 +200,9 @@ local function fn(Sim)
     inst.OnRemoveEntity = onremove
 
 	inst:AddComponent("globalcolourmodifier")
+
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
 
     return inst
 end

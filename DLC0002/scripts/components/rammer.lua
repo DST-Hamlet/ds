@@ -23,7 +23,7 @@ local Rammer = Class(function(self, inst)
 end)
 
 function Rammer:StartCooldown()
-    self.cooldown = 5 * FRAMES
+    self.cooldown = 0.5
 end
 
 function Rammer:CheckRamHit()
@@ -97,7 +97,7 @@ function Rammer:CheckRamHit()
     -- foreach entity, notify callback
     for k, v in pairs(ents) do
         if v ~= driver then -- avoid self-ramming
-            if isInHitCone(v) then           
+            if isInHitCone(v) then
                 self.onRamTarget(self.inst, v)
             end
         end

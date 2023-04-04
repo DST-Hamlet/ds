@@ -51,6 +51,9 @@ local function OnActivate(inst)
 								end)
 end
 
+local function GetStatus(inst)
+	return "OPEN"
+end
 
 local function fn(Sim)
 	local inst = CreateEntity()
@@ -70,6 +73,7 @@ local function fn(Sim)
     inst.components.playerprox:SetOnPlayerNear(onnear)
 
     inst:AddComponent("inspectable")
+	inst.components.inspectable.getstatus = GetStatus
 
 	inst:AddComponent("activatable")
     inst.components.activatable.OnActivate = OnActivate

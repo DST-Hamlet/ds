@@ -97,7 +97,7 @@ local function create_base(sim)
 	local sound = inst.entity:AddSoundEmitter()
 	inst.Transform:SetFourFaced()
 
-	MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst, "whale_body")
 	MakeCharacterPhysics(inst, 100, .75)
 
 	inst:AddTag("whale")

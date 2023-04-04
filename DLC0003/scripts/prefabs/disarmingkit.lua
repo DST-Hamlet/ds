@@ -23,6 +23,8 @@ local function fn(Sim)
 	
 	inst:AddComponent("finiteuses")
 
+	inst:AddTag("smeltable") -- Smelter
+
 	local uses = TUNING.SEWINGKIT_USES
     local player = GetPlayer()
     if player and player:HasTag("treasure_hunter") then

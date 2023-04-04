@@ -61,7 +61,7 @@ local function fn(Sim)
     inst:AddComponent("weapon")
     inst.components.weapon:SetDamage(TUNING.TORCH_DAMAGE)
     inst.components.weapon:SetAttackCallback(
-        function(attacker, target)
+        function(inst, attacker, target)
             if target.components.burnable then
                 if math.random() < TUNING.TORCH_ATTACK_IGNITE_PERCENT*target.components.burnable.flammability then
                     target.components.burnable:Ignite()

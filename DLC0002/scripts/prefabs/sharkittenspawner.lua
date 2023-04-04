@@ -114,6 +114,9 @@ local function DeactiveateSpawner(inst, isload)
    
         inst:ListenForEvent("entitywake", inst.deactivatefn)
 
+        inst.components.childspawner:StopSpawning()
+        ReturnChildren(inst)
+
         if isload then
             inst.deactivatefn()
         end

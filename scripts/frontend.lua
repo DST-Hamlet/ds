@@ -403,7 +403,7 @@ function FrontEnd:DoFadingUpdate(dt)
 				alpha = easing.outCubic(self.fade_time, 0, 1, self.total_fade_time)
 			end
 		end
-		
+
 		self:SetFadeLevel(alpha)
 		if self.fade_time >= self.total_fade_time then
 			self.fadedir = nil
@@ -423,12 +423,15 @@ function FrontEnd:UpdateConsoleOutput()
 end
 
 function FrontEnd:Update(dt)
+	if DEBUGGER_ENABLED then
+        Debuggee.poll()
+    end
+
     if CHEATS_ENABLED then
         ProbeReload(TheInput:IsKeyDown(KEY_F6))
     end
-	
+
 	if self.saving_indicator.shown then
-		
 
 		if self.save_indicator_fade then
 			local alpha = 1

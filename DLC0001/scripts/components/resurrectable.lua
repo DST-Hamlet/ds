@@ -69,7 +69,8 @@ function Resurrectable:DoResurrect()
 		local item = self.inst.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
 		if item and item.prefab == "amulet" then
 			self.inst.sg:GoToState("amulet_rebirth")
-			TrySpawnSkeleton(self.inst)
+			self.inst.last_death_position = nil
+			--TrySpawnSkeleton(self.inst)
 			return true
 		end
 	end

@@ -1,6 +1,7 @@
 local FrostyBreather = Class(function(self, inst)
 	self.inst = inst
     self.breath = nil
+	self.offset_fn = nil
 
 	self.inst:ListenForEvent("animover", function(inst, data)
 		if self.inst.sg:HasStateTag("idle") then

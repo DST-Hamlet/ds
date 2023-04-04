@@ -56,6 +56,7 @@ local function fn(Sim)
     anim:PlayAnimation("idle_loop", true)
 
     inst:AddTag("NOCLICK")
+    inst:AddTag("NOBLOCK")
 
     inst:ListenForEvent("daytime", function() timechange(inst) end, GetWorld())
     inst:ListenForEvent("dusktime", function() timechange(inst) end, GetWorld())

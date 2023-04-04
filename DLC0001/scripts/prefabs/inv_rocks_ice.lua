@@ -29,7 +29,9 @@ local function onperish(inst)
     else
         inst.components.inventoryitem.canbepickedup = false
         inst.AnimState:PlayAnimation("melt")
-        inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+        inst.persists = false
+        inst:ListenForEvent("animover", inst.Remove)
+        inst:ListenForEvent("entitysleep", inst.Remove)
     end
 end
 

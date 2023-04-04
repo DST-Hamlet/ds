@@ -109,10 +109,14 @@ local function FindLavaSpitTargetAction(inst)
 end
 
 local function GoHomeAction(inst)
-    if inst.components.homeseeker and 
-       inst.components.homeseeker.home and 
-       inst.components.homeseeker.home:IsValid() then
-        return BufferedAction(inst, inst.components.homeseeker.home, ACTIONS.GOHOME)
+	local home = inst.components.homeseeker and inst.components.homeseeker.home
+    if
+		home and 
+		home:IsValid() and
+		home.components.hackable and
+		home.components.hackable:CanBeHacked()
+	then
+        return BufferedAction(inst, home, ACTIONS.GOHOME)
     end
 end
 

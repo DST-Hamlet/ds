@@ -129,6 +129,11 @@ function Trap:DoSpring()
                 self.lootprefabs = self.target.components.lootdropper:GenerateLoot()
             end
         end
+
+        if self.target.components.inventory then
+            self.target.components.inventory:DropEverything()
+        end
+
         ProfileStatsAdd("trapped_" .. self.target.prefab)
 		self.target:AddTag("insprungtrap") -- prevents the same ent from being caught in two traps on the same frame
         self.target:Remove()

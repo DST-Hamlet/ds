@@ -53,9 +53,9 @@ local function fn()
         inst.components.equippable.dapperness = 0
     end, GetPlayer())
 
+    inst:AddComponent("characterspecific")
+    inst.components.characterspecific:SetOwner("wilba")
 
-    inst:DoTaskInTime(0, function() if not GetPlayer() or GetPlayer().prefab ~= "wilba" then inst:Remove() end end)
-    
     return inst
 end
 

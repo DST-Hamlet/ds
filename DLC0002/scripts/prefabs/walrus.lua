@@ -30,10 +30,7 @@ SetSharedLootTable( 'walrus',
     {'walrus_tusk',     0.50},
 })
 
-SetSharedLootTable( 'walrus_wee_loot',
-{
-    ['meat']     = 1.0,
-})
+SetSharedLootTable('walrus_wee_loot', {{'meat', 1}})
 
 local function OnAttacked(inst, data)
     inst.components.combat:SetTarget(data.attacker)
@@ -111,7 +108,7 @@ local function create()
     inst.Transform:SetFourFaced()
     inst.Transform:SetScale(1.5,1.5,1.5)
 
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "pig_torso")
     MakeCharacterPhysics(inst, 50, .5)    
      
     anim:SetBank("walrus")

@@ -708,6 +708,10 @@ function EntityScript:GetPosition()
     return Point(self.Transform:GetWorldPosition())
 end
 
+function EntityScript:GetRotation()
+    return self.Transform:GetRotation()
+ end
+
 function EntityScript:GetAngleToPoint(x, y, z)
 	if not x then
 		return 0

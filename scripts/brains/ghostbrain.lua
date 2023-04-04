@@ -9,16 +9,22 @@ end)
 
 local function GetFollowTarget(ghost)
     if ghost.brain.followtarget then
-        if (not ghost.brain.followtarget.components.health or ghost.brain.followtarget.components.health:IsDead()) or
-            ghost:GetDistanceSqToInst(ghost.brain.followtarget) > 15*15 then
+        if 
+            (not ghost.brain.followtarget.components.health or ghost.brain.followtarget.components.health:IsDead()) or
+            not ghost.brain.followtarget:IsValid() or
+            not ghost.brain.followtarget.Transform or
+            ghost:GetDistanceSqToInst(ghost.brain.followtarget) > 15*15
+        then
             ghost.brain.followtarget = nil
         end
     end
     
     if not ghost.brain.followtarget then
         ghost.brain.followtarget = FindEntity(ghost, 10, function(target)
-            return target:HasTag("character") and not (target.components.health and target.components.health:IsDead() )
-        end)
+            return not (target.components.health and target.components.health:IsDead() )
+        end,
+        {"character"}, {"mandrake"}
+        )
     end
     
     return ghost.brain.followtarget

@@ -21,6 +21,7 @@ local assets =
     Asset("SOUND", "sound/pig.fsb"),
     Asset("INV_IMAGE", "pighouse_city"),    
     Asset("MINIMAP_IMAGE", "pig_townhouse"),
+    Asset("MINIMAP_IMAGE", "pig_farmhouse"),
     
 }
 
@@ -126,14 +127,6 @@ local function LightsOff(inst)
     end
 end
 
-local function onfar(inst) 
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOn(inst)
-        end
-    end
-end
-
 local function getstatus(inst)
     if inst:HasTag("burnt") then
         return "BURNT"
@@ -142,14 +135,6 @@ local function getstatus(inst)
             return "FULL"
         else
             return "LIGHTSOUT"
-        end
-    end
-end
-
-local function onnear(inst) 
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOff(inst)
         end
     end
 end
@@ -239,8 +224,12 @@ end
 
 local function onhit(inst, worker)
     if not inst:HasTag("burnt") then
-    	inst.AnimState:PlayAnimation("hit")
-    	inst.AnimState:PushAnimation("idle")
+        inst.AnimState:PlayAnimation("hit")
+        if inst.lightson then
+            inst.AnimState:PushAnimation("lit")
+        else
+            inst.AnimState:PushAnimation("idle")
+        end
     end
 end
 
@@ -278,10 +267,6 @@ local function OnDay(inst)
     end
 
     checktax(inst)    
-end
-
-local function reconstructed(inst)
-    inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/crafted/pighouse/brick")  
 end
 
 local function setcolor(inst,num)
@@ -339,16 +324,13 @@ local function onload(inst, data)
 end
 
 local function ConfigureSpawner( inst, selected_citizens )
-    inst.spawnlist = selected_citizens
-    inst.components.spawner:Configure( selected_citizens[math.random(1,#selected_citizens)], TUNING.PIGHOUSE_CITY_RESPAWNTIME, 1)
-    
-    inst.components.spawner.onoccupied = onoccupied
-    inst.components.spawner.onvacate = onvacate
-    inst:ListenForEvent( "daytime", function() OnDay(inst) end, GetWorld())
+    if inst.components.spawner then
+        inst.spawnlist = selected_citizens
+        inst.components.spawner:Configure( selected_citizens[math.random(1,#selected_citizens)], TUNING.PIGHOUSE_CITY_RESPAWNTIME, 1)
+    end
 end
 
 local function citypossessionfn( inst )
-
     local selected_citizens = {}
     if inst.components.citypossession and inst.components.citypossession.cityID then
         for i=1, inst.components.citypossession.cityID do
@@ -360,7 +342,12 @@ local function citypossessionfn( inst )
         end
     end
 
-    ConfigureSpawner(inst, selected_citizens)    
+    ConfigureSpawner(inst, selected_citizens)
+end
+
+local function reconstructed(inst)
+    inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/crafted/pighouse/brick")
+    citypossessionfn(inst)
 end
 
 local function onbuilt(inst)
@@ -369,11 +356,6 @@ local function onbuilt(inst)
     inst.AnimState:PushAnimation("idle")
     citypossessionfn( inst )
 end
-
-local function OnLoadPostPass(inst)
-    --citypossessionfn( inst )
-end
-
 
 local function makeobstacle(inst)
 
@@ -414,7 +396,7 @@ local function clearobstacle(inst)
     end
 end
 
-local function makefn(animset, setbuild, spawnList)
+local function makefn(animset, setbuild, spawnList, minimapicon)
 
     local function fn(Sim)
     	local inst = CreateEntity()
@@ -424,7 +406,7 @@ local function makefn(animset, setbuild, spawnList)
         inst.entity:AddSoundEmitter()
 
     	local minimap = inst.entity:AddMiniMapEntity()
-    	minimap:SetIcon( "pig_townhouse.png" )
+    	minimap:SetIcon(minimapicon or "pig_townhouse.png")
         --{anim="level1", sound="dontstarve/common/campfire", radius=2, intensity=.75, falloff=.33, colour = {197/255,197/255,170/255}},
         light:SetFalloff(1)
         light:SetIntensity(.5)
@@ -475,11 +457,14 @@ local function makefn(animset, setbuild, spawnList)
     	inst.components.workable:SetOnWorkCallback(onhit)
     	
         inst:AddComponent( "spawner" )
+        inst.components.spawner.onoccupied = onoccupied
+        inst.components.spawner.onvacate = onvacate
+
         if spawnList then
-            ConfigureSpawner(inst, spawnList)           
+            ConfigureSpawner(inst, spawnList)
         else
-            inst.citypossessionfn = citypossessionfn 
-            inst.OnLoadPostPass = OnLoadPostPass
+            inst.citypossessionfn = citypossessionfn
+            inst.OnLoadPostPass = citypossessionfn
         end
 
         inst:ListenForEvent( "daytime", function() OnDay(inst) end, GetWorld())    
@@ -490,7 +475,7 @@ local function makefn(animset, setbuild, spawnList)
     	
     	MakeSnowCovered(inst, .01)
 
-        MakeMediumBurnable(inst, nil, nil, true)
+        MakeLargeBurnable(inst, nil, nil, true)
         MakeLargePropagator(inst)
         
         inst:AddComponent("fixable")        
@@ -559,13 +544,13 @@ local function placetestfn(inst)
     return true
 end
 
-local function house(name, anim, build, spawnList)
-    return Prefab( "common/objects/"..name, makefn(anim, build, spawnList ), assets, prefabs)
+local function house(name, anim, build, spawnList, minimapicon)
+    return Prefab( "common/objects/"..name, makefn(anim, build, spawnList, minimapicon), assets, prefabs)
 end
 
 return house("pighouse_city",nil,nil),
-       house("pighouse_farm","pig_shop","pig_farmhouse_build",spawned_farm),
-       house("pighouse_mine","pig_shop","pig_farmhouse_build",spawned_mine),
+       house("pighouse_farm","pig_shop","pig_farmhouse_build", spawned_farm, "pig_farmhouse.png"),
+       house("pighouse_mine","pig_shop","pig_farmhouse_build", spawned_mine, "pig_farmhouse.png"),
 
        MakePlacer("common/pighouse_city_placer", "pig_shop", "pig_townhouse1_green_build", "idle", nil, nil, true, 0.75, nil, nil, nil, nil, nil, placetestfn)
 

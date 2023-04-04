@@ -29,7 +29,7 @@ function Kramped:onkilledother(victim)
 			if victim.components.follower and victim.components.follower.previousleader == GetPlayer() then
 				self:OnNaughtyAction(3)
 			end
-		elseif victim.prefab == "babybeefalo" then
+		elseif victim.prefab == "babybeefalo" or victim.prefab == "babyox" then
 			self:OnNaughtyAction(6)
 		elseif victim.prefab == "teenbird" then
 			self:OnNaughtyAction(2)

@@ -3,9 +3,8 @@ local assets =
 	Asset("ANIM", "anim/armor_cactus.zip"),
 }
 
-local function OnBlocked(owner, data) 
-	
-	if (data.weapon == nil or (not data.weapon:HasTag("projectile") and data.weapon.projectile == nil))
+local function OnBlocked(owner, data)
+	if (data.weapon == nil or (not data.weapon:HasTag("projectile") and data.weapon.projectile == nil)) and not data.redirected
 		and data.attacker and data.attacker.components.combat and data.stimuli ~= "thorns" and not data.attacker:HasTag("thorny")
 		and (data.attacker.components.combat == nil or (data.attacker.components.combat.defaultdamage > 0)) then
 		

@@ -82,11 +82,13 @@ local function fn(Sim)
     end )
     inst.components.transformer.transformPrefab = "flower_evil"
 
+    --[[
     inst:AddComponent("blowinwindgust")
     inst.components.blowinwindgust:SetWindSpeedThreshold(TUNING.FLOWER_WINDBLOWN_SPEED)
     inst.components.blowinwindgust:SetDestroyChance(TUNING.FLOWER_WINDBLOWN_FALL_CHANCE)
     inst.components.blowinwindgust:SetDestroyFn(ongustpickfn)
     inst.components.blowinwindgust:Start()
+    ]]
 
 
     --------SaveLoad

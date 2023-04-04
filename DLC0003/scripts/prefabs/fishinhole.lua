@@ -227,7 +227,6 @@ local function fn()
 	minimap:SetIcon( "fish2.png" )
 
     inst:AddComponent("inspectable")
-    inst.components.inspectable.nameoverride = "pond"
     inst.no_wet_prefix = true
 
 	inst:AddComponent("fishable")

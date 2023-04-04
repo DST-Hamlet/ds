@@ -601,4 +601,4 @@ CommonStates.AddSleepStates(states,
 
 CommonStates.AddFrozenStates(states)
 
-return StateGraph("flup", states, events, "hide_loop", actionhandlers)
+return StateGraph("flup", states, events, "ground_pre", actionhandlers)

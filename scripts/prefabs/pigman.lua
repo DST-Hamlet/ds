@@ -58,8 +58,8 @@ local function ShouldAcceptItem(inst, item)
     if item.components.equippable and item.components.equippable.equipslot == EQUIPSLOTS.HEAD then
         return true
     end
-    if item.components.edible then
-        
+
+    if inst.components.eater:CanEat(item) then
         if (item.components.edible.foodtype == "MEAT" or item.components.edible.foodtype == "HORRIBLE")
            and inst.components.follower.leader
            and inst.components.follower:GetLoyaltyPercent() > 0.9 then
@@ -84,7 +84,7 @@ end
 local function OnGetItemFromPlayer(inst, giver, item)
     
     --I eat food
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         --meat makes us friends (unless I'm a guard)
         if item.components.edible.foodtype == "MEAT" or item.components.edible.foodtype == "HORRIBLE" then
             if inst.components.combat.target and inst.components.combat.target == giver then

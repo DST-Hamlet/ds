@@ -118,6 +118,19 @@ local function OnEntitySleep(inst)
 	end
 end
 
+local function GetStatus(inst)
+    if inst.components.harvestable and inst.components.harvestable:CanBeHarvested() then
+        if inst.components.harvestable.produce == inst.components.harvestable.maxproduce then
+            return "FULLHONEY"
+        elseif inst.components.childspawner and inst.components.childspawner:CountChildrenOutside() > 0 then
+            return "GENERIC"
+        else
+            return "SOMEHONEY"
+        end
+    end
+    return "NOHONEY"
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -154,11 +167,7 @@ local function fn(Sim)
 	inst:ListenForEvent( "daytime", StartSpawningFn(inst), GetWorld())
 
     inst:AddComponent("inspectable")
-    inst.components.inspectable.getstatus = function(inst)
-        if inst.components.harvestable:CanBeHarvested() then
-            return "READY"
-        end
-    end
+    inst.components.inspectable.getstatus = GetStatus
     
     inst:AddComponent("lootdropper")
     inst:AddComponent("workable")

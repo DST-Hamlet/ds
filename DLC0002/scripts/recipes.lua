@@ -56,7 +56,7 @@ Recipe("turf_checkerfloor", {Ingredient("marble", 1)}, RECIPETABS.TOWN, TECH.SCI
 Recipe("turf_carpetfloor", {Ingredient("boards", 1), Ingredient("beefalowool", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.VANILLA)
 Recipe("turf_snakeskinfloor", {Ingredient("snakeskin", 2), Ingredient("fabric", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
 
-Recipe("pottedfern", {Ingredient("foliage", 5), Ingredient("slurtle_shellpieces",1 )}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.VANILLA, "pottedfern_placer", 0.9)
+Recipe("pottedfern", {Ingredient("foliage", 2), Ingredient("slurtle_shellpieces",1 )}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.VANILLA, "pottedfern_placer", 0.9)
 Recipe("sandbagsmall_item", {Ingredient("fabric", 2), Ingredient("sand", 3)}, RECIPETABS.TOWN, TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.SHIPWRECKED, nil,nil,nil,4)
 Recipe("sand_castle", {Ingredient("sand", 4), Ingredient("palmleaf", 2), Ingredient("seashell", 3)}, RECIPETABS.TOWN,  TECH.NONE, RECIPE_GAME_TYPE.SHIPWRECKED, "sandcastle_placer")
 Recipe("dragonflychest", {Ingredient("dragon_scales", 1), Ingredient("boards", 4), Ingredient("goldnugget", 10)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG, "dragonflychest_placer", 1.5)
@@ -77,8 +77,8 @@ Recipe("mussel_bed", {Ingredient("mussel", 1),Ingredient("coral", 1)}, RECIPETAB
 --SURVIVAL
 Recipe("trap", {Ingredient("twigs", 2),Ingredient("cutgrass", 6)}, RECIPETABS.SURVIVAL, TECH.NONE)
 Recipe("birdtrap", {Ingredient("twigs", 3),Ingredient("silk", 4)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_ONE)
-
 Recipe("bugnet", {Ingredient("twigs", 4), Ingredient("silk", 2), Ingredient("rope", 1)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_ONE)
+Recipe("bundlewrap", {Ingredient("waxpaper", 1), Ingredient("rope", 1)}, RECIPETABS.SURVIVAL, TECH.LOST, RECIPE_GAME_TYPE.COMMON)
 Recipe("fishingrod", {Ingredient("twigs", 2),Ingredient("silk", 2)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_ONE)
 Recipe("monkeyball", {Ingredient("snakeskin", 2), Ingredient("cave_banana", 1), Ingredient("rope", 2)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.SHIPWRECKED)
 --Recipe("bigfishingrod", {Ingredient("twigs", 2),Ingredient("silk", 2)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_ONE)
@@ -101,11 +101,10 @@ Recipe("siestahut", {Ingredient("silk", 2),Ingredient("boards", 4),Ingredient("r
 Recipe("palmleaf_hut", {Ingredient("palmleaf", 4),Ingredient("bamboo", 4),Ingredient("rope", 3)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, "palmleaf_hut_placer")
 Recipe("featherfan", {Ingredient("goose_feather", 5), Ingredient("cutreeds", 2), Ingredient("rope", 2)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG)
 Recipe("tropicalfan", {Ingredient("doydoyfeather", 5), Ingredient("cutreeds", 2), Ingredient("rope", 2)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
-Recipe("icepack", {Ingredient("bearger_fur", 1), Ingredient("gears", 3), Ingredient("transistor", 3)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG)
+Recipe("icepack", {Ingredient("bearger_fur", 1), Ingredient("gears", 1), Ingredient("transistor", 1)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG)
 Recipe("seasack", {Ingredient("seaweed", 5), Ingredient("vine", 2), Ingredient("shark_gills", 1)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
 Recipe("doydoynest", {Ingredient("twigs", 8), Ingredient("doydoyfeather", 2), Ingredient("poop", 4)}, RECIPETABS.SURVIVAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, "doydoynest_placer")
 
-Recipe("bundlewrap", {Ingredient("waxpaper", 1), Ingredient("rope", 1)}, RECIPETABS.SURVIVAL, TECH.LOST, RECIPE_GAME_TYPE.COMMON)
 
 --TOOLS
 Recipe("axe", {Ingredient("twigs", 1),Ingredient("flint", 1)}, RECIPETABS.TOOLS, TECH.NONE)
@@ -161,7 +160,7 @@ Recipe("onemanband", {Ingredient("goldnugget", 2),Ingredient("nightmarefuel", 4)
 Recipe("nightlight", {Ingredient("goldnugget", 8), Ingredient("nightmarefuel", 2),Ingredient("redgem", 1)}, RECIPETABS.MAGIC,  TECH.MAGIC_TWO, RECIPE_GAME_TYPE.COMMON, "nightlight_placer")
 Recipe("armor_sanity", {Ingredient("nightmarefuel", 5),Ingredient("papyrus", 3)}, RECIPETABS.MAGIC,  TECH.MAGIC_THREE)
 Recipe("nightsword", {Ingredient("nightmarefuel", 5),Ingredient("livinglog", 1)}, RECIPETABS.MAGIC,  TECH.MAGIC_THREE)
-Recipe("batbat", {Ingredient("batwing", 5), Ingredient("livinglog", 2), Ingredient("purplegem", 1)}, RECIPETABS.MAGIC, TECH.MAGIC_THREE, RECIPE_GAME_TYPE.VANILLA)
+Recipe("batbat", {Ingredient("batwing", 3), Ingredient("livinglog", 2), Ingredient("purplegem", 1)}, RECIPETABS.MAGIC, TECH.MAGIC_THREE, RECIPE_GAME_TYPE.VANILLA)
 Recipe("armorslurper", {Ingredient("slurper_pelt", 6),Ingredient("rope", 2),Ingredient("nightmarefuel", 2)}, RECIPETABS.MAGIC,  TECH.MAGIC_THREE, RECIPE_GAME_TYPE.VANILLA)
 
 Recipe("amulet", {Ingredient("goldnugget", 3), Ingredient("nightmarefuel", 2),Ingredient("redgem", 1)}, RECIPETABS.MAGIC,  TECH.MAGIC_TWO)
@@ -201,7 +200,7 @@ Recipe("nightstick", {Ingredient("lightninggoathorn", 1), Ingredient("transistor
 Recipe("armorgrass", {Ingredient("cutgrass", 10), Ingredient("twigs", 2)}, RECIPETABS.WAR,  TECH.NONE, RECIPE_GAME_TYPE.VANILLA)
 Recipe("armorwood", {Ingredient("log", 8),Ingredient("rope", 2)}, RECIPETABS.WAR,  TECH.SCIENCE_ONE)
 Recipe("armorseashell", {Ingredient("seashell", 10),Ingredient("seaweed", 2),Ingredient("rope", 1)}, RECIPETABS.WAR,  TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.SHIPWRECKED)
-Recipe("armormarble", {Ingredient("marble", 12),Ingredient("rope", 4)}, RECIPETABS.WAR,  TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.VANILLA)
+Recipe("armormarble", {Ingredient("marble", 6),Ingredient("rope", 2)}, RECIPETABS.WAR,  TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.VANILLA)
 Recipe("armorlimestone", {Ingredient("limestone", 3), Ingredient("rope", 2)}, RECIPETABS.WAR, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
 Recipe("armorcactus", {Ingredient("needlespear", 3), Ingredient("armorwood", 1)}, RECIPETABS.WAR, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
 
@@ -232,10 +231,10 @@ Recipe("strawhat", {Ingredient("cutgrass", 12)}, RECIPETABS.DRESS,  TECH.NONE)
 Recipe("tophat", {Ingredient("silk", 6)}, RECIPETABS.DRESS,  TECH.SCIENCE_ONE)
 Recipe("rainhat", {Ingredient("mole", 2), Ingredient("strawhat", 1), Ingredient("boneshard", 1)}, RECIPETABS.DRESS, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG, nil, nil, nil, nil, true)
 
-Recipe("earmuffshat", {Ingredient("rabbit", 2), Ingredient("twigs",1)}, RECIPETABS.DRESS, TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.VANILLA)
+Recipe("earmuffshat", {Ingredient("rabbit", 2), Ingredient("twigs",1)}, RECIPETABS.DRESS, TECH.NONE, RECIPE_GAME_TYPE.VANILLA)
 Recipe("beefalohat", {Ingredient("beefalowool", 8),Ingredient("horn", 1)}, RECIPETABS.DRESS,  TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.VANILLA)
 Recipe("winterhat", {Ingredient("beefalowool", 4),Ingredient("silk", 4)}, RECIPETABS.DRESS,  TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.VANILLA)
-Recipe("catcoonhat", {Ingredient("coontail", 4), Ingredient("silk", 4)}, RECIPETABS.DRESS, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG)
+Recipe("catcoonhat", {Ingredient("coontail", 1), Ingredient("silk", 4)}, RECIPETABS.DRESS, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.ROG)
 
 -- Recipe("eurekahat", {Ingredient("coral_brain", 1), Ingredient("transistor", 2), Ingredient("sand", 6)}, RECIPETABS.DRESS, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
 Recipe("brainjellyhat", {Ingredient("coral_brain", 1), Ingredient("jellyfish", 1), Ingredient("rope", 2)}, RECIPETABS.DRESS, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
@@ -317,8 +316,8 @@ Recipe("buoy", {Ingredient("messagebottleempty", 1), Ingredient("bamboo", 4), In
 Recipe("quackeringram", {Ingredient("quackenbeak", 1), Ingredient("bamboo", 4), Ingredient("rope", 4)}, RECIPETABS.NAUTICAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED)
 
 
-Recipe("tar_extractor", {Ingredient("coconut", 2), Ingredient("bamboo", 4), Ingredient("limestone", 4)}, RECIPETABS.NAUTICAL, TECH.WATER_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, "tar_extractor_placer", nil, nil, nil, true)
-Recipe("sea_yard", {Ingredient("log", 4), Ingredient("tar", 6), Ingredient("limestone", 6)}, RECIPETABS.NAUTICAL, TECH.WATER_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, "sea_yard_placer", nil, nil, nil, true)
+Recipe("tar_extractor", {Ingredient("coconut", 2), Ingredient("bamboo", 4), Ingredient("limestone", 4)}, RECIPETABS.NAUTICAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, "tar_extractor_placer", 0, nil, nil, true)
+Recipe("sea_yard", {Ingredient("log", 4), Ingredient("tar", 6), Ingredient("limestone", 6)}, RECIPETABS.NAUTICAL, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, "sea_yard_placer", nil, nil, nil, true)
 
 
 Recipe("obsidianmachete", {Ingredient("machete", 1),Ingredient("obsidian", 3), Ingredient("dragoonheart", 1)}, RECIPETABS.OBSIDIAN,  TECH.OBSIDIAN_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, nil, nil, true)
@@ -329,3 +328,17 @@ Recipe("armorobsidian", {Ingredient("armorwood", 1), Ingredient("obsidian", 5), 
 Recipe("obsidiancoconade", {Ingredient("coconade", 3), Ingredient("obsidian", 3), Ingredient("dragoonheart", 1)}, RECIPETABS.OBSIDIAN, TECH.OBSIDIAN_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, nil, nil, true, 3)
 Recipe("wind_conch", {Ingredient("obsidian", 4), Ingredient("purplegem", 1), Ingredient("magic_seal", 1)}, RECIPETABS.OBSIDIAN, TECH.OBSIDIAN_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, nil, nil, true)
 Recipe("sail_stick", {Ingredient("obsidian", 2), Ingredient("nightmarefuel", 3), Ingredient("magic_seal", 1)}, RECIPETABS.OBSIDIAN, TECH.OBSIDIAN_TWO, RECIPE_GAME_TYPE.SHIPWRECKED, nil, nil, true)
+
+---- Deconstruction Recipes ----
+-- These recipes are for other characters' structures to drop their loot and for some things to be deconstructable.
+-- Character recipes here will be overwritten in the character file, so it's safe to register them without tests.
+
+DeconstructRecipe("woodlegsboat", {Ingredient("boatcannon", 1), Ingredient("boards", 4), Ingredient("dubloon", 4)})
+DeconstructRecipe("surfboard", {Ingredient("boards", 1), Ingredient("seashell", 2)})
+
+DeconstructRecipe("telipad",  {Ingredient("gears", 1), Ingredient("transistor", 1), Ingredient("cutstone", 2)})
+DeconstructRecipe("thumper",  {Ingredient("gears", 1), Ingredient("flint"     , 6), Ingredient("hammer"  , 2)})
+
+
+DeconstructRecipe("minisign", {Ingredient("boards", 1)})
+DeconstructRecipe("spiderhat", {Ingredient("silk", 4), Ingredient("spidergland", 2), Ingredient("monstermeat", 1)})

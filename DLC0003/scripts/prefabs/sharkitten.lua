@@ -94,9 +94,8 @@ local function kittenfn()
 	local shadow = inst.entity:AddDynamicShadow()
 
     MakeCharacterPhysics(inst, 10, .5)
-    MakePoisonableCharacter(inst)
-    MakeSmallBurnable(inst)
-    MakeSmallPropagator(inst)
+    MakePoisonableCharacter(inst, "hound_body")
+    MakeMediumBurnableCharacter(inst, "hound_body")
 
 	shadow:SetSize( 2.5, 1.5 )
     trans:SetFourFaced()

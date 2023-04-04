@@ -5,7 +5,7 @@ local TESTTIME = TUNING.SEG_TIME/2
 local Rocmanager = Class(function(self, inst)
 	self.disabled = false
 	self.inst = inst
-	self.inst:DoPeriodicTask(TESTTIME,function() self:ShouldSpawn() end) -- 
+	self.inst:DoPeriodicTask(TESTTIME, function() self:ShouldSpawn() end)
 	self.roc = nil
 	self.nexttime = self:GetNextSpawnTime()
 end)
@@ -15,11 +15,16 @@ function Rocmanager:OnSave()
 	local data = {}
 	data.disabled = self.disabled
 	data.nexttime = self.nexttime
+
+	if self.roc and self.roc:IsValid() then
+		data.roc = self.roc.GUID
+		table.insert(refs, self.roc.GUID)
+	end
+
 	return data, refs
 end 
 
 function Rocmanager:OnLoad(data)
-
 	if data.disabled then
 		self.disabled = data.disabled
 	end
@@ -27,10 +32,24 @@ function Rocmanager:OnLoad(data)
 		self.nexttime = data.nexttime
 	end
 end
+
+function Rocmanager:LoadPostPass(newents, savedata)
+	if savedata.roc then
+		local roc = newents[savedata.roc]
+		if roc then
+			self.roc = roc.entity
+		end
+	end
+end
+
 function Rocmanager:RemoveRoc(inst)
 	if self.roc == inst then 
 		self.roc = nil
 	end
+end
+
+function Rocmanager:Disable()
+	self.disabled = true
 end
 
 function Rocmanager:GetNextSpawnTime()

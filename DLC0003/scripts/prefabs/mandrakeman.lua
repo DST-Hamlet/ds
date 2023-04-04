@@ -23,7 +23,7 @@ local MAX_TARGET_SHARES = 5
 local SHARE_TARGET_DIST = 30
 
 local function ontalk(inst, script)
-	inst.SoundEmitter:PlaySound("dontstarve/creatures/bunnyman/idle_med")
+    inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/elderdrake/dissy")
 end
 
 local function CalcSanityAura(inst, observer)
@@ -48,7 +48,7 @@ local function ShouldAcceptItem(inst, item)
         return true
     end
 
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         
         if inst.components.eater:AbleToEat(item) 
            and inst.components.follower.leader
@@ -64,7 +64,7 @@ end
 local function OnGetItemFromPlayer(inst, giver, item)
 
     --I eat food
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         if inst.components.eater:AbleToEat(item) then
             if inst.components.combat.target and inst.components.combat.target == giver then
                 inst.components.combat:SetTarget(nil)
@@ -240,7 +240,7 @@ local function fn()
     anim:SetBank("elderdrake")  
 
     MakeCharacterPhysics(inst, 50, .5)
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "elderdrake_torso")
 
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.runspeed = TUNING.MANDRAKEMAN_RUN_SPEED --5

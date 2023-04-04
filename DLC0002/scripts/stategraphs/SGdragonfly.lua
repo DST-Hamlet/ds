@@ -344,7 +344,7 @@ local states=
             -- inst.AnimState:SetBuild("dragonfly_build")
             inst.AnimState:PlayAnimation("death")
             inst.SoundEmitter:PlaySound("dontstarve_DLC001/creatures/dragonfly/death")
-            inst.Physics:ClearCollisionMask()
+            RemovePhysicsColliders(inst)
         end,
 
         timeline=

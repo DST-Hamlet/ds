@@ -19,12 +19,13 @@ end
 
 local function BlowAway(inst)
     inst.blowawaytask = nil
-    inst.persists = false
     inst:RemoveComponent("inventoryitem")
     inst:RemoveComponent("inspectable")
 	inst.SoundEmitter:PlaySound("dontstarve/common/dust_blowaway")
 	inst.AnimState:PlayAnimation("disappear")
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 end
 
 local function StopBlowAway(inst)
@@ -41,11 +42,12 @@ end
 
 local function VacuumUp(inst)
 	StopBlowAway(inst)
-    inst.persists = false
     inst:RemoveComponent("inventoryitem")
     inst:RemoveComponent("inspectable")
 	inst.AnimState:PlayAnimation("eaten")
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 end
 
 local function fn(Sim)

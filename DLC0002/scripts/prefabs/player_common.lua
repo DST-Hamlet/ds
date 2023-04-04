@@ -76,6 +76,24 @@ local function giveupstring(combat, target)
 	return str
 end
 
+local TALLER_TALKER_OFFSET = Vector3(0, -700, 0)
+local DEFAULT_TALKER_OFFSET = Vector3(0, -400, 0)
+local function GetTalkerOffset(inst)
+    local rider = inst.components.rider
+    return rider ~= nil and rider:IsRiding()
+        and TALLER_TALKER_OFFSET
+        or DEFAULT_TALKER_OFFSET
+end
+
+local TALLER_FROSTYBREATHER_OFFSET = Vector3(.3, 3.75, 0)
+local DEFAULT_FROSTYBREATHER_OFFSET = Vector3(.3, 1.15, 0)
+local function GetFrostyBreatherOffset(inst)
+    local rider = inst.components.rider
+    return rider ~= nil and rider:IsRiding()
+        and TALLER_FROSTYBREATHER_OFFSET
+        or DEFAULT_FROSTYBREATHER_OFFSET
+end
+
 local function addlevelspecificcomponents(inst, levelprefab)
 	if levelprefab == "shipwrecked" then
 		inst:AddComponent("mapwrapper")
@@ -145,6 +163,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		Asset("ANIM", "anim/player_one_man_band.zip"),
 		Asset("ANIM", "anim/player_slurtle_armor.zip"),
 		Asset("ANIM", "anim/player_staff.zip"),
+		Asset("ANIM", "anim/player_wagstaff.zip"),
 		Asset("ANIM", "anim/player_boat_onoff.zip"),
 		Asset("ANIM", "anim/player_boat_death.zip"),
 		Asset("ANIM", "anim/player_actions_trawl.zip"),
@@ -172,7 +191,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
         Asset("ANIM", "anim/player_mount_shock.zip"),
         Asset("ANIM", "anim/player_mount_frozen.zip"),
         Asset("ANIM", "anim/player_mount_groggy.zip"),
-        Asset("ANIM", "anim/player_mount_hit_darkness.zip"),	
+        Asset("ANIM", "anim/player_mount_hit_darkness.zip"),
+        Asset("ANIM", "anim/player_mount_wagstaff.zip"),
 
         Asset("ANIM", "anim/player_mount_actions_speargun.zip"),
         Asset("ANIM", "anim/player_mount_actions_telescope.zip"),	       
@@ -180,6 +200,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		Asset("ANIM", "anim/player_mount_idles_shiver.zip"),     		          
 
         Asset("ANIM", "anim/player_actions_unsaddle.zip"),
+        
+		Asset("ANIM", "anim/player_wrap_bundle.zip"),
 
         Asset("ANIM", "anim/goo.zip"),	
 
@@ -214,6 +236,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		"reticule",
 		"shovel_dirt",
 		"mining_fx",
+		"spear_wathgrithr",
+        "wathgrithrhat",
 		"splash_footstep",
 		"pixel_out",
 		"pixel_in",
@@ -311,7 +335,11 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		anim:OverrideSymbol("ripplebase", "player_boat_death", "ripplebase")
 		anim:OverrideSymbol("waterline", "player_boat_death", "waterline")
 		anim:OverrideSymbol("waterline", "player_boat_death", "waterline")
+
     	anim:AddOverrideBuild("player_portal_shipwrecked")
+
+		anim:AddOverrideBuild("player_wagstaff")
+    	anim:AddOverrideBuild("player_wrap_bundle")
 
 		inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
 		inst.components.locomotor:SetSlowMultiplier( 0.6 )
@@ -332,6 +360,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		--inst:AddComponent("vehiclecontroller")
 
 		inst:AddComponent("sanitymonsterspawner")
+		inst:AddComponent("flotsamspawner_basegame")
 		inst:AddComponent("autosaver")
 
 		inst:AddComponent("moisture")
@@ -359,6 +388,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		inst:AddComponent("kramped")
 
 		inst:AddComponent("talker")
+		inst.components.talker:SetOffsetFn(GetTalkerOffset)
+
 		-- Reset overrides just in case
 		inst.hurtsoundoverride = nil
 		inst.talker_path_override = nil
@@ -396,7 +427,10 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		inst:AddComponent("eater")
 		inst:AddComponent("playeractionpicker")
 		inst:AddComponent("leader")
+
 		inst:AddComponent("frostybreather")
+		inst.components.frostybreather:SetOffsetFn(GetFrostyBreatherOffset)
+
 		inst:AddComponent("age")
 
 		inst:AddComponent("grue")
@@ -498,7 +532,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 					inst.SoundEmitter:PlaySound("dontstarve/wilson/burned")
 					inst.SoundEmitter:PlaySound("dontstarve/common/campfire", "burning")
 					inst.SoundEmitter:SetParameter("burning", "intensity", 1)
-					local frozenitems = inst.components.inventory:FindItems(function(item) return item:HasTag("frozen") end)
+					local frozenitems = inst.components.inventory:FindItems(function(item) return item:HasTag("frozen") or item:HasTag("meltable") end)
 					if #frozenitems > 0 then
 						for i,v in pairs(frozenitems) do
 							v:PushEvent("firemelt")
@@ -508,7 +542,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 
 		inst:ListenForEvent( "stopfiredamage", function(it, data)
 					inst.SoundEmitter:KillSound("burning")
-					local frozenitems = inst.components.inventory:FindItems(function(item) return item:HasTag("frozen") end)
+					local frozenitems = inst.components.inventory:FindItems(function(item) return item:HasTag("frozen") or item:HasTag("meltable") end)
 					if #frozenitems > 0 then
 						for i,v in pairs(frozenitems) do
 							v:PushEvent("stopfiremelt")
@@ -525,7 +559,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 			end)
 
 		inst:ListenForEvent( "gotnewitem", function(it, data)
-				if data.slot then
+				if data.slot ~= nil or data.toactiveitem ~= nil then
 					Print(VERBOSITY.DEBUG, "gotnewitem: ["..data.item.prefab.."]")
 					if inst.components.driver and inst.components.driver:GetIsDriving() then 
 						inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/HUD_water_collect_resource")
@@ -564,6 +598,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 			end)
 
 		inst:ListenForEvent("working", OnWork)
+		inst:ListenForEvent("hacking", OnWork)
 		--set up the UI root entity
 		--HUD:SetMainCharacter(inst)
 
@@ -600,7 +635,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, customfn, 
 		inst.CanExamine = function() return not inst.beaver end
 
 		inst.Soak = function()
-			local percent = 1 - inst.components.inventory:GetWaterproofness()
+			local percent = 1 - math.min(inst.components.inventory:GetWaterproofness(), 1)
 			print("Soaker!! "..percent)
 			inst.components.moisture:Soak(percent)
 			--inst.components.inventory:Soak()

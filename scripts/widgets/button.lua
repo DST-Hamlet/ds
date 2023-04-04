@@ -25,10 +25,18 @@ function Button:OnControl(control, down)
 	
 	if control == CONTROL_ACCEPT then
 		if down then
-			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-			self.o_pos = self:GetLocalPosition()
-			self:SetPosition(self.o_pos + self.clickoffset)
-			self.down = true
+			if not self.down then
+				TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+				self.o_pos = self:GetLocalPosition()
+				self:SetPosition(self.o_pos + self.clickoffset)
+				self.down = true
+				if self.whiledown then
+					self:StartUpdating()
+				end
+				if self.ondown then
+					self.ondown()
+				end
+			end
 		else
 			if self.down then
 				self.down = false
@@ -36,12 +44,21 @@ function Button:OnControl(control, down)
 				if self.onclick then
 					self.onclick()
 				end
+				self:StopUpdating()
 			end
 		end
 		
 		return true
 	end
+end
 
+-- Will only run if the button is manually told to start updating: we don't want a bunch of unnecessarily updating widgets
+function Button:OnUpdate(dt)
+	if self.down then
+		if self.whiledown then
+			self.whiledown()
+		end
+	end
 end
 
 function Button:OnGainFocus()
@@ -64,6 +81,14 @@ end
 
 function Button:SetFont(font)
 	self.text:SetFont(font)
+end
+
+function Button:SetOnDown( fn )
+	self.ondown = fn
+end
+
+function Button:SetWhileDown( fn )
+	self.whiledown = fn
 end
 
 function Button:SetOnClick( fn )

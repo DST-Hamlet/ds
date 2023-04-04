@@ -148,6 +148,10 @@ local function onSpawn(inst)
     end
 end
 
+local function SanityAura(inst, observer)
+    return not observer:HasTag("plantkin") and -TUNING.SANITYAURA_MED or 0
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
@@ -190,7 +194,7 @@ local function fn(Sim)
     MakeMediumBurnableCharacter(inst, "stem")
     
 	inst:AddComponent("sanityaura")
-    inst.components.sanityaura.aura = -TUNING.SANITYAURA_MED
+	inst.components.sanityaura.aurafn = SanityAura
     
     inst.OnSave = onsave 
     inst.OnLoad = onload

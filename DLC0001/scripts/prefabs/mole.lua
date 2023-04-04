@@ -211,6 +211,7 @@ local function fn(Sim)
     inst.name = STRINGS.NAMES.MOLE_ABOVEGROUND
 
     inst:AddComponent("sleeper")
+    inst.components.sleeper:SetNocturnal(true)
 
     SetState(inst, "under")
     inst.SetState = SetState

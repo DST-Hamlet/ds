@@ -7,6 +7,8 @@ local assets =
 	Asset("ANIM", "anim/dust_fx.zip"),
 	Asset("SOUND", "sound/forest.fsb"),
 	Asset("MINIMAP_IMAGE", "mangrove"),
+	Asset("MINIMAP_IMAGE", "mangrove_stump"),
+	Asset("MINIMAP_IMAGE", "mangrove_burnt"),
 }
 
 local prefabs =
@@ -72,7 +74,9 @@ local function chop_down_burnt_tree(inst, chopper)
 	inst.SoundEmitter:PlaySound("dontstarve/wilson/use_axe_tree")
 	inst.AnimState:PlayAnimation(inst.anims.chop_burnt)
 	RemovePhysicsColliders(inst)
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 	inst.components.lootdropper:SpawnLootPrefab("charcoal")
 	inst.components.lootdropper:DropLoot()
 	if inst.pineconetask then
@@ -120,6 +124,7 @@ local function OnBurnt(inst, imm)
 		inst:DoTaskInTime( 0.5, changes)
 	end
 	inst.AnimState:PlayAnimation(inst.anims.burnt, true)
+	inst.MiniMapEntity:SetIcon("mangrove_burnt.png")
 	--inst.AnimState:SetRayTestOnBB(true);
 	inst:AddTag("burnt")
 
@@ -452,6 +457,7 @@ local function onload(inst, data)
 
 		if data.burnt then
 			inst:AddTag("fire") -- Add the fire tag here: OnEntityWake will handle it actually doing burnt logic
+			inst.MiniMapEntity:SetIcon("mangrove_burnt.png")
 		elseif data.stump then
 			make_stump(inst)
 			inst.AnimState:PlayAnimation(inst.anims.stump)
@@ -590,6 +596,7 @@ make_stump = function(inst)
 
 	--RemovePhysicsColliders(inst)
 	inst.AnimState:PlayAnimation(inst.anims.stump, true)
+	inst.MiniMapEntity:SetIcon("mangrove_stump.png")
 end
 
 local function makefn(build, stage, data)

@@ -51,7 +51,11 @@ local function onburnt(inst)
     product.Transform:SetPosition(inst.Transform:GetWorldPosition())
     inst:Remove()
 end
-    
+
+local function digup(inst, digger)
+    inst.components.crop:ForceHarvest()
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -83,6 +87,11 @@ local function fn(Sim)
     inst.components.burnable:MakeDragonflyBait(1)
     
     anim:SetFinalOffset(-1)
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
     
     return inst
 end

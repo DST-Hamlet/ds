@@ -37,13 +37,13 @@ local PopupDialogScreen = Class(Screen, function(self, title, text, buttons)
 	
 	--title	
     self.title = self.proot:AddChild(Text(TITLEFONT, 50))
-    self.title:SetPosition(0, 70, 0)
+    self.title:SetPosition(0, 60, 0)
     self.title:SetString(title)
 
 	--text
     self.text = self.proot:AddChild(Text(BODYTEXTFONT, 25))
 
-    self.text:SetPosition(0, 5, 0)
+    self.text:SetPosition(0, 0, 0)
     self.text:SetString(text)
     self.text:EnableWordWrap(true)
     self.text:SetRegionSize(500, 80)

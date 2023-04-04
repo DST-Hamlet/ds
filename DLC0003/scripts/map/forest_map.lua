@@ -501,7 +501,10 @@ local function GenerateVoro(prefab, map_width, map_height, tasks, world_gen_choi
 	--WorldSim:ConvertToTileMap(min_size, 500)
 	WorldSim:ConvertToTileMap(min_size, max_size)
 
-	--WorldSim:SeparateIslands()
+	if prefab ~= "porkland" then
+		WorldSim:SeparateIslands()
+	end
+	
     print("Map Baked!")
 	map_width, map_height = WorldSim:GetWorldSize()
 	
@@ -803,7 +806,7 @@ local function GenerateVoro(prefab, map_width, map_height, tasks, world_gen_choi
 	    end
 	end
 
-   	topology_save.root:PopulateVoronoi(SpawnFunctions, entities, map_width, map_height, current_gen_params, prefab)
+   	topology_save.root:PopulateVoronoi(SpawnFunctions, entities, map_width, map_height, current_gen_params, prefab, level_type=="adventure")
 	if prefab == "shipwrecked" then
 		RemoveSingleWaterTile(map_width, map_height)
 		AddShoreline(map_width, map_height)

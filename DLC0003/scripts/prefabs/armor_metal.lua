@@ -28,8 +28,10 @@ local function fn(Sim)
     inst.AnimState:SetBank("armor_metalplate")
     inst.AnimState:SetBuild("armor_metalplate")
     inst.AnimState:PlayAnimation("anim")
+    MakeInventoryFloatable(inst, "idle_water", "anim")
     
     inst:AddTag("metal")
+    inst:AddTag("smeltable") -- Smelter
     
     inst:AddComponent("inspectable")
     

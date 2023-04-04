@@ -23,6 +23,7 @@ end
 
 function Fuse:StopFuse()
 	self.consuming = false
+	self.fusetime = self.maxfusetime
 	self.inst:PushEvent("fusestop", {time = self.fusetime})
 	if self.task then
 		self.task:Cancel()

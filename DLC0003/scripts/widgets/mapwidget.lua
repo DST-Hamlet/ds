@@ -1,11 +1,22 @@
 local Widget = require "widgets/widget"
 local Image = require "widgets/image"
 
+local function GetMapBorderAssets()
+	if SaveGameIndex:IsModeShipwrecked() then
+		return "images/hud_shipwrecked.xml", "map_shipwrecked.tex"
+
+	elseif SaveGameIndex:IsModePorkland() then
+		return "images/hud_porkland.xml", "map_hamlet.tex"
+	end
+	
+	return "images/hud.xml", "map.tex"
+end
+
 local MapWidget = Class(Widget, function(self)
     Widget._ctor(self, "MapWidget")
 	self.owner = GetPlayer()
 
-    self.bg = self:AddChild(Image("images/hud_porkland.xml", "map_hamlet.tex"))
+    self.bg = self:AddChild(Image(GetMapBorderAssets()))
     self.bg:SetVRegPoint(ANCHOR_MIDDLE)
     self.bg:SetHRegPoint(ANCHOR_MIDDLE)
     self.bg:SetVAnchor(ANCHOR_MIDDLE)

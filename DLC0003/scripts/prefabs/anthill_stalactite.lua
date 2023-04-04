@@ -13,7 +13,7 @@ local function fn(Sim)
 	local minimap = inst.entity:AddMiniMapEntity()
 	minimap:SetIcon("rock_antcave.png")
 
-	anim:SetBank("rock")
+	anim:SetBank("rock_antcave")
 	anim:SetBuild("rock_antcave")
 	anim:PlayAnimation("full", true)
 

@@ -17,6 +17,8 @@ local assets =
 	Asset("SOUND", "sound/forest.fsb"),
 	Asset("INV_IMAGE", "jungleTreeSeed"),
 	Asset("MINIMAP_IMAGE", "claw_tree"),
+	Asset("MINIMAP_IMAGE", "claw_tree_stump"),
+	Asset("MINIMAP_IMAGE", "claw_tree_burnt"),
 }
 
 local prefabs =
@@ -97,7 +99,9 @@ local function chop_down_burnt_tree(inst, chopper)
 	inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/harvested/clawtree/chop")
 	inst.AnimState:PlayAnimation(inst.anims.chop_burnt)
 	RemovePhysicsColliders(inst)
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 	inst.components.lootdropper:SpawnLootPrefab("charcoal")
 	inst.components.lootdropper:DropLoot()
 	if inst.pineconetask then
@@ -145,6 +149,7 @@ local function OnBurnt(inst, imm)
 		inst:DoTaskInTime( 0.5, changes)
 	end
 	inst.AnimState:PlayAnimation(inst.anims.burnt, true)
+	inst.MiniMapEntity:SetIcon("claw_tree_burnt.png")
 	--inst.AnimState:SetRayTestOnBB(true);
 	inst:AddTag("burnt")
 
@@ -356,6 +361,7 @@ local function chop_down_tree(inst, chopper)
 
 	RemovePhysicsColliders(inst)
 	inst.AnimState:PushAnimation(inst.anims.stump)
+	inst.MiniMapEntity:SetIcon("claw_tree_stump.png")
 
 	inst:AddComponent("workable")
 	inst.components.workable:SetWorkAction(ACTIONS.DIG)
@@ -555,6 +561,7 @@ local function onload(inst, data)
 
 		if data.burnt then
 			inst:AddTag("fire") -- Add the fire tag here: OnEntityWake will handle it actually doing burnt logic
+			inst.MiniMapEntity:SetIcon("claw_tree_burnt.png")
 		elseif data.stump then
 			inst:RemoveComponent("burnable")
 			MakeSmallBurnable(inst)
@@ -564,6 +571,7 @@ local function onload(inst, data)
 			inst:RemoveComponent("growable")
 			RemovePhysicsColliders(inst)
 			inst.AnimState:PlayAnimation(inst.anims.stump)
+			inst.MiniMapEntity:SetIcon("claw_tree_stump.png")
 			inst:AddTag("stump")
 			inst:RemoveTag("shelter")
 			inst:RemoveTag("gustable")
@@ -630,9 +638,11 @@ local function OnGustAnimDone(inst)
 		inst.AnimState:PlayAnimation(inst.anims["blown"..tostring(anim)], false)
 	else
 		inst:DoTaskInTime(math.random()/2, function(inst)
-			inst:RemoveEventCallback("animover", OnGustAnimDone)
-			inst.AnimState:PlayAnimation(inst.anims.blown_pst, false)
-			PushSway(inst)
+            if not inst:HasTag("stump") and not inst:HasTag("burnt") then
+                inst.AnimState:PlayAnimation(inst.anims.blown_pst, false)
+                PushSway(inst)
+            end
+            inst:RemoveEventCallback("animover", OnGustAnimDone)
 		end)
 	end
 end
@@ -642,6 +652,9 @@ local function OnGustStart(inst, windspeed)
 		return
 	end
 	inst:DoTaskInTime(math.random()/2, function(inst)
+		if inst:HasTag("stump") or inst:HasTag("burnt") then
+			return
+		end
 		if inst.spotemitter == nil then
 			AddToNearSpotEmitter(inst, "treeherd", "tree_creak_emitter", TUNING.TREE_CREAK_RANGE)
 		end
@@ -804,6 +817,7 @@ local function makefn(build, stage, data)
 			inst:RemoveTag("gustable")
 			RemovePhysicsColliders(inst)
 			inst.AnimState:PlayAnimation(inst.anims.stump)
+			inst.MiniMapEntity:SetIcon("claw_tree_stump.png")
 			inst:AddTag("stump")
 			inst:AddComponent("workable")
 			inst.components.workable:SetWorkAction(ACTIONS.DIG)

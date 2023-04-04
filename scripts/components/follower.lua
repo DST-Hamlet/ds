@@ -14,6 +14,10 @@ local Follower = Class(function(self, inst)
     self.canaccepttarget = true
 
     self.inst:ListenForEvent("attacked", onattacked)
+
+	self.OnLeaderRemoved = function()
+        self:SetLeader(nil)
+    end
 end)
 
 --[[
@@ -77,11 +81,16 @@ end
 function Follower:SetLeader(inst)
     if self.leader and self.leader.components.leader then
         self.leader.components.leader:RemoveFollower(self.inst)
+		self.inst:RemoveEventCallback("onremove", self.OnLeaderRemoved, self.leader)
     end
     if inst and inst.components.leader then
         inst.components.leader:AddFollower(self.inst)
     end
     self.leader = inst
+
+	if self.leader then
+		self.inst:ListenForEvent("onremove", self.OnLeaderRemoved, self.leader)
+	end
     
     if self.leader and (self.leader:HasTag("player") or 
     	--Special case for Chester...

@@ -6,15 +6,7 @@ local assets =
 }
 
 local function test_ground(inst, pt)
-    local basetile = GROUND.DIRT
-    if GetWorld():HasTag("shipwrecked") then
-        basetile = GROUND.BEACH
-    end
-    local tile = inst:GetCurrentTileType(pt.x, pt.y, pt.z)
-
-    local ground = GetWorld()
-    local onWater = ground.Map:IsWater(tile)
-    return not onWater
+    return not inst:GetIsOnWater(pt:Get()) and IsPointInInteriorBounds(pt, 2)
 end
 
 local function ondeploy(inst, pt) 
@@ -63,7 +55,7 @@ local function fn(Sim)
     inst:AddComponent("deployable")
     inst.components.deployable.test = test_ground
     inst.components.deployable.ondeploy = ondeploy
-    
+    inst.components.deployable.deploydistance = 1.5
 
     return inst
 end

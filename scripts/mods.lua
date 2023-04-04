@@ -414,7 +414,7 @@ function ModWrangler:SetPostEnv()
 		moddetail = moddetail.. STRINGS.UI.MAINSCREEN.FORCEMODDETAIL.." "..forcemodnames.."\n\n"
 	end
 
-	if (modnames ~= "" or newmodnames ~= "" or oldmodnames ~= "" or failedmodnames ~= "" or forcemodnames ~= "")  and TheSim:ShouldWarnModsLoaded() then
+	if (modnames ~= "" or newmodnames ~= "" or oldmodnames ~= "" or failedmodnames ~= "" or forcemodnames ~= "")  and TheSim:ShouldWarnModsLoaded() and Profile:GetModsWarning() then
 	--if (#self.enabledmods > 0)  and TheSim:ShouldWarnModsLoaded() then
 		TheFrontEnd:PushScreen(
 			ScriptErrorScreen(
@@ -429,7 +429,7 @@ function ModWrangler:SetPostEnv()
 																	end)
 																end},
 					{text=STRINGS.UI.MAINSCREEN.MODFORUMS, nopop=true, cb = function() VisitURL("http://forums.kleientertainment.com/index.php?/forum/26-dont-starve-mods-and-tools/") end }
-				}))
+				}, nil, nil, nil, nil, true))
 	elseif KnownModIndex:WasLoadBad() then
 		TheFrontEnd:PushScreen(
 			ScriptErrorScreen(

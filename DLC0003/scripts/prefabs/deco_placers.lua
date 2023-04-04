@@ -257,7 +257,7 @@ local function placeTestWallFn(inst, pt, distance)
         local dist = distance or 3
         ents = TheSim:FindEntities(pt.x, pt.y, pt.z, dist, {"wallsection"})  
         print("ENTS",#ents, canbuild)
-        dumptable(ents,1,1,1)    
+        --dumptable(ents,1,1,1)    
         if #ents < 1 and canbuild then
             return true
         end  

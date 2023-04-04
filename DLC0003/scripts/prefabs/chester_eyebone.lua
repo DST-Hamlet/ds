@@ -219,6 +219,7 @@ local function fn(Sim)
 
     inst:AddTag("chester_eyebone")
     inst:AddTag("irreplaceable")
+    inst:AddTag("dropontravel")
 	inst:AddTag("nonpotatable")
     inst:AddTag("follower_leash")
 

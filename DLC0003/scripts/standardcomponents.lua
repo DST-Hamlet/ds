@@ -1,5 +1,5 @@
 function GetWorldCollision()
-    local worldCollision = { forest = COLLISION.WORLD_01, shipwrecked = COLLISION.WORLD_01, porkland = COLLISION.WORLD_01, volcanolevel = COLLISION.WORLD_01, cave = COLLISION.WORLD_01 }
+    local worldCollision = { forest = COLLISION.WORLD_01, shipwrecked = COLLISION.GROUND, porkland = COLLISION.WORLD_01, volcanolevel = COLLISION.WORLD_01, cave = COLLISION.WORLD_01 }
     return worldCollision[GetWorld().prefab]
 end
 
@@ -8,6 +8,7 @@ function GetWaterCollision()
     return waterCollision[GetWorld().prefab]
 end
 
+-- Deprecated, use GetWorldCollision instead.
 function SetAquaticEntityCollision(inst)
     if GetWorld().prefab == "shipwrecked" then
         inst.Physics:CollidesWith(COLLISION.GROUND)
@@ -116,6 +117,10 @@ function DefaultBurntStructureFn(inst)
     if inst.components.stewer then
        inst.components.stewer:StopCooking("fire") 
        inst:RemoveComponent("stewer")
+    end
+    if inst.components.melter then
+       inst.components.melter:StopCooking("fire") 
+       inst:RemoveComponent("melter")
     end
     if inst.components.harvestable then
         inst.components.harvestable:StopGrowing()
@@ -361,7 +366,7 @@ function MakeInventoryPhysics(inst)
     inst.Physics:SetRestitution(.5)
     inst.Physics:SetCollisionGroup(COLLISION.ITEMS)
     inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(COLLISION.GROUND) --inst.Physics:CollidesWith(COLLISION.WORLD) [dg] Trying this
+    inst.Physics:CollidesWith(GetWorldCollision())
     inst.Physics:CollidesWith(COLLISION.OBSTACLES)
     inst.Physics:CollidesWith(COLLISION.INTWALL)
 end
@@ -403,7 +408,7 @@ function MakeAmphibiousCharacterPhysics(inst, mass, rad)
     inst.Physics:SetDamping(5)
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
     inst.Physics:ClearCollisionMask()
-    SetAquaticEntityCollision(inst)
+    inst.Physics:CollidesWith(GetWorldCollision())
     inst.Physics:CollidesWith(COLLISION.OBSTACLES)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
 	inst.Physics:CollidesWith(COLLISION.WAVES)
@@ -419,26 +424,14 @@ function MakeAmphibiousGhostPhysics(inst, mass, rad)
     inst.Physics:SetDamping(5)
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
     inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(COLLISION.GROUND)
+    inst.Physics:CollidesWith(GetWorldCollision())
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
 	inst.Physics:CollidesWith(COLLISION.WAVES)
     inst.Physics:CollidesWith(COLLISION.INTWALL)
 end
 
-function MakeGhostPhysics(inst, mass, rad)
-    local physics = inst.entity:AddPhysics()
-    physics:SetMass(mass)
-    physics:SetCapsule(rad, 1)
-    inst.Physics:SetFriction(0)
-    inst.Physics:SetDamping(5)
-    inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
-    inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(GetWorldCollision())
-    -- inst.Physics:CollidesWith(COLLISION.OBSTACLES)
-    inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-	inst.Physics:CollidesWith(COLLISION.WAVES)
-    inst.Physics:CollidesWith(COLLISION.INTWALL)
-end
+-- For compatibility
+MakeGhostPhysics = MakeAmphibiousGhostPhysics
 
 -- THIS PHYSICS DEF WILL IGNORE INTERIOR WALLS. FOR SHADOW HANDS
 function MakeSpecialGhostPhysics(inst, mass, rad)
@@ -449,7 +442,7 @@ function MakeSpecialGhostPhysics(inst, mass, rad)
     inst.Physics:SetDamping(5)
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
     inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(GetWorldCollision())
+    inst.Physics:CollidesWith(COLLISION.GROUND)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
     inst.Physics:CollidesWith(COLLISION.WAVES)
 end
@@ -470,8 +463,6 @@ function ChangeToGhostPhysics(inst)
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
     inst.Physics:ClearCollisionMask()
     inst.Physics:CollidesWith(GetWorldCollision())
-    inst.Physics:CollidesWith(COLLISION.WORLD)
-    -- inst.Physics:CollidesWith(COLLISION.OBSTACLES)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
 	inst.Physics:CollidesWith(COLLISION.WAVES)
     inst.Physics:CollidesWith(COLLISION.INTWALL)
@@ -493,6 +484,7 @@ function ChangeToUndergroundCharacterPhysics(inst)
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
     inst.Physics:ClearCollisionMask()
     inst.Physics:CollidesWith(GetWorldCollision())
+    inst.Physics:CollidesWith(GetWaterCollision())
     inst.Physics:CollidesWith(COLLISION.OBSTACLES)
     inst.Physics:CollidesWith(COLLISION.INTWALL)
 end
@@ -511,7 +503,7 @@ end
 function ChangeToInventoryPhysics(inst)
     inst.Physics:SetCollisionGroup(COLLISION.ITEMS)
     inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(COLLISION.GROUND) --inst.Physics:CollidesWith(COLLISION.WORLD) [dg] Trying this
+    inst.Physics:CollidesWith(GetWorldCollision())
     inst.Physics:CollidesWith(COLLISION.OBSTACLES)
     inst.Physics:CollidesWith(COLLISION.INTWALL)
 end
@@ -574,7 +566,7 @@ end
 function RemovePhysicsColliders(inst)
     inst.Physics:ClearCollisionMask()
     if inst.Physics:GetMass() > 0 then
-        inst.Physics:CollidesWith(COLLISION.GROUND)
+        inst.Physics:CollidesWith(GetWorldCollision())
     end
 end
 
@@ -740,7 +732,14 @@ end
 
 function MakePickableBlowInWindGust(inst, wind_speed, destroy_chance)
     inst.onblownpstdone = function(inst)
-        if inst.components.pickable and inst.components.pickable:CanBePicked() and inst.AnimState:IsCurrentAnimation("blown_pst") then
+        if inst.components.pickable and
+            inst.components.pickable:CanBePicked() and 
+            (
+                inst.AnimState:IsCurrentAnimation("blown_pst") or
+                inst.AnimState:IsCurrentAnimation("blown_loop") or
+                inst.AnimState:IsCurrentAnimation("blown_pre")
+            )
+        then
             inst.AnimState:PlayAnimation("idle", true)
         end
         inst:RemoveEventCallback("animover", inst.onblownpstdone)
@@ -754,10 +753,14 @@ function MakePickableBlowInWindGust(inst, wind_speed, destroy_chance)
             else
                 inst:DoTaskInTime(math.random()/2, function(inst)
                     inst:RemoveEventCallback("animover", inst.ongustanimdone)
-                    inst.AnimState:PlayAnimation("blown_pst", false)
-                    -- changed this from a push animation to an animover listen event so that it can be interrupted if necessary, and that a check can be made at the end to know if it should go to idle at that time.
-                    --inst.AnimState:PushAnimation("idle", true)
-                    inst:ListenForEvent("animover", inst.onblownpstdone)
+
+                    -- This may not be true anymore
+                    if inst.components.pickable and inst.components.pickable:CanBePicked() then
+                        inst.AnimState:PlayAnimation("blown_pst", false)
+                        -- changed this from a push animation to an animover listen event so that it can be interrupted if necessary, and that a check can be made at the end to know if it should go to idle at that time.
+                        --inst.AnimState:PushAnimation("idle", true)
+                        inst:ListenForEvent("animover", inst.onblownpstdone)
+                    end
                 end)
             end
         else
@@ -766,12 +769,12 @@ function MakePickableBlowInWindGust(inst, wind_speed, destroy_chance)
     end
 
     inst.onguststart = function(inst, windspeed)
-        if inst.components.pickable and inst.components.pickable:CanBePicked() then
-            inst:DoTaskInTime(math.random()/2, function(inst)
+        inst:DoTaskInTime(math.random()/2, function(inst)
+            if inst.components.pickable and inst.components.pickable:CanBePicked() then
                 inst.AnimState:PlayAnimation("blown_pre", false)
                 inst:ListenForEvent("animover", inst.ongustanimdone)
-            end)
-        end
+            end
+        end)
     end
 
     inst.ongustpick = function(inst)
@@ -785,11 +788,26 @@ function MakePickableBlowInWindGust(inst, wind_speed, destroy_chance)
     inst.components.blowinwindgust:SetWindSpeedThreshold(wind_speed)
     inst.components.blowinwindgust:SetDestroyChance(destroy_chance)
     inst.components.blowinwindgust:SetGustStartFn(inst.onguststart)
+    inst.components.blowinwindgust:SetGustEndFn(inst.onblownpstdone)
     inst.components.blowinwindgust:SetDestroyFn(inst.ongustpick)
     inst.components.blowinwindgust:Start()
 end
 
 function MakeHackableBlowInWindGust(inst, wind_speed, destroy_chance)
+    inst.onblownpstdone = function(inst)
+        if inst.components.hackable and
+            inst.components.hackable:CanBeHacked() and 
+            (
+                inst.AnimState:IsCurrentAnimation("blown_pst") or
+                inst.AnimState:IsCurrentAnimation("blown_loop") or
+                inst.AnimState:IsCurrentAnimation("blown_pre")
+            )
+        then
+            inst.AnimState:PlayAnimation("idle", true)
+        end
+        inst:RemoveEventCallback("animover", inst.onblownpstdone)
+    end
+    
     inst.ongustanimdone = function(inst)
         if inst.components.hackable and inst.components.hackable:CanBeHacked() then
             if inst.components.blowinwindgust:IsGusting() then
@@ -798,8 +816,14 @@ function MakeHackableBlowInWindGust(inst, wind_speed, destroy_chance)
             else
                 inst:DoTaskInTime(math.random()/2, function(inst)
                     inst:RemoveEventCallback("animover", inst.ongustanimdone)
-                    inst.AnimState:PlayAnimation("blown_pst", false)
-                    inst.AnimState:PushAnimation("idle", true)
+
+                    -- This may not be true anymore
+                    if inst.components.hackable and inst.components.hackable:CanBeHacked() then
+                        inst.AnimState:PlayAnimation("blown_pst", false)
+                        -- changed this from a push animation to an animover listen event so that it can be interrupted if necessary, and that a check can be made at the end to know if it should go to idle at that time.
+                        --inst.AnimState:PushAnimation("idle", true)
+                        inst:ListenForEvent("animover", inst.onblownpstdone)
+                    end
                 end)
             end
         else
@@ -808,12 +832,12 @@ function MakeHackableBlowInWindGust(inst, wind_speed, destroy_chance)
     end
 
     inst.onguststart = function(inst, windspeed)
-        if inst.components.hackable and inst.components.hackable:CanBeHacked() then
-            inst:DoTaskInTime(math.random()/2, function(inst)
+        inst:DoTaskInTime(math.random()/2, function(inst)
+            if inst.components.hackable and inst.components.hackable:CanBeHacked() then
                 inst.AnimState:PlayAnimation("blown_pre", false)
                 inst:ListenForEvent("animover", inst.ongustanimdone)
-            end)
-        end
+            end
+        end)
     end
 
     inst.ongusthack = function(inst)
@@ -827,6 +851,7 @@ function MakeHackableBlowInWindGust(inst, wind_speed, destroy_chance)
     inst.components.blowinwindgust:SetWindSpeedThreshold(wind_speed)
     inst.components.blowinwindgust:SetDestroyChance(destroy_chance)
     inst.components.blowinwindgust:SetGustStartFn(inst.onguststart)
+    inst.components.blowinwindgust:SetGustEndFn(inst.onblownpstdone)
     inst.components.blowinwindgust:SetDestroyFn(inst.ongusthack)
     inst.components.blowinwindgust:Start()
 end

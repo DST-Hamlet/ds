@@ -27,7 +27,9 @@ local function fn()
     inst:AddComponent("shatterfx")
     inst.components.shatterfx.levels = shatterlevels
     
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
     
     inst.SoundEmitter:PlaySound("dontstarve/common/break_iceblock")
     return inst

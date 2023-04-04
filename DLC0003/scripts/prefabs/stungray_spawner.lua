@@ -47,6 +47,7 @@ local function fn(Sim)
 	minimap:SetEnabled(false)
 
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst:AddComponent( "childspawner" )
 	inst.components.childspawner:SetRegenPeriod(60)

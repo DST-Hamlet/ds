@@ -270,9 +270,11 @@ return {
 		BOOK_GARDENING = "Imagine, a rolling field of red flowers...",
 		BOOK_SLEEP = "Does it bestow an eternal slumber?",
 		BOOK_BRIMSTONE = "The tome to end it all...",
+		BOOK_METEOR = "Reading is a dangerous thing.",
 		LUCY = "Hello... 'Lucy'. I'd like you to meet my sister.",
 		BALLOONS_EMPTY = "These look as deflated as I feel...",
 		SPEAR_WATHGRITHR = "It seems a tad dramatic.",
+		WATHGRITHRHAT = "Perhaps someone was playing dress-up. I suppose I missed it.",
 		WAXWELLJOURNAL = "Do you want me to read you a story, Abigail?",
 		
 		BEARGER = "It could crush me in one blow. I wish it would.",
@@ -704,6 +706,8 @@ return {
             GENERIC = "Why leave? The light here compliments my complexion.",
             OPEN = "The surface beckons.",
         },
+
+        CAVE_REGENERATOR = "It yearns to be brought to the cave's entrance.",
 
 		BOOMERANG = "Death returns to the sender.",
 		MAXWELLPHONOGRAPH = "Shall we have a danse macabre?",
@@ -2758,6 +2762,7 @@ return {
     	HARDSHELL_TACOS = "It's hard crust reminds me of life.",
     	GUMMY_CAKE = "It fills me with no joy.",
     	STEAMEDHAMSANDWICH = "Old family recipe.",
+		MEATED_NETTLE = "Temporary relief for life's grief... wrapped in meat.",
 
     	ROC_NEST_DEBRIS1 = "It has endured hardship.",
     	ROC_NEST_DEBRIS2 = "It has withstood much.",
@@ -2836,6 +2841,7 @@ return {
         BILL_QUILL = "It's been separated from its animal.",
 
         ANTLER = "Do you enjoy the wistful sound of bird song, Abigail?",
+        ANTLER_CORRUPTED = "It has a most haunting sound.",
 
         PUGALISK_SKULL = "Brings me no joy.",
         PUGALISK_CORPSE = "Life is fragile. Even for evil snakes.",
@@ -2915,6 +2921,13 @@ return {
         -------------YOTP---------------
         FIRECRACKERS = "It needs only a light.",
         REDLANTERN = "A light to guide me.",
+
+		-------------Wormwood Specific-------
+		
+		COMPOSTWRAP = "It's poop. Sigh.",
+		POISONBALM = "In case I don't want to succumb to poison. Unlikely.",
+        ARMOR_BRAMBLE = "So my outside matches my inside.",
+        TRAP_BRAMBLE = "To prick and ensnare.",
 
         -------rewards update-------
 

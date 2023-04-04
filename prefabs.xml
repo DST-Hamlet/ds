@@ -283,6 +283,7 @@
 	<Assets>
 		<Asset  type='ANIM' file='anim/teleport_pad.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/teleport_pad_beacon.zip' flags='0' />
+		<Asset  type='SOUND' file='sound/dontstarve_wagstaff.fsb' flags='0' />
 	</Assets>
 </Prefab>
 <Prefab name='beardhair' file='scripts/prefabs/beardhair.lua' desc='' >
@@ -434,6 +435,13 @@
 		<Dep prefab='perd' />
 		<Dep prefab='twigs' />
 	</Deps>
+</Prefab>
+<Prefab name='bigshadowtentacle' file='scripts/prefabs/bigshadowtentacle.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/tentacle_arm.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/tentacle_arm_black_build.zip' flags='0' />
+		<Asset  type='SOUND' file='sound/tentacle.fsb' flags='0' />
+	</Assets>
 </Prefab>
 <Prefab name='bird_egg' file='scripts/prefabs/egg.lua' desc='' >
 	<Assets>
@@ -699,6 +707,11 @@
 		<Asset  type='ANIM' file='anim/ui_bundle_2x2.zip' flags='0' />
 	</Assets>
 </Prefab>
+<Prefab name='bundle_unwrap' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/bundle.zip' flags='0' />
+	</Assets>
+</Prefab>
 <Prefab name='bundlewrap' file='scripts/prefabs/bundle.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/bundle.zip' flags='0' />
@@ -706,11 +719,6 @@
 	<Deps>
 		<Dep prefab='bundle' />
 		<Dep prefab='bundle_container' />
-		<Dep prefab='bundle' />
-		<Dep prefab='bundle_blueprint' />
-		<Dep prefab='bundle_large' />
-		<Dep prefab='bundle_medium' />
-		<Dep prefab='bundle_small' />
 	</Deps>
 </Prefab>
 <Prefab name='bunnyman' file='scripts/prefabs/bunnyman.lua' desc='' >
@@ -923,6 +931,7 @@
 	<Deps>
 		<Dep prefab='bat' />
 		<Dep prefab='exitcavelight' />
+		<Dep prefab='cave_regenerator' />
 	</Deps>
 </Prefab>
 <Prefab name='cave_exit' file='scripts/prefabs/cave_exit.lua' desc='' >
@@ -937,6 +946,11 @@
 	<Deps>
 		<Dep prefab='foliage' />
 	</Deps>
+</Prefab>
+<Prefab name='cave_regenerator' file='scripts/prefabs/cave_regenerator.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/cave_regenerator.zip' flags='0' />
+	</Assets>
 </Prefab>
 <Prefab name='cavelight' file='scripts/prefabs/cavelight.lua' desc='' >
 	<Assets>
@@ -1176,7 +1190,6 @@
 		<Dep prefab='smallmeat' />
 		<Dep prefab='cookedsmallmeat' />
 		<Dep prefab='feather_crow' />
-		<Dep prefab='note' />
 	</Deps>
 </Prefab>
 <Prefab name='cutgrass' file='scripts/prefabs/cutgrass.lua' desc='' >
@@ -1652,10 +1665,6 @@
 		<Dep prefab='eyeturret_base' />
 	</Deps>
 </Prefab>
-<Prefab name='farmplot_placer' file='scripts/prefabs/farmplot.lua' desc='' >
-	<Assets>
-	</Assets>
-</Prefab>
 <Prefab name='farmrock' file='scripts/prefabs/farm_decor.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/farm_decor.zip' flags='0' />
@@ -1691,6 +1700,10 @@
 		<Dep prefab='fencepost' />
 		<Dep prefab='fencepostright' />
 	</Deps>
+</Prefab>
+<Prefab name='fast_farmplot_placer' file='scripts/prefabs/farmplot.lua' desc='' >
+	<Assets>
+	</Assets>
 </Prefab>
 <Prefab name='feather_crow' file='scripts/prefabs/feathers.lua' desc='' >
 	<Assets>
@@ -1821,6 +1834,8 @@
 		<Dep prefab='fire_projectile' />
 		<Dep prefab='staffcastfx' />
 		<Dep prefab='stafflight' />
+		<Dep prefab='sand_puff_large_front' />
+		<Dep prefab='sand_puff_large_back' />
 	</Deps>
 </Prefab>
 <Prefab name='firework_fx' file='scripts/prefabs/fx.lua' desc='' >
@@ -2052,7 +2067,6 @@
 		<Dep prefab='horizontal_maxwelllight' />
 		<Dep prefab='vertical_maxwelllight' />
 		<Dep prefab='quad_maxwelllight' />
-		<Dep prefab='area_maxwelllight' />
 		<Dep prefab='maxwelllock' />
 		<Dep prefab='maxwellphonograph' />
 		<Dep prefab='puppet_wilson' />
@@ -2076,7 +2090,6 @@
 		<Dep prefab='accomplishment_shrine' />
 		<Dep prefab='anim_test' />
 		<Dep prefab='bonfire' />
-		<Dep prefab='brokenwalls' />
 		<Dep prefab='deadlyfeast' />
 		<Dep prefab='dropperweb' />
 		<Dep prefab='lanternfire' />
@@ -2087,26 +2100,18 @@
 		<Dep prefab='maxwellintro' />
 		<Dep prefab='maxwellkey' />
 		<Dep prefab='mistarea' />
-		<Dep prefab='nightmare_flame' />
-		<Dep prefab='paired_maxwelllight' />
 		<Dep prefab='phonograph' />
 		<Dep prefab='plant_normal' />
-		<Dep prefab='player_common' />
 		<Dep prefab='portal_home' />
 		<Dep prefab='portal_level' />
-		<Dep prefab='researchmachine' />
 		<Dep prefab='rubble' />
-		<Dep prefab='ruin' />
 		<Dep prefab='sinkhole' />
 		<Dep prefab='sounddebugicon' />
 		<Dep prefab='staff_castinglight' />
-		<Dep prefab='stairs' />
 		<Dep prefab='sunkboat' />
 		<Dep prefab='teamleader' />
 		<Dep prefab='teleportato_checkmate' />
 		<Dep prefab='teleportlocation' />
-		<Dep prefab='tree_clump' />
-		<Dep prefab='unlockable_players' />
 		<Dep prefab='nightlight_flame' />
 		<Dep prefab='spat' />
 		<Dep prefab='transistor' />
@@ -2304,6 +2309,24 @@
 		<Asset  type='IMAGE' file='images/globalpanels.tex' flags='0' />
 		<Asset  type='ATLAS' file='images/saveslot_portraits.xml' flags='0' />
 		<Asset  type='IMAGE' file='images/saveslot_portraits.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_wagstaff.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_wagstaff.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_maxwell.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_maxwell.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_newhorizons.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_newhorizons.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_wendy.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_wendy.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_wickerbottom.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_wickerbottom.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_wolfgang.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_wolfgang.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_woodie2_trailer.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_woodie2_trailer.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_woodie_trailer.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_woodie_trailer.tex' flags='0' />
+		<Asset  type='ATLAS' file='images/bg_loading_loading_night.xml' flags='0' />
+		<Asset  type='IMAGE' file='images/bg_loading_loading_night.tex' flags='0' />
 		<Asset  type='FONT' file='fonts/talkingfont.zip' flags='0' />
 		<Asset  type='FONT' file='fonts/talkingfont_wathgrithr.zip' flags='0' />
 		<Asset  type='FONT' file='fonts/talkingfont_wormwood.zip' flags='0' />
@@ -2447,6 +2470,8 @@
 		<Dep prefab='fire_projectile' />
 		<Dep prefab='staffcastfx' />
 		<Dep prefab='stafflight' />
+		<Dep prefab='sand_puff_large_front' />
+		<Dep prefab='sand_puff_large_back' />
 	</Deps>
 </Prefab>
 <Prefab name='gridplacer' file='scripts/prefabs/gridplacer.lua' desc='' >
@@ -2687,6 +2712,8 @@
 		<Dep prefab='fire_projectile' />
 		<Dep prefab='staffcastfx' />
 		<Dep prefab='stafflight' />
+		<Dep prefab='sand_puff_large_front' />
+		<Dep prefab='sand_puff_large_back' />
 	</Deps>
 </Prefab>
 <Prefab name='impact' file='scripts/prefabs/impact.lua' desc='' >
@@ -3126,11 +3153,13 @@
 		<Dep prefab='maxwellendgame' />
 		<Dep prefab='puppet_wilson' />
 		<Dep prefab='puppet_willow' />
-		<Dep prefab='puppet_wendy' />
-		<Dep prefab='puppet_wickerbottom' />
 		<Dep prefab='puppet_wolfgang' />
+		<Dep prefab='puppet_wendy' />
 		<Dep prefab='puppet_wx78' />
+		<Dep prefab='puppet_wickerbottom' />
+		<Dep prefab='puppet_woodie' />
 		<Dep prefab='puppet_wes' />
+		<Dep prefab='puppet_wagstaff' />
 	</Deps>
 </Prefab>
 <Prefab name='meat' file='scripts/prefabs/meats.lua' desc='' >
@@ -3344,13 +3373,74 @@
 <Prefab name='minotaur' file='scripts/prefabs/minotaur.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/rook.zip' flags='0' />
-		<Asset  type='ANIM' file='anim/rook_build.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/rook_rhino.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/rook_rhino_damaged_build.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/rook_attacks.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/chess.fsb' flags='0' />
+		<Asset  type='SOUNDPACKAGE' file='sound/ancientguardian_rework.fev' flags='0' />
+		<Asset  type='SOUND' file='sound/ancientguardian_rework.fsb' flags='0' />
 	</Assets>
 	<Deps>
 		<Dep prefab='meat' />
 		<Dep prefab='minotaurhorn' />
+		<Dep prefab='minotaurchestspawner' />
+		<Dep prefab='collapse_small' />
+		<Dep prefab='bigshadowtentacle' />
+		<Dep prefab='shadowhand_fx' />
+		<Dep prefab='ruins_cavein_obstacle' />
+		<Dep prefab='minotaur_blood1' />
+		<Dep prefab='minotaur_blood2' />
+		<Dep prefab='minotaur_blood3' />
+		<Dep prefab='minotaur_blood_big' />
+	</Deps>
+</Prefab>
+<Prefab name='minotaur_blood1' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/rook_rhino_blood_fx.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='minotaur_blood2' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/rook_rhino_blood_fx.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='minotaur_blood3' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/rook_rhino_blood_fx.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='minotaur_blood_big' file='scripts/prefabs/minotaur.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/rook_rhino_blood_big_fx.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='minotaurchest' file='scripts/prefabs/treasurechest.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/treasure_chest.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/ui_chest_3x2.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/pandoras_chest.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/skull_chest.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/pandoras_chest_large.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='minotaurchestspawner' file='scripts/prefabs/minotaur.lua' desc='' >
+	<Assets>
+	</Assets>
+	<Deps>
+		<Dep prefab='minotaurchest' />
+		<Dep prefab='armorruins' />
+		<Dep prefab='ruinshat' />
+		<Dep prefab='ruins_bat' />
+		<Dep prefab='orangestaff' />
+		<Dep prefab='yellowstaff' />
+		<Dep prefab='orangeamulet' />
+		<Dep prefab='yellowamulet' />
+		<Dep prefab='yellowgem' />
+		<Dep prefab='orangegem' />
+		<Dep prefab='greengem' />
+		<Dep prefab='thulecite' />
+		<Dep prefab='thulecite_pieces' />
+		<Dep prefab='gears' />
 	</Deps>
 </Prefab>
 <Prefab name='minotaurhorn' file='scripts/prefabs/minotaurhorn.lua' desc='' >
@@ -3600,6 +3690,9 @@
 		<Asset  type='ANIM' file='anim/amulets.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/torso_amulets.zip' flags='0' />
 	</Assets>
+	<Deps>
+		<Dep prefab='sand_puff' />
+	</Deps>
 </Prefab>
 <Prefab name='orangegem' file='scripts/prefabs/gem.lua' desc='' >
 	<Assets>
@@ -3616,6 +3709,8 @@
 		<Dep prefab='fire_projectile' />
 		<Dep prefab='staffcastfx' />
 		<Dep prefab='stafflight' />
+		<Dep prefab='sand_puff_large_front' />
+		<Dep prefab='sand_puff_large_back' />
 	</Deps>
 </Prefab>
 <Prefab name='panflute' file='scripts/prefabs/panflute.lua' desc='' >
@@ -3996,6 +4091,13 @@
 		<Dep prefab='spoiled_food' />
 	</Deps>
 </Prefab>
+<Prefab name='puppet_wagstaff' file='scripts/prefabs/puppet.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_basic.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_throne.zip' flags='0' />
+	</Assets>
+</Prefab>
 <Prefab name='puppet_wendy' file='scripts/prefabs/puppet.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/wendy.zip' flags='0' />
@@ -4034,6 +4136,13 @@
 <Prefab name='puppet_wolfgang' file='scripts/prefabs/puppet.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/wolfgang.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_basic.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_throne.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='puppet_woodie' file='scripts/prefabs/puppet.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/woodie.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_basic.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_throne.zip' flags='0' />
 	</Assets>
@@ -4229,7 +4338,6 @@
 		<Dep prefab='smallmeat' />
 		<Dep prefab='cookedsmallmeat' />
 		<Dep prefab='feather_robin' />
-		<Dep prefab='note' />
 	</Deps>
 </Prefab>
 <Prefab name='robin_winter' file='scripts/prefabs/birds.lua' desc='' >
@@ -4243,7 +4351,6 @@
 		<Dep prefab='smallmeat' />
 		<Dep prefab='cookedsmallmeat' />
 		<Dep prefab='feather_robin_winter' />
-		<Dep prefab='note' />
 	</Deps>
 </Prefab>
 <Prefab name='rock1' file='scripts/prefabs/rocks.lua' desc='' >
@@ -4383,6 +4490,25 @@
 		<Dep prefab='greengem' />
 		<Dep prefab='orangegem' />
 		<Dep prefab='yellowgem' />
+	</Deps>
+</Prefab>
+<Prefab name='ruins_cavein_obstacle' file='scripts/prefabs/ruins_cavein_obstacle.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/rock_ruins.zip' flags='0' />
+	</Assets>
+	<Deps>
+		<Dep prefab='rocks' />
+		<Dep prefab='flint' />
+		<Dep prefab='ruins_cavein_obstacle_rubble_fx' />
+	</Deps>
+</Prefab>
+<Prefab name='ruins_cavein_obstacle_rubble_fx' file='scripts/prefabs/ruins_cavein_obstacle.lua' desc='' >
+	<Assets>
+	</Assets>
+	<Deps>
+		<Dep prefab='rocks' />
+		<Dep prefab='flint' />
+		<Dep prefab='ruins_cavein_obstacle_rubble_fx' />
 	</Deps>
 </Prefab>
 <Prefab name='ruins_chair' file='scripts/prefabs/smashables.lua' desc='' >
@@ -4623,6 +4749,21 @@
 	<Assets>
 	</Assets>
 </Prefab>
+<Prefab name='sand_puff' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/sand_puff.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='sand_puff_large_back' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/sand_puff.zip' flags='0' />
+	</Assets>
+</Prefab>
+<Prefab name='sand_puff_large_front' file='scripts/prefabs/fx.lua' desc='' >
+	<Assets>
+		<Asset  type='ANIM' file='anim/sand_puff.zip' flags='0' />
+	</Assets>
+</Prefab>
 <Prefab name='sanity_lower' file='scripts/prefabs/fx.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/blocker_sanity_fx.zip' flags='0' />
@@ -4782,6 +4923,10 @@
 		<Dep prefab='fencepost' />
 		<Dep prefab='fencepostright' />
 	</Deps>
+</Prefab>
+<Prefab name='slow_farmplot_placer' file='scripts/prefabs/farmplot.lua' desc='' >
+	<Assets>
+	</Assets>
 </Prefab>
 <Prefab name='slurper' file='scripts/prefabs/slurper.lua' desc='' >
 	<Assets>
@@ -5144,7 +5289,7 @@
 </Prefab>
 <Prefab name='stafflight' file='scripts/prefabs/stafflight.lua' desc='' >
 	<Assets>
-		<Asset  type='ANIM' file='anim/star.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/star_hot.zip' flags='0' />
 	</Assets>
 </Prefab>
 <Prefab name='stalagmite' file='scripts/prefabs/stalagmite.lua' desc='' >
@@ -5357,6 +5502,7 @@
 		<Asset  type='ANIM' file='anim/swap_telebrella.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/swap_telebrella_red.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/swap_telebrella_green.zip' flags='0' />
+		<Asset  type='SOUND' file='sound/dontstarve_wagstaff.fsb' flags='0' />
 	</Assets>
 </Prefab>
 <Prefab name='teleportato_base' file='scripts/prefabs/teleportato.lua' desc='' >
@@ -5418,12 +5564,15 @@
 		<Dep prefab='fire_projectile' />
 		<Dep prefab='staffcastfx' />
 		<Dep prefab='stafflight' />
+		<Dep prefab='sand_puff_large_front' />
+		<Dep prefab='sand_puff_large_back' />
 	</Deps>
 </Prefab>
 <Prefab name='telipad' file='scripts/prefabs/telipad.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/teleport_pad.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/teleport_pad_beacon.zip' flags='0' />
+		<Asset  type='SOUND' file='sound/dontstarve_wagstaff.fsb' flags='0' />
 	</Assets>
 </Prefab>
 <Prefab name='tent' file='scripts/prefabs/tent.lua' desc='' >
@@ -5503,6 +5652,7 @@
 <Prefab name='thumper' file='scripts/prefabs/thumper.lua' desc='' >
 	<Assets>
 		<Asset  type='ANIM' file='anim/wagstaff_thumper.zip' flags='0' />
+		<Asset  type='SOUND' file='sound/dontstarve_wagstaff.fsb' flags='0' />
 	</Assets>
 </Prefab>
 <Prefab name='tophat' file='scripts/prefabs/hats.lua' desc='' >
@@ -5848,6 +5998,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -5860,7 +6011,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -5894,6 +6048,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6073,6 +6229,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6085,7 +6242,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6114,6 +6274,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6168,6 +6330,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6180,7 +6343,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6209,6 +6375,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6251,6 +6419,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6263,7 +6432,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6293,6 +6465,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6343,6 +6517,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6355,7 +6530,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6384,6 +6562,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6426,6 +6606,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6438,7 +6619,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6467,6 +6651,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6514,6 +6700,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6526,7 +6713,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6555,6 +6745,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6610,6 +6802,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6622,7 +6815,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6655,6 +6851,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -6695,6 +6893,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -6707,7 +6906,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -6742,6 +6944,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -7018,6 +7222,7 @@
 		<Asset  type='ANIM' file='anim/player_one_man_band.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_slurtle_armor.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_staff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wagstaff.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/shadow_hands.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_travel.zip' flags='0' />
@@ -7030,7 +7235,10 @@
 		<Asset  type='ANIM' file='anim/player_mount_frozen.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_groggy.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_mount_hit_darkness.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_wagstaff.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_mount_idles_shiver.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/player_actions_unsaddle.zip' flags='0' />
+		<Asset  type='ANIM' file='anim/player_wrap_bundle.zip' flags='0' />
 		<Asset  type='ANIM' file='anim/goo.zip' flags='0' />
 		<Asset  type='SOUND' file='sound/sfx.fsb' flags='0' />
 		<Asset  type='SOUND' file='sound/wilson.fsb' flags='0' />
@@ -7059,6 +7267,8 @@
 		<Dep prefab='reticule' />
 		<Dep prefab='shovel_dirt' />
 		<Dep prefab='mining_fx' />
+		<Dep prefab='spear_wathgrithr' />
+		<Dep prefab='wathgrithrhat' />
 		<Dep prefab='gogglesnormalhat' />
 		<Dep prefab='gogglesheathat' />
 		<Dep prefab='gogglesarmorhat' />
@@ -7093,6 +7303,8 @@
 		<Dep prefab='fire_projectile' />
 		<Dep prefab='staffcastfx' />
 		<Dep prefab='stafflight' />
+		<Dep prefab='sand_puff_large_front' />
+		<Dep prefab='sand_puff_large_back' />
 	</Deps>
 </Prefab>
 </Defs>
@@ -7136,6 +7348,7 @@
 	<File name='scripts/prefabs/beemine.lua'/>
 	<File name='scripts/prefabs/beeswax.lua'/>
 	<File name='scripts/prefabs/berrybush.lua'/>
+	<File name='scripts/prefabs/bigshadowtentacle.lua'/>
 	<File name='scripts/prefabs/birdcage.lua'/>
 	<File name='scripts/prefabs/birds.lua'/>
 	<File name='scripts/prefabs/birdtrap.lua'/>
@@ -7165,6 +7378,7 @@
 	<File name='scripts/prefabs/cave_entrance.lua'/>
 	<File name='scripts/prefabs/cave_exit.lua'/>
 	<File name='scripts/prefabs/cave_fern.lua'/>
+	<File name='scripts/prefabs/cave_regenerator.lua'/>
 	<File name='scripts/prefabs/cavelight.lua'/>
 	<File name='scripts/prefabs/cavespiders.lua'/>
 	<File name='scripts/prefabs/character_fire.lua'/>
@@ -7373,6 +7587,7 @@
 	<File name='scripts/prefabs/rope.lua'/>
 	<File name='scripts/prefabs/rubble.lua'/>
 	<File name='scripts/prefabs/ruins_bat.lua'/>
+	<File name='scripts/prefabs/ruins_cavein_obstacle.lua'/>
 	<File name='scripts/prefabs/saddle.lua'/>
 	<File name='scripts/prefabs/saddlehorn.lua'/>
 	<File name='scripts/prefabs/saltlick.lua'/>

@@ -100,6 +100,7 @@ local function fn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon.onattack = OnAttack
 
     inst:AddComponent("inventoryitem")

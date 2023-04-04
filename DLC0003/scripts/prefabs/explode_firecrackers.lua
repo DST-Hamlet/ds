@@ -9,7 +9,6 @@ local function MakeExplosion(data)
 
         inst:AddTag("FX")
         inst.entity:SetCanSleep(false)
-        inst.persists = false
 
         inst.entity:AddTransform()
         inst.entity:AddAnimState()
@@ -34,6 +33,7 @@ local function MakeExplosion(data)
             inst.SoundEmitter:PlaySound(data ~= nil and data.sound or "dontstarve/common/blackpowder_explo")
         end
 
+        inst.persists = false
         inst:ListenForEvent("animover", inst.Remove)
     end
 

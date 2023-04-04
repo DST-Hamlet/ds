@@ -42,9 +42,9 @@ local function SetImage(inst, ent)
 
     if src ~= nil and src.components.inventoryitem ~= nil then
         image = src.prefab
-        if src.components.inventoryitem.imagename then
-            image = src.components.inventoryitem.imagename
-        end          
+        if src.components.inventoryitem then
+            image = src.components.inventoryitem:GetImage():gsub("%.tex", "")
+        end
     end 
 
     if image ~= nil then 

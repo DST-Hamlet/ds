@@ -183,8 +183,14 @@ STRINGS =
         },
 		WRAPBUNDLE = "Wrap",
 		UNWRAP = "Unwrap",
-        ADDFUEL = "Add Fuel",
-        ADDWETFUEL = "Add Wet Fuel",
+        ADDFUEL = {
+            GENERIC = "Add Fuel",
+            REPAIR = "Repair",
+        },
+        ADDWETFUEL = {
+            GENERIC = "Add Wet Fuel",
+            REPAIR = "Repair",
+        },
         LIGHT = "Light",
         EXTINGUISH = "Extinguish",
         LOOKAT = "Examine",
@@ -248,6 +254,8 @@ STRINGS =
             GENERIC = "Plant",
             GROUNDTILE = "Place Ground",
             WALL = "Build Wall",
+            FENCE = "Build Fence",
+            GATE = "Build Gate",
             TURRET = "Place",
             PLACE = "Place",
         },
@@ -256,6 +264,8 @@ STRINGS =
             GENERIC = "Plant",
             GROUNDTILE = "Place Ground",
             WALL = "Build Wall",
+            FENCE = "Build Fence",
+            GATE = "Build Gate",
             TURRET = "Place",
             PLACE = "Place",
         },
@@ -281,6 +291,8 @@ STRINGS =
         RESETMINE = "Reset",
         ACTIVATE = {
             GENERIC = "Activate",
+            OPEN = "Open",
+            CLOSE = "Close",
             INVESTIGATE = "Investigate",
             SPELUNK = "Spelunk",
             CLIMB = "Climb",
@@ -435,10 +447,10 @@ STRINGS =
 
         ANCIENT_ALTAR ="Ancient Pseudoscience Station",
         ANCIENT_ALTAR_BROKEN ="Broken Ancient Pseudoscience Station",
-        ANCIENT_STATUE ="Ancient statue",
-        CHESSJUNK1 = "Broken clockworks",
-        CHESSJUNK2 = "Broken clockworks",
-        CHESSJUNK3 = "Broken clockworks",
+        ANCIENT_STATUE ="Ancient Statue",
+        CHESSJUNK1 = "Broken Clockworks",
+        CHESSJUNK2 = "Broken Clockworks",
+        CHESSJUNK3 = "Broken Clockworks",
         ABIGAIL_FLOWER = "Abigail's Flower",
         BALLOONS_EMPTY = "Pile o' Balloons",
         BALLOON = "Balloon",
@@ -516,6 +528,9 @@ STRINGS =
         CAVE_ENTRANCE_OPEN = "Sinkhole",
         CAVE_ENTRANCE_OPEN_CAVE = "Deeper",
         CAVE_ENTRANCE_CLOSED_CAVE = "Plugged Hole",
+        CAVE_REGENERATOR = "Seed of Ruin",
+        RUINS_CAVEIN_OBSTACLE = "Blocky Ruins",
+        BIGSHADOWTENTACLE = "Guardian Shadow Tentacle",
         RABBITHOUSE = "Rabbit Hutch",
         CAVE_EXIT = "Rope",
         UMBRELLA = "Umbrella",
@@ -1799,7 +1814,7 @@ STRINGS =
         INTERIOR_FLOOR_WOODPANELS = "Wood Panel Flooring",
         INTERIOR_FLOOR_HERRINGBONE = "Herringbone Flooring",
         INTERIOR_FLOOR_HEXAGON = "Hexagon Flooring",
-        INTERIOR_FLOOR_HOOF_CURVY = "Curcy Hoof Flooring",
+        INTERIOR_FLOOR_HOOF_CURVY = "Curvy Hoof Flooring",
         INTERIOR_FLOOR_OCTAGON = "Octagon Flooring",
 
         INTERIOR_WALL_WOOD = "Wood Paneling",
@@ -1811,7 +1826,7 @@ STRINGS =
         INTERIOR_WALL_PEAGAWK = "Peagawk Wall Paper",
         INTERIOR_WALL_PLAIN_DS = "Orange Wall Paper",
         INTERIOR_WALL_PLAIN_ROG = "Purple Wall Paper",
-        INTERIOR_WALL_ROPE = "Rope Wall Panneling",
+        INTERIOR_WALL_ROPE = "Rope Wall Paneling",
         INTERIOR_WALL_CIRCLES = "Circle Wall Tiling",
         INTERIOR_WALL_MARBLE = "Marble Wall Tiling",
         INTERIOR_WALL_MAYORSOFFICE = "Fine Wall Tiling",
@@ -2062,6 +2077,7 @@ STRINGS =
         HARDSHELL_TACOS = "Hard Shell Tacos",
         GUMMY_CAKE = "Gummy Cake",
         STEAMEDHAMSANDWICH = "Steamed Ham Sandwich",
+        MEATED_NETTLE = "Meated Nettles",
 
         RADISH = "Radish", 
         RADISH_COOKED = "Cooked Radish",
@@ -2215,6 +2231,7 @@ STRINGS =
         BILL_QUILL = "Platapine Quill",
 
         ANTLER = "Bird Whistle",
+        ANTLER_CORRUPTED = "Nightmarish Bird Whistle",
         PUGALISK_SKULL = "Pugalisk Skull",
         PUGALISK_CORPSE = "Petrifying Bones",
 
@@ -2481,6 +2498,8 @@ STRINGS =
 
         SPEAR_WATHGRITHR = "The gold makes it sharper.",
         WATHGRITHRHAT = "The unicorn is what protects you.",
+
+        SPIDEREGGSACK = "Get a little help from your friends.",
 
         MOLEHAT = "Grants the wearer Smell-E-Vision.",
         ICEHAT = "Science, on the rocks.",
@@ -2851,7 +2870,7 @@ STRINGS =
         CLAWPALMTREE_SAPLING = "It's a wonder these things grow at all.", 
         CORKCHEST = "Fill and put a cork in it.",
         CORKBOAT = "Good for portage and tough as porridge.",
-        SMELTER = "Turn Iron into Alloy",
+        SMELTER = "Turn Iron into Alloy.",
         BUGREPELLENT = "In case you don't enjoy the company of bugs.", 
         HOGUSPORKUSATOR = "Pigs can do tricks too.",
         PORKLAND_ENTRANCE = "Hop on. What could possibly go wrong?",
@@ -2881,6 +2900,7 @@ STRINGS =
         TURF_DEEPRAINFOREST_NOCANOPY = "As tame as wild jungle can be.",
 
         ANTLER = "For calling birds. Did you make it too big?",
+        ANTLER_CORRUPTED = "Strikes fear into even the biggest birds.",
         BONESTAFF = "Wield the gaze of the Pugalisk!",
         
         FENCE_ITEM = "Wood fence segments.",
@@ -4658,6 +4678,7 @@ STRINGS.UI =
         MODSBADTITLE = "All Mods Disabled",
         MODSBADLOAD = "The game did not start correctly last time. This was likely caused by a mod, so all mods have been disabled.\n\nYou can try re-enabling mods from the mod settings screen.",
         MODS = "Mods",
+        ACKNOWLEDGEWARNING = "Don't Show This Again.",
         SCRIPTERRORQUIT = "Exit Game",
         SCRIPTERRORMODWARNING = "This error may have occurred due to a mod you have enabled!\nYou have the following mods enabled:\n",
         TESTING = "This is the testing branch!",
@@ -4916,6 +4937,10 @@ STRINGS.UI =
         DEFAULT = "Default",
         DIM = "Dim",
         DIMMEST = "Dimmest",
+
+        BACKPACKMODE = "Backpack Layout",
+		INTEGRATEDBACKPACK_DISABLED = "Separated",
+		INTEGRATEDBACKPACK_ENABLED = "Integrated",
     },
 
     LANGUAGE_OPTIONS_SCREEN = 
@@ -5095,6 +5120,30 @@ STRINGS.UI =
         NAMES = 
         {
             WORLD_SIZE = "World Size",
+            BRANCHING = "Branches",
+            LOOP = "Loops",
+            SEASON = "Seasons",
+            CAVE_ENTRANCE = "Caves", -- World customization.
+            MARSHBUSH = "Spiky Bushes",
+            RABBITS = "Rabbit Holes",
+            MOLES = "Mole Burrows",
+            PIGS = "Pigs",
+            BEEFALOHEAT = "Beefalo Mating Frequency",
+            HUNT = "Hunts",
+            PENGUINS = "Pengulls",
+            FROGS = "Frogs",
+            TENTACLES = "Tentacles",
+            CHESS = "Clockworks",
+            LIEFS = "Treeguards",
+            SUMMER = "Summer",
+            WINTER = "Winter",
+            SPRING = "Spring",
+            AUTUMN = "Autumn",
+            FROGRAIN = "Frog Rain",
+            WILDFIRES = "Wildfires",
+            PONDS = "Ponds",
+            DECIDUOUSMONSTER = "Poison Birchnut Trees",
+            GOOSEMOOSE = "Meese/Geese",
             MILD_SEASON = "Mild",
             WET_SEASON = "Hurricane",
             GREEN_SEASON = "Monsoon",
@@ -5696,7 +5745,7 @@ STRINGS.UI =
 
     RESETCAVE=
     {
-        TITLE="Regen this cave?",
+        TITLE="Regenerate this cave?",
         BODY="Are you sure you want to make a new cave here?",
         YES="Yes",
         NO="No",

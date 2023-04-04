@@ -22,6 +22,10 @@ local function fn(Sim)
     inst.components.fuel.fueltype = "NIGHTMARE"
     inst.components.fuel.fuelvalue = TUNING.LARGE_FUEL
 
+    inst:AddComponent("repairer")
+    inst.components.repairer.repairmaterial = "nightmare"
+    inst.components.repairer.finiteusesrepairvalue = TUNING.NIGHTMAREFUEL_FINITEUSESREPAIRVALUE
+
     inst:AddComponent("inventoryitem")
     
 	return inst
