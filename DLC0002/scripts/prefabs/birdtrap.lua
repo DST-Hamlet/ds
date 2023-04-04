@@ -19,20 +19,35 @@ local prefabs = {
 	"robin_winter",
 }
 
---this should be redone as a periodic test, probably, so that we can control the expected return explicitly
-local function OnSleep(inst)
-    if inst.components.trap and inst.components.trap:IsBaited() then
-        local ground = GetWorld()
-        if ground and ground.components.birdspawner and math.random() < .5 then
-            local bird = ground.components.birdspawner:SpawnBird(Vector3(inst.Transform:GetWorldPosition() ) )
-            if bird then
-                bird.Transform:SetPosition(inst.Transform:GetWorldPosition() )
+local function CatchOffScreen(inst)
+    inst._sleeptask = nil
+    if not inst:IsInLimbo() and inst.components.trap ~= nil and inst.components.trap:IsBaited() and math.random() < 0.5 then
+        local birdspawner =  GetWorld().components.birdspawner
+        if birdspawner ~= nil then
+            local pos = inst:GetPosition()
+            local bird = birdspawner:SpawnBird(pos)
+            if bird ~= nil then
+                bird.Physics:Teleport(pos:Get())
                 bird:ReturnToScene()
                 inst.components.trap.target = bird
                 inst.components.trap:DoSpring()
                 inst.sg:GoToState("full")
             end
         end
+    end
+end
+
+local function OnEntitySleep(inst)
+    if inst._sleeptask ~= nil then
+        inst._sleeptask:Cancel()
+    end
+    inst._sleeptask = inst:DoTaskInTime(1, CatchOffScreen)
+end
+
+local function OnEntityWake(inst)
+    if inst._sleeptask ~= nil then
+        inst._sleeptask:Cancel()
+        inst._sleeptask = nil
     end
 end
 
@@ -111,10 +126,10 @@ local function fn(Sim)
     inst.components.trap:SetOnHarvestFn(OnHarvested)
     inst.components.trap:SetOnSpringFn(OnSpring)
     inst.components.trap.baitsortorder = 1
-    
-	inst:ListenForEvent("entitysleep", OnSleep)
-   
-    
+
+    inst.OnEntitySleep = OnEntitySleep
+    inst.OnEntityWake = OnEntityWake
+
     inst:SetStateGraph("SGtrap")
     
     inst.OnSave = OnSave

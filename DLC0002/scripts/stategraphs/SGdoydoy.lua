@@ -349,7 +349,6 @@ local states=
 			inst.Physics:ClearCollisionMask()
 			inst.Physics:CollidesWith(GetWorldCollision())
 			inst.Physics:CollidesWith(COLLISION.OBSTACLES)
-			inst.Physics:CollidesWith(COLLISION.INTWALL)
 
 			inst.AnimState:PlayAnimation("mate_pre")
 
@@ -425,7 +424,6 @@ local states=
 			inst.Physics:CollidesWith(COLLISION.OBSTACLES)
 			inst.Physics:CollidesWith(COLLISION.CHARACTERS)
 			inst.Physics:CollidesWith(COLLISION.WAVES)
-			inst.Physics:CollidesWith(COLLISION.INTWALL)
 
 			inst:PerformBufferedAction()
 		end,

@@ -385,6 +385,8 @@ local function chest(style, aquatic)
 			inst.components.container.onclosefn = oncloseocto
 			inst.components.container:SetNumSlots(#octo_slotpos, true)
 
+			inst:AddComponent("floatable")
+
 			inst.components.container.widgetslotpos = octo_slotpos
 			inst.components.container.widgetpos = Vector3(75, 200, 0)
 		    inst.components.container.widgetanimbank = "ui_thatchpack_1x4"

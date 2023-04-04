@@ -43,7 +43,7 @@ ACTIONS=
 	TALKTO = Action({mount_enabled=true},3, true),
 	WALKTO = Action({mount_enabled=true},-4),
 	BAIT = Action({}),
-	CHECKTRAP = Action({},2),
+	CHECKTRAP = Action({mount_enabled=true},2),
 	BUILD = Action({mount_enabled=true}),
 	PLANT = Action({}),
 	PLANTONGROWABLE = Action({}),

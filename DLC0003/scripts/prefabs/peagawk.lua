@@ -164,29 +164,25 @@ end
 
 local function OnSave(inst, data)
     data.feathers = inst.feathers
-    data.is_bush = inst.is_bush
     data.prism = inst.prism
 end
 
 local function OnLoad(inst, data)
     if not data then return end
-
+    
     if data.feathers then
         inst.feathers = data.feathers
-        inst.prism = data.prism
 
         -- The pickable OnLoad considers whether there is an active regen to set these variables.
         if inst.feathers > 0 then
             inst.components.pickable.canbepicked = true
             inst.components.pickable.hasbeenpicked = false
         end
-
+        
         refreshart(inst)
     end
-
-    if data.is_bush then
-        inst.TransformToBush(inst)
-    end
+    
+    inst.prism = data.prism
 
     if data.prism then
         inst.TransformToRainbow(inst)

@@ -19,10 +19,6 @@ local BigerPopupDialogScreen = require "screens/bigerpopupdialog"
 local show_graphics = PLATFORM ~= "NACL"
 local text_font = UIFONT--NUMBERFONT
 
-local enableDisableOptions = { { text = STRINGS.UI.OPTIONS.DISABLED, data = false }, { text = STRINGS.UI.OPTIONS.ENABLED, data = true } }
-local enableScreenFlashOptions = { { text = STRINGS.UI.OPTIONS.DEFAULT, data = 1 }, { text = STRINGS.UI.OPTIONS.DIM, data = 2 } , { text = STRINGS.UI.OPTIONS.DIMMEST, data = 3 } }
-local integratedbackpackOptions = { { text = STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_DISABLED, data = false }, { text = STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_ENABLED, data = true } }
-
 local spinnerFont = { font = BUTTONFONT, size = 30 }
 
 local function GetResolutionString( w, h )
@@ -118,6 +114,10 @@ local OptionsScreen = Class(Screen, function(self, in_game)
 	Screen._ctor(self, "OptionsScreen")
 	self.in_game = in_game
 	--TheFrontEnd:DoFadeIn(2)
+
+	self.enableDisableOptions = { { text = STRINGS.UI.OPTIONS.DISABLED, data = false }, { text = STRINGS.UI.OPTIONS.ENABLED, data = true } }
+	self.enableScreenFlashOptions = { { text = STRINGS.UI.OPTIONS.DEFAULT, data = 1 }, { text = STRINGS.UI.OPTIONS.DIM, data = 2 } , { text = STRINGS.UI.OPTIONS.DIMMEST, data = 3 } }
+	self.integratedbackpackOptions = { { text = STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_DISABLED, data = false }, { text = STRINGS.UI.OPTIONS.INTEGRATEDBACKPACK_ENABLED, data = true } }
 
 	local graphicsOptions = TheFrontEnd:GetGraphicsOptions()
 	self.options = {
@@ -623,7 +623,7 @@ function OptionsScreen:DoInitHamletPage()
 	local hamletOptions = {"renderjunglecanopy", "renderjunglevines"}
 
 	for i,v in pairs(hamletOptions) do
-		local spinner = Spinner( enableDisableOptions )
+		local spinner = Spinner( self.enableDisableOptions )
 		spinner.OnChanged =
 			function( _, data )
 				self.working[dlcname..":"..v] = data
@@ -646,14 +646,14 @@ function OptionsScreen:DoInitPerformancePage()
 	local hamletOptions = {"renderjunglecanopy", "renderjunglevines"}
 
 	if show_graphics then
-		self.smallTexturesSpinner = Spinner( enableDisableOptions )
+		self.smallTexturesSpinner = Spinner( self.enableDisableOptions )
 		self.smallTexturesSpinner.OnChanged =
 			function( _, data )
 				self.working.smalltextures = data
 				--this:Apply()
 				self:UpdateMenu()
 			end
-		self.netbookModeSpinner = Spinner( enableDisableOptions )
+		self.netbookModeSpinner = Spinner( self.enableDisableOptions )
 		self.netbookModeSpinner.OnChanged =
 			function( _, data )
 				self.working.netbookmode = data
@@ -770,7 +770,7 @@ function OptionsScreen:DoInitMainPage()
 	if show_graphics then
 		local gOpts = TheFrontEnd:GetGraphicsOptions()
 	
-		self.fullscreenSpinner = Spinner( enableDisableOptions )
+		self.fullscreenSpinner = Spinner( self.enableDisableOptions )
 		
 		self.fullscreenSpinner.OnChanged =
 			function( _, data )
@@ -813,7 +813,7 @@ function OptionsScreen:DoInitMainPage()
 			end							
 	end
 	
-	self.bloomSpinner = Spinner( enableDisableOptions )
+	self.bloomSpinner = Spinner( self.enableDisableOptions )
 	self.bloomSpinner.OnChanged =
 		function( _, data )
 			this.working.bloom = data
@@ -821,7 +821,7 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 		
-	self.distortionSpinner = Spinner( enableDisableOptions )
+	self.distortionSpinner = Spinner( self.enableDisableOptions )
 	self.distortionSpinner.OnChanged =
 		function( _, data )
 			this.working.distortion = data
@@ -829,7 +829,7 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 
-	self.screenshakeSpinner = Spinner( enableDisableOptions )
+	self.screenshakeSpinner = Spinner( self.enableDisableOptions )
 	self.screenshakeSpinner.OnChanged =
 		function( _, data )
 			this.working.screenshake = data
@@ -869,7 +869,7 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 
-	self.screenFlashSpinner = Spinner( enableScreenFlashOptions ) 
+	self.screenFlashSpinner = Spinner( self.enableScreenFlashOptions ) 
 	self.screenFlashSpinner.OnChanged =
 		function( _, data )
 			this.working.screenflash = data
@@ -877,7 +877,7 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 
-	self.integratedbackpackSpinner = Spinner( integratedbackpackOptions ) 
+	self.integratedbackpackSpinner = Spinner( self.integratedbackpackOptions ) 
 	self.integratedbackpackSpinner.OnChanged =
 		function( _, data )
 			this.working.integratedbackpack = data
@@ -885,7 +885,7 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 
-	self.vibrationSpinner = Spinner( enableDisableOptions )
+	self.vibrationSpinner = Spinner( self.enableDisableOptions )
 	self.vibrationSpinner.OnChanged =
 		function( _, data )
 			this.working.vibration = data
@@ -893,7 +893,7 @@ function OptionsScreen:DoInitMainPage()
 			self:UpdateMenu()
 		end
 
-	self.sendstatsSpinner = Spinner( enableDisableOptions )
+	self.sendstatsSpinner = Spinner( self.enableDisableOptions )
 	self.sendstatsSpinner.OnChanged =
 		function( _, data )
 			this.working.sendstats = data
@@ -906,7 +906,7 @@ function OptionsScreen:DoInitMainPage()
 
 
 	if IsDLCInstalled(REIGN_OF_GIANTS) then
-		self.wathgrithrfontSpinner = Spinner( enableDisableOptions )
+		self.wathgrithrfontSpinner = Spinner( self.enableDisableOptions )
 		self.wathgrithrfontSpinner.OnChanged =
 			function( _, data )
 				this.working.wathgrithrfont = data

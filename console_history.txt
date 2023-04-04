@@ -1,16 +1,11 @@
-c_countprefabs "glowfly_cocoon"
-c_countprefabs "glowfly_cocoon"
-c_countprefabs "glowfly_cocoon"
-c_countprefabs "glowfly_cocoon"
-c_countprefabs "glowfly_cocoon"
-c_countprefabs "glowfly"
-c_countprefabs "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
-c_gonext "glowfly"
+LongUpdate(TUNING.TOTAL_DAY_TIME * 5, true)
+LongUpdate(TUNING.TOTAL_DAY_TIME, true)
+LongUpdate(TUNING.TOTAL_DAY_TIME, true)
+LongUpdate(TUNING.TOTAL_DAY_TIME, true)
+GetWorld().minimap.MiniMap:ShowArea(0, 0, 0, 10000)
+c_spawn
+c_spawn "flower_rainforest"
+c_spawn "flower_rainforest"
+c_spawn "flower_rainforest"
+c_spawn "flower_rainforest"
+c_spawn "flower_rainforest"

@@ -144,7 +144,7 @@ end
 
 local function ironactionstring(inst, action)
     if action.action.id == "CHARGE_UP" then
-        return action.action.str
+        return STRINGS.ACTIONS.CHARGE_UP
     end
     return STRINGS.ACTIONS.PUNCH
 end

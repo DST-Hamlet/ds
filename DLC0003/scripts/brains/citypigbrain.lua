@@ -272,7 +272,7 @@ end
 
 local function shouldPanic(inst)
     local x,y,z = inst.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x,y,z, 20, {"hostile"}, {"city_pig", "INLIMBO", "shadowcreature"}) 
+    local ents = TheSim:FindEntities(x,y,z, 20, {"hostile"}, {"city_pig", "INLIMBO", "shadowcreature", "bramble"}) 
     if #ents > 0 then
         return true
     end

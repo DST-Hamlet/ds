@@ -48,7 +48,7 @@ ACTIONS=
 	WALKTO = Action({mount_enabled=true},-4),
 	DODGE = Action({},-5, nil, nil, 2, nil, true),
 	BAIT = Action({}),	
-	CHECKTRAP = Action({},2),
+	CHECKTRAP = Action({mount_enabled=true},2),
 	BUILD = Action({mount_enabled=true}),
 	PLANT = Action({}),
 	PLANTONGROWABLE = Action({}),

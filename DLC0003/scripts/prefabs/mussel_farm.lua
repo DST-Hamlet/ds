@@ -66,7 +66,7 @@ local function makeemptyfn(inst)
 end
 
 local function makefullfn(inst)
-	inst.AnimState:PlayAnimation("idle_full")
+	--inst.AnimState:PlayAnimation("idle_full")
 end
 
 -- stage 1
@@ -162,17 +162,16 @@ local function GrowEmpty(inst)
 end
 
 local function GrowSmall(inst)
-	--inst.AnimState:PlayAnimation("empty_to_small")
-	--inst.AnimState:PushAnimation("idle_small", true)
+
 end
 
 local function GrowMedium(inst)
-	inst.AnimState:PlayAnimation("small_to_full")
-	inst.AnimState:PushAnimation("idle_full", true)
+
 end
 
 local function GrowLarge(inst)
-
+	inst.AnimState:PlayAnimation("small_to_full")
+	inst.AnimState:PushAnimation("idle_full", true)
 end
 
 local growth_stages =

@@ -200,11 +200,12 @@ local function MakeVeggie(name, has_seeds, iswater)
 		inst:AddComponent("cookable")
 		inst.components.cookable.product = name.."_cooked"
 
-		local is_banana = name == "cave_banana"
-		if is_banana then
-			--inst.components.inventoryitem:ChangeImageName("bananas")
+		local is_banana_in_sw = name == "cave_banana" and SaveGameIndex:IsModeShipwrecked()
+		if is_banana_in_sw then
 			inst:AddComponent("named")
 			inst.components.named:SetName(STRINGS.NAMES["BANANA"])
+
+			inst.AnimState:SetBuild("bananas")
 		end
 
 		return inst
@@ -246,11 +247,14 @@ local function MakeVeggie(name, has_seeds, iswater)
 
 		inst:AddComponent("inspectable")
 
-		local is_banana = name == "cave_banana"
-		if is_banana then
+		inst:AddComponent("inventoryitem")
+
+		local is_banana_in_sw = name == "cave_banana" and SaveGameIndex:IsModeShipwrecked()
+		if is_banana_in_sw then
 			inst:AddComponent("named")
-			--inst.components.inventoryitem:ChangeImageName("bananas_cooked")
 			inst.components.named:SetName(STRINGS.NAMES["BANANA_COOKED"])
+
+			inst.AnimState:SetBuild("bananas")
 		end
 
 		local is_blown_in_hurricane = name == "carrot" or name == "berries"
