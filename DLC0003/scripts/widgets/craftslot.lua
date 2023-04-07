@@ -86,23 +86,22 @@ end
 function CraftSlot:OnControl(control, down)
     if CraftSlot._base.OnControl(self, control, down) then return true end
 
-    if control == CONTROL_ACCEPT then
+    if control == CONTROL_ACCEPT and self.recipe then
         if not down then
             self.down = false
-            if self.recipe then
-                if self.recipe.subcategory then
-                    self:Open()
-                else
-                    if self.owner then
-                        if self.recipepopup and not self.recipepopup.focus then 
-                            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-                            print("JAMES_DEBUG: Craft Slot On Control Recipe = "..self.recipename.." Test Index = "..self.test_index)
 
-                            self:OnClick()
-                            self:StopUpdating()
+            if self.recipe.subcategory then
+                self:Open()
+            else
+                if self.owner then
+                    if self.recipepopup and not self.recipepopup.focus then 
+                        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+                        print("JAMES_DEBUG: Craft Slot On Control Recipe = "..self.recipename.." Test Index = "..self.test_index)
 
-                            return true
-                        end
+                        self:OnClick()
+                        self:StopUpdating()
+
+                        return true
                     end
                 end
             end

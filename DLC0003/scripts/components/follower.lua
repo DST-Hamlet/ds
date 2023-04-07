@@ -152,6 +152,10 @@ function Follower:CanFollowLeaderThroughExit(exit_destination)
 	return canFollow
 end
 
+function Follower:CanFollowLeaderToInterior(exit_destination)
+	return self:CanFollowLeaderThroughExit(EXIT_DESTINATION.LAND)
+end
+
 function Follower:GetLoyaltyPercent()
     if self.targettime and self.maxfollowtime then
         local timeLeft = math.max(0, self.targettime - GetTime())

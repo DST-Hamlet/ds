@@ -540,10 +540,12 @@ function InteriorSpawner:ExecuteTeleport(doer, destination, direction)
 	end
 
 	if doer.components.leader then
-		for follower, v in pairs(doer.components.leader.followers) do			
-			self:Teleport(follower, destination)
-			if direction then
-				self:PushDirectionEvent(follower, direction)
+		for follower, v in pairs(doer.components.leader.followers) do
+			if follower.components.follower and follower.components.follower:CanFollowLeaderToInterior() then
+				self:Teleport(follower, destination)
+				if direction then
+					self:PushDirectionEvent(follower, direction)
+				end
 			end
 		end
 	end
@@ -2025,8 +2027,10 @@ function InteriorSpawner:DestroyInteriorByDoor(door, main_door)
         end
     end
 
+    local x, y, z = main_door.Transform:GetWorldPosition()
+
     for _, item in ipairs(loot) do
-        item.Transform:SetPosition(main_door.Transform:GetWorldPosition())
+        item.Transform:SetPosition(x, y, z)
 
         if item.components.inventoryitem then
             item.components.inventoryitem:OnDropped(true)

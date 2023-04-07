@@ -14,7 +14,7 @@ local function retargetfn(inst)
         function(guy)
             return guy.prefab ~= inst.prefab
                 and guy.entity:IsVisible()
-                and target.components.health ~= nil
+                and guy.components.health ~= nil
                 and not guy.components.health:IsDead()
                 and (guy.components.combat.target == inst or
                     guy:HasTag("character") or

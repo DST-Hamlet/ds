@@ -306,6 +306,9 @@ function PlayFallingSound(inst, volume)
     end
 end
 
+local SMASHABLE_TAGS = { "smashable", "hascombatcomponent"}
+local NON_SMASHABLE_TAGS = { "INLIMBO", "irreplaceable"}
+
 local function grounddetection_update(inst)
     local pt = Point(inst.Transform:GetWorldPosition())
     
@@ -326,7 +329,7 @@ local function grounddetection_update(inst)
             inst.shadow:Remove()
         end
 
-        local ents = TheSim:FindEntities(pt.x, 0, pt.z, 2, nil, {'smashable'})
+        local ents = TheSim:FindEntities(pt.x, 0, pt.z, 2, nil, NON_SMASHABLE_TAGS, SMASHABLE_TAGS)
         for k,v in pairs(ents) do
             if v and v.components.combat and v ~= inst then  -- quakes shouldn't break the set dressing
                 v.components.combat:GetAttacked(inst, 20, nil)

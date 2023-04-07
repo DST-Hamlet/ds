@@ -451,8 +451,8 @@ local states =
             inst.SoundEmitter:KillAllSounds()
             if not islure then
                 ChangeToLure(inst)
-                inst.components.lighttweener:StartTween(nil, 0, nil, nil, nil, .66, function(inst, light) if light then light:Enable(false) end end)
             end
+            inst.components.lighttweener:StartTween(nil, 0, nil, nil, nil, .66, function(inst, light) if light then light:Enable(false) end end)
         end,
 
         timeline =

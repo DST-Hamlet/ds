@@ -84,9 +84,13 @@ local function sea_onbaited(inst, bait)
 end
 
 local function sea_onpickup(inst, doer)
-	if inst.components.trap and inst.components.trap.bait and doer.components.inventory then
-		inst.components.trap.bait:Show()
-		doer.components.inventory:GiveItem(inst.components.trap.bait)
+	if inst.components.trap then
+		if inst.components.trap.bait and doer.components.inventory then
+			inst.components.trap.bait:Show()
+			doer.components.inventory:GiveItem(inst.components.trap.bait)
+		end
+
+		inst.components.trap:Reset()
 	end
 end
 
@@ -103,6 +107,7 @@ local function seafn(Sim)
 	inst.components.trap.water = true
 	inst.components.trap.onbaited = sea_onbaited
 	inst.components.trap.range = 2
+	inst.components.trap.targettag = "lobster"
 
 	inst.components.inventoryitem.nobounce = true
 	inst.components.inventoryitem:SetOnPickupFn(sea_onpickup)

@@ -68,10 +68,11 @@ end
 function CraftSlot:OnControl(control, down)
     if CraftSlot._base.OnControl(self, control, down) then return true end
 
-    if control == CONTROL_ACCEPT then
+    if control == CONTROL_ACCEPT and self.recipe then
         if not down then
             self.down = false
-            if self.recipe and self.owner then
+
+            if self.owner then
                 if self.recipepopup and not self.recipepopup.focus then 
                     TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
 

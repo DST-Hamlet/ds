@@ -290,6 +290,8 @@ local function grounddetection_update(inst)
 			inst.shadow:Remove()
 		end
 
+		inst:RemoveTag("falling")
+
 		local ents = TheSim:FindEntities(pt.x, 0, pt.z, 2, nil, {'smashable'})
 
 	    for k,v in pairs(ents) do
@@ -344,6 +346,8 @@ local function chop_tree(inst, chopper, chops)
 	        local rad = chopper:GetPosition():Dist(inst:GetPosition())
 	        local vec = (chopper:GetPosition() - inst:GetPosition()):Normalize()
 	        local offset = Vector3(vec.x * rad, 4, vec.z * rad)
+
+			coconut:AddTag("falling")
 
 			coconut.Transform:SetPosition((inst:GetPosition() + offset):Get())
 			coconut.updatetask = coconut:DoPeriodicTask(0.1, grounddetection_update, 0.05)

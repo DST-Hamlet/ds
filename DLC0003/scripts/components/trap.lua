@@ -25,7 +25,9 @@ local function OnDropped(inst)
 end
 
 local function OnPickup(inst)
-    inst.components.trap:Reset()
+    if not inst.components.trap.water then
+        inst.components.trap:Reset()
+    end
 end
 
 local Trap = Class(function(self, inst)

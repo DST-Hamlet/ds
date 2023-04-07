@@ -43,7 +43,7 @@ end
 
 local function TakeBaitAction(inst)
     -- Don't look for bait if just spawned, busy making a new home, or has full inventory
-    if inst:GetTimeAlive() < 3 or inst.needs_home_time or (inst.components.inventory and inst.components.inventory:IsFull()) then
+    if inst:GetTimeAlive() < 3 or inst.sg:HasStateTag("busy") or inst.needs_home_time or (inst.components.inventory and inst.components.inventory:IsFull()) then
         return
     end
 

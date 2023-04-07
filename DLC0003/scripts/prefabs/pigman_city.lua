@@ -469,7 +469,7 @@ local function OnAttackedByDecidRoot(inst, attacker)
     end
 end
 
-local function callGuards(inst, attacker)
+local function callGuards(inst, attacker, task)
     local x,y,z = inst.Transform:GetWorldPosition()
     local ents = TheSim:FindEntities(x,y,z, 30,{"guard_entrance"})
     if #ents > 0 then
@@ -492,12 +492,17 @@ local function callGuards(inst, attacker)
         if interior then
             GetInteriorSpawner():injectprefab(guard, interior)
         end
+
+        if inst[task] then
+            inst[task]:Cancel()
+            inst[task] = nil
+        end
     end
 end
 
 local function spawnguardtasks(inst, attacker)
-    inst.task_guard1 = inst:DoTaskInTime(math.random(1)+1,function() callGuards(inst,attacker) end)
-    inst.task_guard2 = inst:DoTaskInTime(math.random(1)+1.5,function() callGuards(inst,attacker) end)
+    inst.task_guard1 = inst:DoTaskInTime(math.random(1) + 1,   function() callGuards(inst, attacker, "task_guard1") end)
+    inst.task_guard2 = inst:DoTaskInTime(math.random(1) + 1.5, function() callGuards(inst, attacker, "task_guard2") end)
 end
 
 local function OnAttacked(inst, data)
