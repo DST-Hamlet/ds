@@ -572,6 +572,8 @@ function PlayerController:GetToolAction(tool)
 			else
 				action = ACTIONS.PICKUP
 			end
+		elseif notriding(self.inst) and (tool and tool.components.tool and pickup.components.shearable and pickup.components.shearable:CanShear() and tool.components.tool:CanDoAction(ACTIONS.SHEAR)) then
+			action = ACTIONS.SHEAR
 		elseif pickup.components.pickable and pickup.components.pickable:CanBePicked() then 
 			action = ACTIONS.PICK 
 		elseif notriding(self.inst) and pickup.components.harvestable and pickup.components.harvestable:CanBeHarvested() then
@@ -592,8 +594,6 @@ function PlayerController:GetToolAction(tool)
 			action = ACTIONS.MOUNT
 		elseif notriding(self.inst) and (tool and tool.components.tool and pickup.components.hackable  and pickup.components.hackable:CanBeHacked() and tool.components.tool:CanDoAction(ACTIONS.HACK)) then
 			action = ACTIONS.HACK
-		elseif notriding(self.inst) and (tool and tool.components.tool and pickup.components.shearable and pickup.components.shearable:CanShear() and tool.components.tool:CanDoAction(ACTIONS.SHEAR)) then
-			action = ACTIONS.SHEAR
 		elseif (tool and tool.components.tool and tool.components.tool:CanDoAction(ACTIONS.SPY)) and ((pickup.components.mystery and pickup:HasTag("mystery")) or (pickup.components.door and pickup:HasTag("secret_room"))) then
 			action = ACTIONS.SPY
 		elseif notriding(self.inst) and (tool and tool.components.dislodger and pickup.components.dislodgeable and pickup.components.dislodgeable:CanBeDislodged() ) then

@@ -24,10 +24,13 @@ local MAX_CHASEAWAY_DIST = 80
 local MAX_TARGET_SHARES = 5
 local SHARE_TARGET_DIST = 40
 
-SetSharedLootTable( 'monkey',
+local LOOT = { "smallmeat", "cave_banana" }
+
+SetSharedLootTable('monkey',
 {
     {'smallmeat',     1.0},
     {'cave_banana',   1.0},
+    {'beardhair',     1.0},
     {'nightmarefuel', 0.5},
 })
 
@@ -137,8 +140,8 @@ local function FindTargetOfInterest(inst)
 	if not inst.harassplayer and not inst.components.combat.target then
 		local m_pt = inst:GetPosition()
 	    local target = GetPlayer()
-	    local onboat = target.components.driver and target.components.driver:GetIsDriving()
-		if target and target.components.inventory and not onboat and distsq(m_pt, target:GetPosition()) < 25*25 then			
+		local onboat = target.components.driver and target.components.driver:GetIsDriving()
+		if target and target.components.inventory and not onboat and distsq(m_pt, target:GetPosition()) < 25*25 then
 			local interest_chance = 0.15
 			local item = target.components.inventory:FindItem(function(item) return item.prefab == "cave_banana" or item.prefab == "cave_banana_cooked" end )
 
@@ -159,8 +162,8 @@ local function retargetfn(inst)
 	if inst:HasTag("nightmare") then
 	    local newtarget = FindEntity(inst, 20, function(guy)
 	            return (guy:HasTag("character") or guy:HasTag("monster") )
-	            	   and not guy:HasTag("aquatic")
-	                   and inst.components.combat:CanTarget(guy)
+					and not guy:HasTag("aquatic")
+					and inst.components.combat:CanTarget(guy)
 	    end)
 	    return newtarget
 	end
@@ -236,8 +239,8 @@ local function SetNormalMonkey(inst)
     inst.AnimState:SetMultColour(1,1,1,1)
     inst.curious = true
     inst.soundtype = ""
-    inst.components.lootdropper:SetLoot({"smallmeat", "cave_banana"})
-    inst.components.lootdropper.droppingchanceloot = false
+    inst.components.lootdropper:SetLoot(LOOT)
+    inst.components.lootdropper:SetChanceLootTable(nil)
 
     inst.components.combat:SetTarget(nil)
     
@@ -258,8 +261,9 @@ local function SetNightmareMonkey(inst)
     	inst.task = nil
     end
     
-    inst.components.lootdropper:SetLoot({"beardhair"})
-    inst.components.lootdropper.droppingchanceloot = true
+	inst.components.lootdropper:SetLoot(nil)
+	inst.components.lootdropper:SetChanceLootTable("monkey")
+
     inst.components.combat:SetTarget(nil)
     
     inst:RemoveEventCallback("entity_death", inst.listenfn, GetWorld()) 
@@ -297,10 +301,10 @@ local function fn()
 	inst.Transform:SetSixFaced()
 
 	MakeCharacterPhysics(inst, 10, 0.25)
-    MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst)
     MakeMediumBurnableCharacter(inst)
     MakeMediumFreezableCharacter(inst)
- 
+
     anim:SetBank("kiki")
 	anim:SetBuild("kiki_basic")
 	
@@ -340,8 +344,7 @@ local function fn()
     inst.components.periodicspawner:Start()
 
     inst:AddComponent("lootdropper")
-    inst.components.lootdropper:SetChanceLootTable('monkey')
-    inst.components.lootdropper.droppingchanceloot = false
+    inst.components.lootdropper:SetLoot(LOOT)
 
 	inst:AddComponent("eater")
 	inst.components.eater:SetVegetarian()

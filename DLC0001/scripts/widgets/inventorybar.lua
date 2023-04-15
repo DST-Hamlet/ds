@@ -519,7 +519,7 @@ function Inv:OnControl(control, down)
 				
 				if inv_item and not inv_item.components.inventoryitem.cangoincontainer and not active_item then
 					self.owner.components.inventory:DropItem(inv_item)
-					self:CloseControllerInventory()
+					self.owner.HUD:CloseControllerInventory()
 				else
 					self.active_slot:Click()
 				end
@@ -539,7 +539,7 @@ function Inv:OnControl(control, down)
 					local use_action = use_action_l or use_action_r
 					if use_action then
 						self.owner.components.locomotor:PushAction(use_action, true)
-						self:CloseControllerInventory()
+						self.owner.HUD:CloseControllerInventory()
 					end
 				end
 			

@@ -32,7 +32,7 @@ function Repairable:Repair(doer, repair_item)
         self.inst.components.health:DoDelta(repair_item.components.repairer.healthrepairvalue)
 
     elseif self.inst.components.workable ~= nil and self.inst.components.workable.workleft ~= nil then
-        if not self.inst.components.workable.workable or self.inst.components.workable.workleft >= self.inst.components.workable.maxwork then
+        if self.inst.components.workable.workleft >= self.inst.components.workable.maxwork then
             return false
         end
 

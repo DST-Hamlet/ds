@@ -253,7 +253,7 @@ local function fn()
 	local anim = inst.entity:AddAnimState()
 	
 	inst.entity:AddSoundEmitter()
-	MakeObstaclePhysics(inst, 0.8, 1.2)
+	MakeObstaclePhysics(inst, 0.3, 1.2)
  	inst.Physics:SetCollides(false)
 
 	local minimap = inst.entity:AddMiniMapEntity()
