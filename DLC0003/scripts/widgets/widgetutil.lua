@@ -19,6 +19,8 @@ function CanPrototypeRecipe(recipetree, buildertree)
     return true
 end
 
+local lastsoundtime = nil
+
 function DoRecipeClick(owner, recipe)
     if recipe and owner and owner.components.builder then
         local knows = owner.components.builder:KnowsRecipe(recipe.name)
@@ -61,7 +63,10 @@ function DoRecipeClick(owner, recipe)
             local tech_level = owner.components.builder.accessible_tech_trees
             
             if can_build and CanPrototypeRecipe(recipe.level, tech_level) then
-                owner.SoundEmitter:PlaySound("dontstarve/HUD/research_unlock")
+                if lastsoundtime == nil or GetTime() - lastsoundtime >= 1 then
+                    lastsoundtime = GetTime()
+                    owner.SoundEmitter:PlaySound("dontstarve/HUD/research_unlock")
+                end
 
                 local onsuccess = function()
                     owner.components.builder:ActivateCurrentResearchMachine()

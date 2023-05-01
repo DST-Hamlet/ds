@@ -156,7 +156,7 @@ function Breeder:Seed(item)
 end
 
 function Breeder:CanBeHarvested(doer)
-    return self.volume > 0 and doer.components.inventory ~= nil
+    return self.volume > 0
 end
 
 function Breeder:CollectSceneActions(doer, actions)

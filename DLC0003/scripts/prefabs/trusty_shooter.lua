@@ -91,26 +91,29 @@ local function onunequip(inst,owner)
 end
 
 local function CanTakeAmmo(inst, ammo, giver)
-    return (ammo.components.inventoryitem ~= nil) and
-    inst.components.trader.enabled and
-    (
-        inst.components.weapon.projectile == nil or
+    return
+        (ammo.components.inventoryitem ~= nil) and
+        inst.components.trader.enabled and
         (
-            inst.components.weapon.projectile == ammo.prefab and 
-            inst.components.inventory:GetItemInSlot(1).components.stackable and
-            not inst.components.inventory:GetItemInSlot(1).components.stackable:IsFull()
-        )
-    ) and
-    not ammo.components.health and
-    not ammo:HasTag("irreplaceable")
+            inst.components.weapon.projectile == nil or
+            (
+                inst.components.weapon.projectile == ammo.prefab and
+                inst.components.inventory:GetItemInSlot(1) ~= nil and
+                inst.components.inventory:GetItemInSlot(1).components.stackable and
+                not inst.components.inventory:GetItemInSlot(1).components.stackable:IsFull()
+            )
+        ) and
+        not ammo.components.health and
+        not ammo:HasTag("irreplaceable") and
+        not ammo:HasTag("invalidammo")
 end
 
 local function SetAmmoDamageAndRange(inst, ammo)
-
     if ammo.components.equippable then
         inst.components.weapon:SetRange(TUNING.TRUSTY_SHOOTER_ATTACK_RANGE_HIGH, TUNING.TRUSTY_SHOOTER_HIT_RANGE_HIGH)
         inst.components.weapon:SetDamage(TUNING.TRUSTY_SHOOTER_DAMAGE_HIGH)
         inst.SoundEmitter:PlaySound("dontstarve_DLC003/characters/wheeler/air_horn/load_3")
+        return
     end
 
     for i,v in ipairs(TUNING.TRUSTY_SHOOTER_TIERS.AMMO_HIGH) do
@@ -237,7 +240,6 @@ local function ResetAmmo(inst)
 end
 
 local function OnProjectileLaunch(inst, attacker, target, proj)
-
     inst.SoundEmitter:PlaySound("dontstarve_DLC003/characters/wheeler/air_horn/shoot")
 
     proj:AddTag("projectile")
@@ -253,7 +255,13 @@ local function OnProjectileLaunch(inst, attacker, target, proj)
     proj.persists = false
 
     -- If the projectile still exists in 2 seconds something went wrong
-    proj.self_destruct = proj:DoTaskInTime(2, function() proj:Remove() end)
+    proj.self_destruct = proj:DoTaskInTime(2, function()
+        proj:Remove()
+        if inst.ammo == 0 then
+            inst:ResetAmmo()
+        end
+    end)
+
     inst.ammo = inst.ammo - 1
 
     local removed_item = inst.components.inventory:RemoveSingleItemBySlot(1)

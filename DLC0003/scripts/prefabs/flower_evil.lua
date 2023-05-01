@@ -65,16 +65,9 @@ local function fn(Sim)
 	inst.components.pickable.onpickedfn = onpickedfn
     inst.components.pickable.quickpick = true
     inst.components.pickable.wildfirestarter = true
-    
-    inst:AddComponent("blowinwindgust")
-    inst.components.blowinwindgust:SetWindSpeedThreshold(TUNING.FLOWER_WINDBLOWN_SPEED)
-    inst.components.blowinwindgust:SetDestroyChance(TUNING.FLOWER_WINDBLOWN_FALL_CHANCE)
-    inst.components.blowinwindgust:SetDestroyFn(ongustpickfn)
-    inst.components.blowinwindgust:Start()
-    
+
 	MakeSmallBurnable(inst)
     MakeSmallPropagator(inst)
-
 
     --------SaveLoad
     inst.OnSave = onsave 
