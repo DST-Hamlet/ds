@@ -119,7 +119,7 @@ end
 
 function ConsoleScreen:OnRawKey( key, down)
 	if ConsoleScreen._base.OnRawKey(self, key, down) then 
-		self:PrefabSuggest(down, key)
+		self:SuggestCompletion(down, key)
 		return true 
 	end
 
@@ -198,12 +198,17 @@ function ConsoleScreen:SuggestComplete()
 	if str:find("\'") ~= nil then 
 		str = str .. "\'"
 	elseif str:find("\"") ~= nil then 
-		str = str .. "\"" 
+		str = str .. "\""
 	end 
 
 	if string.find(str, "(", nil, true) then 
 		str = str .. ")"
-	end 
+	end
+
+	-- Command Suggestion 
+	if str:find("\'") == nil and str:find("\"") == nil and not string.find(str, "(", nil, true) then
+		str = str .. "("
+	end
 
 	for _,v in ipairs(self.suggest_text) do 
 		v:SetString("")
@@ -235,46 +240,103 @@ local function CountQuotes(str)
 	end  
 
 	return numquotes 
-end 
+end
 
-function ConsoleScreen:PrefabSuggest(down, key)
-	 -- not yet comprehensive 
-	local TESTS = {"c_spawn\"", "c_gonext\"", "c_give\"", "c_list\"", "c_find\"", "c_findnext\"", "c_countprefabs\"", "c_selectnear\"", "c_removeall\""}
+local PREFAB_TESTS = {
+	"c_spawn\"",
+	"c_give\"",
+	"c_list\"",
+	"c_findnext\"",
+	"c_find\"",
+	"c_spawn_ds\"",
+	"c_countprefabs\"",
+	"c_countprefabsinrange\"",
+	"c_prefabexists\"",
+	"c_selectnear\"",
+	"c_removeall\"",
+	"c_gonext\"",
+	"c_warp\"",
+	"c_gonear\"",
+	"c_circle\"",
+	"c_mat\"",
+	"c_mats\"",
+	"c_material\"",
+	"c_materials\"",
+	"c_swapcharacter\"",
+}
+
+local COMMAND_TESTS = {
+	"c_spawn", "c_enablecheats", "c_sel", "c_select", "c_tile", "c_doscenario", "c_season", "c_sel_health", "c_sethealth",
+	"c_setboathealth", "c_setminhealth", "c_setsanity", "c_sethunger", "c_setmoisture", "c_give", "c_unlockdoor",
+	"c_pos", "c_printpos", "c_teleport", "c_move", "c_goto", "c_inst", "c_list", "c_listtag", "c_findnext", "c_godmode",
+	"c_supergodmode", "c_exploration", "c_gonext", "c_housing", "c_find", "c_findtag", "c_gonexttag", "c_got ","c_findnext",
+	"c_gonear", "c_printtextureinfo", "c_simphase", "c_anim", "c_light", "c_spawn_ds", "c_hats", "c_countprefabs",
+	"c_countprefabsinrange", "c_replacewith", "c_countallprefabs", "c_speed", "c_forcecrash", "c_testruins", "c_teststate",
+	"c_poison", "c_testpoison", "c_testfire", "c_testcrockpot", "c_givepreparedfood", "c_warp", "c_testdoydoy", "c_testcage",
+	"c_holdingdevtool", "c_wetseason", "c_greenseason", "c_dryseason", "c_nextseason", "c_givetreasuremaps", "c_revealtreasure",
+	"c_erupt", "c_nexterupt", "c_hurricane", "c_prefabexists", "c_treasuretest", "c_spawntreasure", "c_floats", "c_octoking",
+	"c_sounddebug", "c_sounddebug", "c_repeatlastcommand", "c_packim", "c_mapstats", "c_playslots", "c_selectnear", "c_reload",
+	"c_skipdays", "c_setlightningflashenabled", "c_kraken", "c_removeallwithtags", "c_removeall", "c_tryexitblackroom", 
+	"c_interiorinfo", "c_revealmap", "c_circle", "c_skip", "c_setboathealt ","c_save", "c_regenerateallworlds", "c_reset",  
+	"c_freecrafting", "c_domesticatedbeefalo", "c_mat", "c_mats", "c_material", "c_materials", "c_swapcharacter", "c_testteleportato",
+	"c_regeneratecurrentworld", "c_regeneratecave",
+}
+
+function ConsoleScreen:SuggestCompletion(down, key)
+	-- Not yet comprehensive.
 	if key == KEY_TAB or key == KEY_UP or key == KEY_DOWN then return end  
+
 	if down then 
-		for _,v in ipairs(self.suggest_text) do 
+		for _, v in ipairs(self.suggest_text) do 
 			v:SetString("")
 		end 
-		local str_test = self.console_edit:GetString()
-		str_test = string.lower(str_test) -- lowercase for comparison 
-		str_test = string.gsub(str_test, "%(", "") --remove parens for comparison
-		str_test = string.gsub(str_test, "\'", "\"")
-		local numquotes = CountQuotes(str_test)
 
-		if (numquotes % 2 == 0) then -- even # of quotes, don't autofill 
-			return 
-		end 
+		local str = self.console_edit:GetString()
+		str = string.lower(str) -- Lowercase for comparison 
+		str = string.gsub(str, "\'", "\"")
+		
+		local str_prefab_test = str
+		str_prefab_test = string.gsub(str_prefab_test, "%(", "") -- Remove parens for comparison.
+		local numquotes = CountQuotes(str_prefab_test)
 
-		for _,test in ipairs(TESTS) do 
-			local start, fin = str_test:find(test) 
-			if start ~= nil and fin ~= nil then 
-				-- make sure it's not no text and doesn't have a closing quote/parens 
-				if str_test:len() > fin and str_test:find("\"", fin + 1) == nil and str_test:find("%)", fin + 1) == nil then 
-					self:ShowSuggestions(str_test, test, start, fin)
-					break
-				else
-					self.suggesting = false 
+		local suggesting_prefab
+
+		-- Test for prefab completion
+		if not (numquotes % 2 == 0) then -- Even # of quotes, don't autofill.
+			for _, test in ipairs(PREFAB_TESTS) do 
+				local start, fin = str_prefab_test:find(test)
+				if start ~= nil and fin ~= nil then
+					-- Make sure it's not no text and doesn't have a closing quote/parens.
+					if str_prefab_test:len() > fin and str_prefab_test:find("\"", fin + 1) == nil and str_prefab_test:find("%)", fin + 1) == nil then 
+						self:ShowSuggestions(str_prefab_test, PREFAB_KEYS, start, fin)
+						suggesting_prefab = true
+						break
+					else
+						self.suggesting = false 
+					end 
 				end 
-			end 
-		end 
+			end
+		end
+
+		if suggesting_prefab then
+			return
+		end
+
+		local start, fin = 	str:find("c_")
+
+		-- Test for command completion.
+		if start ~= nil and fin ~= nil then
+			if str:len() > fin and str:find("\"") == nil and str:find("%(", fin + 1) == nil and str:find("%)", fin + 1) == nil then
+				self:ShowSuggestions(str, COMMAND_TESTS, start, fin-2)
+			end
+		end
 	end
 end 
 
-function ConsoleScreen:ShowSuggestions(fullstr, command, start, fin)
-
+function ConsoleScreen:ShowSuggestions(fullstr, options, start, fin)
 	local str = fullstr:sub(fin+1)
 	local suggestions = {}
-	for _,v in ipairs(PREFAB_KEYS) do
+	for _,v in ipairs(options) do
 		if #suggestions >= SUGGESTIONS_MAX then break end
 
 		str = string.gsub(str, "%[", "%%%[")
@@ -298,7 +360,7 @@ function ConsoleScreen:ShowSuggestions(fullstr, command, start, fin)
 		end
 		self.suggest_text[k]:SetString(v)
 	end
-end 
+end
 
 function ConsoleScreen:Highlight(key)
 	for k,v in ipairs(self.suggest_text) do 

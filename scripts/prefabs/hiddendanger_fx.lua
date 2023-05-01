@@ -53,6 +53,7 @@ local function idfn(Sim)
     inst.persists = false
 
     inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
     inst:AddTag("NOCLICK")
 
     inst.entity:AddTransform()

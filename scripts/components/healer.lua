@@ -8,7 +8,7 @@ function Healer:SetHealthAmount(health)
 end
 
 function Healer:CollectInventoryActions(doer, actions)
-    if doer.components.health then
+    if doer.components.health and not (self.inst:HasTag("heal_fertilize") and not doer:HasTag("plantkin")) then
         table.insert(actions, ACTIONS.HEAL)
     end
 end
@@ -26,7 +26,7 @@ function Healer:Heal(target)
 end
 
 function Healer:CollectUseActions(doer, target, actions)
-    if target.components.health and target.components.health.canheal then
+    if target.components.health and target.components.health.canheal and not (self.inst:HasTag("heal_fertilize") and not doer:HasTag("plantkin")) then
         table.insert(actions, ACTIONS.HEAL)
     end
 end

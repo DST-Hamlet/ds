@@ -239,9 +239,13 @@ local states=
         name = "emerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
-            -- local is_moving = inst.sg:HasStateTag("moving")
-            -- local is_running = inst.sg:HasStateTag("running")
+        onenter = function(inst, noanim)
+            if noanim then
+                inst.AnimState:SetBank("hippo")
+                inst.sg:GoToState("idle")
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then
@@ -262,7 +266,6 @@ local states=
         events=
         {
             EventHandler("animover", function(inst) 
-                inst.AnimState:PlayAnimation("idle_loop")
                 inst.AnimState:SetBank("hippo")
                 inst.sg:GoToState("idle")
             end),
@@ -277,7 +280,13 @@ local states=
         name = "submerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
+        onenter = function(inst, noanim)
+            if noanim then
+                inst.AnimState:SetBank("hippo_water")
+                inst.sg:GoToState("idle")
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then

@@ -81,7 +81,6 @@ local prefabs =
     "deco_wood_beam",
     "deco_wood_cornerbeam",
     "wall_light1",
-    "swinging_light1",
     "swinging_light_floral_bloomer",
     "swinging_light_basic_metal",
     "swinging_light_chandalier_candles",
@@ -108,7 +107,6 @@ local prefabs =
     "deco_marble_beam",
     "deco_valence",
     "wall_light_hoofspa",
-    "wall_light_hoofspa_backwall",
 
     "wall_mirror",
 
@@ -151,89 +149,12 @@ local function LightsOff(inst)
     end
 end
 
-local function onfar(inst) 
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOn(inst)
-        end
-    end
-end
-
 local function getstatus(inst)
     if inst:HasTag("burnt") then
         return "BURNT"
-    elseif inst.components.spawner and inst.components.spawner:IsOccupied() then
-        if inst.lightson then
-            return "FULL"
-        else
-            return "LIGHTSOUT"
-        end
     end
 end
 
-local function onnear(inst) 
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOff(inst)
-        end
-    end
-end
-
-local function onwere(child)
-    if child.parent and not child.parent:HasTag("burnt") then
-        child.parent.SoundEmitter:KillSound("pigsound")
-        child.parent.SoundEmitter:PlaySound("dontstarve/pig/werepig_in_hut", "pigsound")
-    end
-end
-
-local function onnormal(child)
-    if child.parent and not child.parent:HasTag("burnt") then
-        child.parent.SoundEmitter:KillSound("pigsound")
-        child.parent.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/city_pig/pig_in_house_LP", "pigsound")
-    end
-end
-
-local function onoccupied(inst, child)
-    if not inst:HasTag("burnt") then
-        inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/city_pig/pig_in_house_LP", "pigsound")
-        -- inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
-        
-        if inst.doortask then
-            inst.doortask:Cancel()
-            inst.doortask = nil
-        end
-        --inst.doortask = inst:DoTaskInTime(1, function() if not inst.components.playerprox:IsPlayerClose() then LightsOn(inst) end end)
-        inst.doortask = inst:DoTaskInTime(1, function() LightsOn(inst) end)
-        if child then
-            inst:ListenForEvent("transformwere", onwere, child)
-            inst:ListenForEvent("transformnormal", onnormal, child)
-        end
-    end
-end
-
-local function onvacate(inst, child)
-    if not inst:HasTag("burnt") then
-        if inst.doortask then
-            inst.doortask:Cancel()
-            inst.doortask = nil
-        end
-        -- inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
-        inst.SoundEmitter:KillSound("pigsound")
-        
-        if child then
-            inst:RemoveEventCallback("transformwere", onwere, child)
-            inst:RemoveEventCallback("transformnormal", onnormal, child)
-            if child.components.werebeast then
-                child.components.werebeast:ResetTriggers()
-            end
-            if child.components.health then
-                child.components.health:SetPercent(1)
-            end
-        end    
-    end
-end
-        
-        
 local function onhammered(inst, worker)
     if inst:HasTag("fire") and inst.components.burnable then
         inst.components.burnable:Extinguish()
@@ -242,14 +163,12 @@ local function onhammered(inst, worker)
         inst.doortask:Cancel()
         inst.doortask = nil
     end
-    if inst.components.spawner then inst.components.spawner:ReleaseChild() end
-
     if not inst.components.fixable then
         inst.components.lootdropper:DropLoot()
     end    
 
     SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
-    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_".. inst.breaksoundsufix)
     inst:Remove()
 end
 
@@ -260,7 +179,11 @@ end
 local function onhit(inst, worker)
     if not inst:HasTag("burnt") then
         inst.AnimState:PlayAnimation("hit")
-        inst.AnimState:PushAnimation("idle")
+        if inst.lightson then
+            inst.AnimState:PushAnimation("lit")
+        else
+            inst.AnimState:PushAnimation("idle")
+        end
     end
 end
 
@@ -274,9 +197,8 @@ local function OnDay(inst)
     end
 end
 
-local function OnDusk(inst)
-    --print(inst, "OnDay")
-    if not inst:HasTag("burnt") then       
+local function OnNight(inst)
+    if not inst:HasTag("burnt") then
         LightsOff(inst)
         if inst.doortask then
             inst.doortask:Cancel()
@@ -315,14 +237,6 @@ local function onsave(inst, data)
 end
 
 local function onload(inst, data)
-    if data and data.burnt then
-        inst.components.burnable.onburnt(inst)
-    end
-
-    if data and data.burning == true then
-        inst:DoTaskInTime(0, function() inst.components.burnable:Ignite(true) end)
-    end
-
     if data and data.spawned_shop then
         inst:AddTag("spawned_shop")
     end
@@ -447,6 +361,14 @@ local function onload(inst, data)
             end)
         end
     end    
+
+    if data and data.burnt then
+        inst.components.burnable.onburnt(inst)
+    end
+
+    if data and data.burning == true then
+        inst:DoTaskInTime(0, function() inst.components.burnable:Ignite(true) end)
+    end
 end
 
 local function spawn_shop(inst)  
@@ -1333,10 +1255,10 @@ local function makefn(name,build, bank, data)
             inst.components.workable:SetOnWorkCallback(onhit)
         end
 
-        inst:ListenForEvent( "daytime", function() OnDay(inst) end, GetWorld())    
-        inst:ListenForEvent( "dusktime", function() OnDusk(inst) end, GetWorld())    
+        inst:ListenForEvent( "daytime",   function() OnDay(inst) end, GetWorld())    
+        inst:ListenForEvent( "nighttime", function() OnNight(inst) end, GetWorld())    
   
-        inst:AddComponent("inspectable")    
+        inst:AddComponent("inspectable")
 
         if name == "pig_shop_cityhall" then
             inst.AnimState:AddOverrideBuild("flag_post_duster_build")
@@ -1362,7 +1284,7 @@ local function makefn(name,build, bank, data)
         inst.components.fixable:AddRecinstructionStageData("unbuilt",fixbank,build)
 
         if not data or not data.unburnable then
-            MakeMediumBurnable(inst, nil, nil, true)
+            MakeLargeBurnable(inst, nil, nil, true)
             MakeLargePropagator(inst)
             inst.components.burnable:SetCanActuallyBurnFunction(canburn)
         end
@@ -1375,19 +1297,14 @@ local function makefn(name,build, bank, data)
             end
             inst:Remove()
         end)
-        inst:ListenForEvent("onignite", function(inst, data)
-            if inst.components.spawner then
-                inst.components.spawner:ReleaseChild()
-            end
-        end)
 
         inst.OnSave = onsave 
         inst.OnLoad = onload
 
         inst:ListenForEvent( "onbuilt", onbuilt)
+
         inst:DoTaskInTime(math.random(), function() 
-            --print(inst, "spawn check day")
-            if GetClock():IsDay() then 
+            if GetClock():IsDay() or GetClock():IsDusk() then 
                 OnDay(inst)
             end 
         end)
@@ -1396,12 +1313,16 @@ local function makefn(name,build, bank, data)
              creatInterior(inst, name)
         end)
 
-        inst:ListenForEvent("nighttime", function() inst.components.door.disabled = true end, GetWorld())
-        inst:ListenForEvent("daytime", function() inst.components.door.disabled = nil end, GetWorld())  
+        if name ~= "pig_shop_cityhall_player" then
+            inst:ListenForEvent("nighttime", function() inst.components.door.disabled = true end, GetWorld())
+            inst:ListenForEvent("daytime", function() inst.components.door.disabled = nil end, GetWorld())
+        end  
 
         if data and data.sounds then
             inst.usesounds = data.sounds
         end
+
+        inst.breaksoundsufix = data and data.usestonebreaksound and "stone" or "wood"
 
         inst:ListenForEvent("usedoor", function(inst,data) usedoor(inst,data) end)
 
@@ -1441,22 +1362,22 @@ local function placetestfn(inst)
 end
 
 return makeshop("pig_shop_deli",        "pig_shop_deli",        nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
-       makeshop("pig_shop_general",     "pig_shop_general",     nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
+       makeshop("pig_shop_general",     "pig_shop_general",     nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2}, usestonebreaksound = true } ),
        makeshop("pig_shop_hoofspa",     "pig_shop_hoofspa",     nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),        
        makeshop("pig_shop_produce",     "pig_shop_produce",     nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
        makeshop("pig_shop_florist",     "pig_shop_florist",     nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
-       makeshop("pig_shop_antiquities", "pig_shop_antiquities", nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ), 
+       makeshop("pig_shop_antiquities", "pig_shop_antiquities", nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2}, usestonebreaksound = true } ), 
 
        makeshop("pig_shop_academy",     "pig_shop_accademia",   nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
        makeshop("pig_shop_arcane",      "pig_shop_arcane",      nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
        makeshop("pig_shop_weapons",     "pig_shop_weapons",     nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
        makeshop("pig_shop_hatshop",     "pig_shop_millinery",   nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
 
-       makeshop("pig_shop_bank",        "pig_shop_bank",        nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
-       makeshop("pig_shop_tinker",      "pig_shop_tinker",      nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} } ),
+       makeshop("pig_shop_bank",        "pig_shop_bank",        nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2}, usestonebreaksound = true } ),
+       makeshop("pig_shop_tinker",      "pig_shop_tinker",      nil,    {sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2}, usestonebreaksound = true } ),
 
        makeshop("pig_shop_cityhall", "pig_cityhall", "pig_cityhall",    {indestructable=true, unburnable=true, sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} }),
-       makeshop("pig_shop_cityhall_player", "pig_cityhall", "pig_cityhall",{ unburnable=true, sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} }),
+       makeshop("pig_shop_cityhall_player", "pig_cityhall", "pig_cityhall",{ unburnable=true, sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2}, usestonebreaksound = true }),
        Prefab("common/objects/pig_shop_spawner", makespawnerfn, assets, spawnprefabs ),
 
 

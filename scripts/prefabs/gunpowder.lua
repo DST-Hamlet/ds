@@ -50,6 +50,8 @@ local function fn(Sim)
     inst.components.explosive:SetOnExplodeFn(OnExplodeFn)
     inst.components.explosive:SetOnIgniteFn(OnIgniteFn)
     inst.components.explosive.explosivedamage = TUNING.GUNPOWDER_DAMAGE
+
+    inst:ListenForEvent("onextinguish", function(inst) inst.SoundEmitter:KillSound("hiss") end)
     
     inst:AddComponent("inventoryitem")
 

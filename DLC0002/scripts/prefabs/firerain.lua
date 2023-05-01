@@ -82,7 +82,9 @@ local function StartStep(inst)
 	inst:DoTaskInTime(TUNING.VOLCANO_FIRERAIN_WARNING - (14*FRAMES), function(inst)
 		inst:Show()
 		inst.AnimState:PlayAnimation("idle")
-		inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+		inst.persists = false
+		inst:ListenForEvent("animover", inst.Remove)
+		inst:ListenForEvent("entitysleep", inst.Remove)
 	end)
 end
 

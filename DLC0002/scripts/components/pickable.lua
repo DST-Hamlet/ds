@@ -28,6 +28,8 @@ local Pickable = Class(function(self, inst)
     self.protected = false
     self.wildfirestarter = false
 
+	self.highfertilizerconsumer = false
+
     self.reverseseasons = nil
 
     if SaveGameIndex:GetCurrentMode() == "volcano" or SaveGameIndex:GetCurrentMode() == "shipwrecked" then
@@ -164,38 +166,15 @@ function Pickable:MakeWitherable()
 end
 
 function Pickable:Rejuvenate(fertilizer)
-	if self.inst.components.burnable then
-        self.inst.components.burnable:StopSmoldering()
-    end
-
-	if self.protected_cycles ~= nil then
-		self.protected_cycles = self.protected_cycles + fertilizer.components.fertilizer.withered_cycles
-	else
-		self.protected_cycles = fertilizer.components.fertilizer.withered_cycles
-	end
-
-	if self.protected_cycles >= 1 then
+	if self.protected_cycles >= 0 then
 		self.withered = false
 		self.inst:RemoveTag("withered")
 		self.witherable = false
 		self.inst:RemoveTag("witherable")
 		self.shouldwither = true
-		self:MakeEmpty()
 
-		-- self.inst:DoTaskInTime(TUNING.TOTAL_DAY_TIME*7, function() 
-		-- 	if self.shouldwither then
-		-- 		self.witherable = true
-		-- 		self.shouldwither = false
-		-- 		if not self.withered and GetSeasonManager:GetTemperature() > self.wither_temp then
-		-- 			self.withered = true
-		--     		self.wither_time = GetTime()
-		--     		self:MakeBarren()
-		--     		while self.protected_cycles >= 1 do
-		--     			self.protected_cycles = self.protected_cycles - 1
-		--     		end
-		--     	end
-		-- 	end
-		-- end)
+		self.cycles_left = self.max_cycles
+		self:MakeEmpty()
 	else
 		GetPlayer():PushEvent("insufficientfertilizer")
 	end
@@ -326,8 +305,8 @@ function Pickable:CanBeFertilized()
 	end
 end
 
-function Pickable:Fertilize(fertilizer)
-	if self.inst.components.burnable then
+function Pickable:Fertilize(fertilizer, doer)
+    if self.inst.components.burnable ~= nil then
         self.inst.components.burnable:StopSmoldering()
     end
 
@@ -336,15 +315,23 @@ function Pickable:Fertilize(fertilizer)
     else
         fertilizer.components.stackable:Get(1):Remove()
     end
-	self.cycles_left = self.max_cycles
-	if self.withered or self.shouldwither then
+
+	local fertilize_cycles = fertilizer.components.fertilizer ~= nil and fertilizer.components.fertilizer.withered_cycles or 0
+
+    self.protected_cycles = (self.protected_cycles or 0) + fertilize_cycles
+
+	if not self.highfertilizerconsumer then
+		self.protected_cycles = math.max(self.protected_cycles, 0)
+	end
+
+	if self.withered then
 		self:Rejuvenate(fertilizer)
-	else
-		self:MakeEmpty()
-	end	
+		return
+	end
+
+	self.cycles_left = self.max_cycles
+	self:MakeEmpty()
 end
-
-
 
 function Pickable:OnSave()
 	
@@ -447,17 +434,18 @@ function OnRegen(inst)
 end
 
 function Pickable:Regen()
-    
     self.canbepicked = true
     self.hasbeenpicked = false
+
+	self.targettime = nil
+    self.task = nil
+
     if self.onregenfn then
         self.onregenfn(self.inst)
     end
     if self.makefullfn then
     	self.makefullfn(self.inst)
     end
-    self.targettime = nil
-    self.task = nil
 end
 
 function Pickable:MakeBarren()
@@ -517,10 +505,13 @@ function Pickable:Pick(picker)
 			end
 		end
 
-		if self.shouldwither then
-			if self.protected_cycles ~= nil then
-				self.protected_cycles = self.protected_cycles - 1
-			end
+		if self.protected_cycles ~= nil then
+			self.protected_cycles = self.protected_cycles - 1
+			if self.protected_cycles <= 0 then
+                if not self:IsWithered() then
+                    self:MakeWitherable()
+                end
+            end
 		end
 		
 		local loot = nil

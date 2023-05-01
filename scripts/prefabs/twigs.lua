@@ -37,6 +37,7 @@ local function fn(Sim)
     ----------------------
     
     inst:AddComponent("inventoryitem")
+    inst:AddComponent("tradable")
     
 	inst:AddComponent("repairer")
 	inst.components.repairer.repairmaterial = "wood"

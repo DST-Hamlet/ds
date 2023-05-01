@@ -19,19 +19,21 @@ end
 
 local function fn(Sim)
 	local inst = CreateEntity()
-    
+
 	inst.entity:AddTransform()
 	inst.entity:AddAnimState()
     MakeInventoryPhysics(inst)
-    
+
+    inst:AddTag("fuelrepairable")
+
     inst.AnimState:SetBank("armor_tarsuit")
     inst.AnimState:SetBuild("armor_tarsuit")
     inst.AnimState:PlayAnimation("anim")
 
     MakeInventoryFloatable(inst, "idle_water", "anim")
-    
+
     inst:AddComponent("inspectable")
-    
+
     inst:AddComponent("waterproofer")
     inst.components.waterproofer.effectiveness = TUNING.WATERPROOFNESS_ABSOLUTE
 
@@ -40,15 +42,17 @@ local function fn(Sim)
 
     inst:AddComponent("equippable")
     inst.components.equippable.equipslot = EQUIPSLOTS.BODY
-    
+
     inst.components.equippable:SetOnEquip( onequip )
     inst.components.equippable:SetOnUnequip( onunequip )
-    
+
     inst:AddComponent("fueled")
-    inst.components.fueled.fueltype = "USAGE"
+    inst.components.fueled.fueltype = "TAR"
+    inst.components.fueled.accepting = true
+    inst.components.fueled.bonusmult = 2
     inst.components.fueled:InitializeFuelLevel(TUNING.TARSUIT_PERISHTIME)
     inst.components.fueled:SetDepletedFn(onperish)
-    
+
     return inst
 end
 

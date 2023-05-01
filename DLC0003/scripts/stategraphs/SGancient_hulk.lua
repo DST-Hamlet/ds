@@ -311,7 +311,7 @@ local states=
                 inst.components.locomotor:StopMoving()
             end
             inst.AnimState:PlayAnimation("death_explode")
-            inst.Physics:ClearCollisionMask()
+            RemovePhysicsColliders(inst)
         end,
 
         timeline=

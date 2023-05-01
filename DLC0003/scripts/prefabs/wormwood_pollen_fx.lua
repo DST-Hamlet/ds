@@ -25,13 +25,12 @@ local function fn(Sim)
 
     inst:AddTag("NOCLICK")
     inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
     inst:AddTag("wormwood_pollen_fx")
     
-    inst.persists = false
-
-    inst:ListenForEvent("animover", function(inst, data)    
-        inst:Remove()          
-    end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
     return inst
 end

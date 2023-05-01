@@ -91,17 +91,29 @@ local function onunequip(inst,owner)
 end
 
 local function CanTakeAmmo(inst, ammo, giver)
-    return (ammo.components.inventoryitem ~= nil) and
-            inst.components.trader.enabled and ((inst.components.weapon.projectile == nil or inst.components.weapon.projectile == ammo.prefab))
-            and not ammo.components.health and not ammo:HasTag("irreplaceable")
+    return
+        (ammo.components.inventoryitem ~= nil) and
+        inst.components.trader.enabled and
+        (
+            inst.components.weapon.projectile == nil or
+            (
+                inst.components.weapon.projectile == ammo.prefab and
+                inst.components.inventory:GetItemInSlot(1) ~= nil and
+                inst.components.inventory:GetItemInSlot(1).components.stackable and
+                not inst.components.inventory:GetItemInSlot(1).components.stackable:IsFull()
+            )
+        ) and
+        not ammo.components.health and
+        not ammo:HasTag("irreplaceable") and
+        not ammo:HasTag("invalidammo")
 end
 
 local function SetAmmoDamageAndRange(inst, ammo)
-
     if ammo.components.equippable then
         inst.components.weapon:SetRange(TUNING.TRUSTY_SHOOTER_ATTACK_RANGE_HIGH, TUNING.TRUSTY_SHOOTER_HIT_RANGE_HIGH)
         inst.components.weapon:SetDamage(TUNING.TRUSTY_SHOOTER_DAMAGE_HIGH)
         inst.SoundEmitter:PlaySound("dontstarve_DLC003/characters/wheeler/air_horn/load_3")
+        return
     end
 
     for i,v in ipairs(TUNING.TRUSTY_SHOOTER_TIERS.AMMO_HIGH) do
@@ -228,7 +240,6 @@ local function ResetAmmo(inst)
 end
 
 local function OnProjectileLaunch(inst, attacker, target, proj)
-
     inst.SoundEmitter:PlaySound("dontstarve_DLC003/characters/wheeler/air_horn/shoot")
 
     proj:AddTag("projectile")
@@ -244,13 +255,25 @@ local function OnProjectileLaunch(inst, attacker, target, proj)
     proj.persists = false
 
     -- If the projectile still exists in 2 seconds something went wrong
-    proj.self_destruct = proj:DoTaskInTime(2, function() proj:Remove() end)
+    proj.self_destruct = proj:DoTaskInTime(2, function()
+        proj:Remove()
+        if inst.ammo == 0 then
+            inst:ResetAmmo()
+        end
+    end)
+
     inst.ammo = inst.ammo - 1
 
     local removed_item = inst.components.inventory:RemoveSingleItemBySlot(1)
     if removed_item then
         removed_item:Remove()
     end
+end
+
+local function onremove(inst)
+    local item = inst.components.inventory:RemoveItemBySlot(1)
+    local owner  = inst.components.inventoryitem.owner or inst 
+    inst.components.inventory:DropItem(item, true, true, owner:GetPosition())
 end
 
 local function fn()
@@ -263,7 +286,7 @@ local function fn()
     inst.MiniMapEntity:SetIcon( "trusty_shooter.png" )    
 
     MakeInventoryPhysics(inst)
-    inst:AddTag("gun")
+
     inst:AddTag("hand_gun")
     inst:AddTag("irreplaceable")
 
@@ -274,6 +297,7 @@ local function fn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetCanAttack(CanAttack)
     --inst.components.weapon:SetAttackCallback(OnAttack)
     inst.components.weapon:SetOnProjectileLaunch(OnProjectileLaunch)
@@ -311,9 +335,12 @@ local function fn()
 
     inst:ListenForEvent("trade", OnTakeAmmo)
 
+    inst:ListenForEvent("onremove", onremove)
+
     inst.CanTakeItem = CanTakeAmmo
 
     inst:AddComponent("trader")
+    inst.components.trader.acceptnontradable = true
     inst.components.trader.deleteitemonaccept = true
     inst.components.trader:SetAcceptTest(CanTakeAmmo)
     inst.components.trader.enabled = true
@@ -337,7 +364,8 @@ local function fn()
         end
     end)
 
-    inst:DoTaskInTime(0, function() if not GetPlayer() or GetPlayer().prefab ~= "wheeler" then inst:Remove() end end)
+    inst:AddComponent("characterspecific")
+    inst.components.characterspecific:SetOwner("wheeler")
 
     return inst
 end

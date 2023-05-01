@@ -215,6 +215,8 @@ local function itemfn(Sim)
     inst.AnimState:SetBank("tar")
     inst.AnimState:SetBuild("tar")
 
+    inst:AddTag("tar")
+
     inst.AnimState:PlayAnimation("idle")
     
     inst:AddComponent("stackable")

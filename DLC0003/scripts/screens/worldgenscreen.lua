@@ -77,7 +77,7 @@ local WorldGenScreen = Class(Screen, function(self, profile, cb, world_gen_optio
 		self.worldanim:GetAnimState():SetBank("generating_volcano")
 	    self.worldgentext:SetString(STRINGS.UI.WORLDGEN.VOLCANOTITLE)
 
-	elseif world_gen_options.level_type == "survival" then
+	elseif world_gen_options.level_type == "survival" or world_gen_options.level_type == "adventure" then
 		if rog_enabled then
 			self.bg:SetTint(BGCOLOURS.PURPLE[1],BGCOLOURS.PURPLE[2],BGCOLOURS.PURPLE[3], 1)
 		else
@@ -200,7 +200,8 @@ end
 
 function WorldGenScreen:OnLoseFocus()
 	Screen.OnLoseFocus(self)
-	TheFrontEnd:GetSound():KillSound("worldgensound")    
+	TheFrontEnd:GetSound():KillSound("worldgensound")
+	TheFrontEnd:GetSound():KillSound("FEMusic")
 end
 
 function WorldGenScreen:OnUpdate(dt)

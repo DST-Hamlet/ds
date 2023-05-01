@@ -649,6 +649,28 @@ ROAD_PARAMETERS =
 	WIDTH_JITTER_SCALE=1,
 }
 
+BG_LOADING_IMAGES = {
+	MAIN_GAME = {
+		"loading_wagstaff",
+		"loading_maxwell",
+		"loading_newhorizons",
+		"loading_wendy",
+		"loading_wickerbottom",
+		"loading_wolfgang",
+		"loading_woodie2_trailer",
+		"loading_woodie_trailer",
+		"loading_night",
+	},
+
+	DLCS = {
+		-- RoG
+		{
+			"loading_webber",
+			"loading_wigfrid",
+		}
+	},
+}
+
 BGCOLOURS =
 {
 	RED = {255/255, 89/255, 46/255},
@@ -692,7 +714,7 @@ VIBRATION_CAMERA_SHAKE = 0
 VIBRATION_BLOOD_FLASH = 1
 VIBRATION_BLOOD_OVER = 2
 
-NUM_SAVE_SLOTS = 5
+NUM_SAVE_SLOTS = 10
 
 SAVELOAD = 
 {    

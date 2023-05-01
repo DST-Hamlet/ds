@@ -204,6 +204,7 @@ local states=
         onexit = function(inst)
             local pt = inst:GetPosition()
             pt.y = 0
+            inst.Physics:SetMotorVel(0,0,0)
             inst.Transform:SetPosition(pt:Get())
         end,
     },    

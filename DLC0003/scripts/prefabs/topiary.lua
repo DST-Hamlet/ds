@@ -1,10 +1,9 @@
 local assets =
 {
-	Asset("ANIM", "anim/topiary.zip"),
-    Asset("ANIM", "anim/topiary_pigman_build.zip"),
-    Asset("ANIM", "anim/topiary_werepig_build.zip"),
-    Asset("ANIM", "anim/topiary_beefalo_build.zip"),
-    Asset("ANIM", "anim/topiary_pigking_build.zip"),
+    Asset("ANIM", "anim/topiary_pigman.zip"),
+    Asset("ANIM", "anim/topiary_werepig.zip"),
+    Asset("ANIM", "anim/topiary_beefalo.zip"),
+    Asset("ANIM", "anim/topiary_pigking.zip"),
     Asset("MINIMAP_IMAGE", "topiary_1"),
     Asset("MINIMAP_IMAGE", "topiary_2"),
     Asset("MINIMAP_IMAGE", "topiary_3"),
@@ -16,34 +15,36 @@ local prefabs =
     "ash",
     "collapse_small",
 }
-    
 
 local function onhammered(inst, worker)
-    --inst.components.lootdropper:DropLoot()
-    SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
+    local x, y, z = inst.Transform:GetWorldPosition()
+    for i=1,math.random(3,4) do
+        local fx = SpawnPrefab("robot_leaf_fx")
+        fx.Transform:SetPosition(x + (math.random()*2) , y+math.random()*0.5, z + (math.random()*2))
+        if math.random() < 0.5 then
+            fx.Transform:SetScale(-1,1,-1)
+        end
+    end
+
     if not inst.components.fixable then
         inst.components.lootdropper:DropLoot()
-    end    
-    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+    end
+    
+    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_straw")
     inst:Remove()
 end
 
 local function onhit(inst, worker)
 	inst.AnimState:PlayAnimation("hit")
 	inst.AnimState:PushAnimation("idle", false)
+
+    local fx = SpawnPrefab("robot_leaf_fx")
+    local x, y, z= inst.Transform:GetWorldPosition()
+    fx.Transform:SetPosition(x, y + math.random()*0.5, z)
+            
+    inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/vine_hack")
 end
 
-local function OnSave(inst, data)
-
-end
-
-local function OnLoad(inst, data)
-
-end
-
-local function getstatus(inst)
-
-end
 
 local function onbuilt(inst)
 	inst.AnimState:PlayAnimation("place")
@@ -57,7 +58,7 @@ local function makeitem(name, build, frame)
         local anim = inst.entity:AddAnimState() 
 
         inst.entity:AddPhysics() 
-        MakeObstaclePhysics(inst, .25)         
+        MakeObstaclePhysics(inst, .25)
      
         local minimap = inst.entity:AddMiniMapEntity()
         minimap:SetIcon( "topiary_".. frame ..".png" )
@@ -65,7 +66,7 @@ local function makeitem(name, build, frame)
         inst.entity:AddSoundEmitter()
         inst:AddTag("structure")
 
-        anim:SetBank("topiary")
+        anim:SetBank(build)
         anim:SetBuild(build)
 
         anim:PlayAnimation("idle",true)
@@ -77,30 +78,36 @@ local function makeitem(name, build, frame)
         inst.components.workable:SetWorkLeft(4)
         inst.components.workable:SetOnFinishCallback(onhammered)
         inst.components.workable:SetOnWorkCallback(onhit)
+
+        if frame == "3" or frame == "4" then
+            MakeLargeBurnable(inst, nil, nil, true)
+            MakeLargePropagator(inst)
+        else
+            MakeMediumBurnable(inst, nil, nil, true)
+            MakeMediumPropagator(inst)
+        end
+
+        inst:ListenForEvent("burntup", inst.Remove)
         
         inst:AddComponent("inspectable")
-        inst.components.inspectable.getstatus = getstatus
         
-        MakeSnowCovered(inst, .01)
-        --inst:ListenForEvent( "onbuilt", onbuilt)
+        MakeSnowCovered(inst)
 
         inst:AddComponent("fixable")
-        inst.components.fixable:AddRecinstructionStageData("burnt","topiary",build)
-
+        inst.components.fixable:AddRecinstructionStageData("burnt", build, build)
+        inst.components.fixable:SetPrefabName("topiary")
 
         inst:SetPrefabNameOverride("topiary")
 
-        inst.OnSave = OnSave
-        inst.OnLoad = OnLoad
         return inst
     end
 
     return Prefab( name, fn, assets, prefabs)
 end
 
-return makeitem( "topiary_1", "topiary_pigman_build", "1" ),
-       makeitem( "topiary_2", "topiary_werepig_build", "2" ),
-       makeitem( "topiary_3", "topiary_beefalo_build", "3" ),
-       makeitem( "topiary_4", "topiary_pigking_build", "4" )     
+return 
+    makeitem( "topiary_1", "topiary_pigman",  "1" ),
+    makeitem( "topiary_2", "topiary_werepig", "2" ),
+    makeitem( "topiary_3", "topiary_beefalo", "3" ),
+    makeitem( "topiary_4", "topiary_pigking", "4" )     
 
-	   --MakePlacer("common/lightning_rod_placer", "lightning_rod", "lightning_rod", "idle")  

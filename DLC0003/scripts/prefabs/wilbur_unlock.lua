@@ -45,7 +45,9 @@ local function UnlockWilbur(inst)
             death_fx.Transform:SetPosition(inst:GetPosition():Get())
             inst.SoundEmitter:PlaySound("dontstarve_DLC002/characters/wilbur/sinking_death")
 			inst:DoTaskInTime(50*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/boat_sinking_shadow") end)
+			inst.persists = false
 			inst:ListenForEvent("animover", inst.Remove)
+			inst:ListenForEvent("entitysleep", inst.Remove)
 		end)
 	end
 

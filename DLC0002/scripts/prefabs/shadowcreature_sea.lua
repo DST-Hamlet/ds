@@ -44,6 +44,15 @@ local function OnAttacked(inst, data)
     inst.components.combat:ShareTarget(data.attacker, 30, function(dude) return dude:HasTag("shadowcreature") and not dude.components.health:IsDead() end, 1)
 end
 
+-- World Hop causes shadow creatures to be disconnected with the sanitymonsterspawner component.
+-- Let's delete them in those cases.
+local function CheckSanityCreatureSpawnerLink(inst)
+    if GetPlayer() and GetPlayer().components.sanitymonsterspawner and
+    not table.contains(GetPlayer().components.sanitymonsterspawner.monsters or {}, inst) then
+        inst:Remove()
+    end
+end
+
 local function MakeShadowCreature(data)
 
     local bank = data.bank 
@@ -95,6 +104,7 @@ local function MakeShadowCreature(data)
         inst:AddTag("monster")
 	    inst:AddTag("hostile")
         inst:AddTag("shadow")
+        inst:AddTag("windspeedimmune")
         inst:AddTag("notraptrigger")
 
         local brain = require "brains/shadowcreaturebrain"
@@ -104,6 +114,8 @@ local function MakeShadowCreature(data)
 	    inst.components.sanityaura.aurafn = CalcSanityAura
         
         inst:AddComponent("transparentonsanity")
+        inst.components.transparentonsanity:ForceUpdate()
+
         inst:AddComponent("health")
         inst.components.health:SetMaxHealth(data.health)
         
@@ -120,6 +132,8 @@ local function MakeShadowCreature(data)
         inst.components.lootdropper:SetChanceLootTable('shadow_creature')
         
         inst:ListenForEvent("attacked", OnAttacked)
+
+        inst:DoTaskInTime(0, CheckSanityCreatureSpawnerLink)
 
         return inst
     end

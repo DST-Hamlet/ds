@@ -216,7 +216,6 @@ end
 
 local function checkRemoveGlowfly(inst)
 	if not inst:HasTag("cocoonspawn") and inst:GetDistanceSqToInst(GetPlayer()) > 30*30 and not inst.components.inventoryitem:IsHeld() then
-		print("REMOVING GLOWFLY, TOO FAR AWAY")
 		inst:Remove()
 	end
 end
@@ -423,6 +422,7 @@ local function commonfn(Sim)
 	inst.components.inventoryitem:SetOnDroppedFn(OnDropped)
 	inst.components.inventoryitem:SetOnPutInInventoryFn(OnPickedUp)
 	inst.components.inventoryitem.canbepickedup = false
+	inst.components.inventoryitem.nosink = true
 	inst.components.inventoryitem:ChangeImageName("lantern_fly")
 
 	---------------------
@@ -513,7 +513,7 @@ end
 
 local function glowflyfn(sim)
 	local inst = commonfn(sim)
-	MakePoisonableCharacter(inst)
+	MakePoisonableCharacter(inst, "upper_body", Vector3(0, -1, 1))
 	inst.components.lootdropper:SetChanceLootTable('glowfly')	
 	return inst 
 end 

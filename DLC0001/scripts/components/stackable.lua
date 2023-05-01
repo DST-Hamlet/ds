@@ -47,25 +47,33 @@ end
 
 function Stackable:Get(num)
     local num_to_get = num or 1
-	-- If we have more than one item in the stack
-	if self.stacksize > num_to_get then
-		local instance = SpawnPrefab(self.inst.prefab)
-	
+    -- If we have more than one item in the stack
+    if self.stacksize > num_to_get then
+        local instance = SpawnPrefab(self.inst.prefab)
+
         self:SetStackSize(self.stacksize - num_to_get)
         instance.components.stackable:SetStackSize(num_to_get)
-        
-    	if self.ondestack then
+
+        if self.ondestack then
             self.ondestack(instance)
         end
-        
+
         if instance.components.perishable then
-			instance.components.perishable.perishremainingtime = self.inst.components.perishable.perishremainingtime
+            instance.components.perishable.perishremainingtime = self.inst.components.perishable.perishremainingtime
         end
-        
+
+        if instance.components.inventoryitem ~= nil and self.inst.components.inventoryitem ~= nil then
+            if self.inst.components.inventoryitem.owner then
+                instance.components.inventoryitem:OnPutInInventory(self.inst.components.inventoryitem.owner)
+            end
+
+            self.inst:ApplyInheritedMoisture(instance)
+        end
+
         return instance
-	end
-	
-	return self.inst	
+    end
+
+    return self.inst
 end
 
 function Stackable:RoomLeft()

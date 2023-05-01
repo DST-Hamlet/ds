@@ -52,6 +52,16 @@ local function destroy(inst)
 	end)
 end
 
+local function OnSave(inst, data)
+    data.queued_charcoal = inst.queued_charcoal or nil
+end
+
+local function OnLoad(inst, data)
+    if data ~= nil and data.queued_charcoal then
+        inst.queued_charcoal = true
+    end
+end
+
 local function fn(Sim)
 
 	local inst = CreateEntity()
@@ -107,11 +117,21 @@ local function fn(Sim)
         function(section)
             if section == 0 then
                 inst.components.burnable:Extinguish() 
-                anim:PlayAnimation("dead") 
-                RemovePhysicsColliders(inst)             
+                anim:PlayAnimation("dead")
+                RemovePhysicsColliders(inst)
 
-				local ash = SpawnPrefab("ash")
-				ash.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                if inst.queued_charcoal then
+                    local charcoal = SpawnPrefab("charcoal")
+                    charcoal.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                    inst.queued_charcoal = nil
+
+                    local interior = GetInteriorSpawner():getPropInterior(inst)
+                    if interior then
+                        GetInteriorSpawner():AddPrefabToInterior(charcoal, interior)
+                    end
+                else
+                    SpawnPrefab("ash").Transform:SetPosition(inst.Transform:GetWorldPosition())
+                end
 
                 inst.components.fueled.accepting = false
                 inst:RemoveComponent("cooker")
@@ -126,6 +146,10 @@ local function fn(Sim)
                 local output = {2,5,5,10}
                 inst.components.propagator.propagaterange = ranges[section]
                 inst.components.propagator.heatoutput = output[section]
+
+                if section == inst.components.fueled.sections then
+                    inst.queued_charcoal = true
+                end
             end
         end)
         
@@ -153,17 +177,9 @@ local function fn(Sim)
         inst.SoundEmitter:PlaySound("dontstarve/common/fireAddFuel")
     end)
 
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
 
-    --[[
-    inst:AddComponent("blowinwindgust")
-    inst.components.blowinwindgust:SetWindSpeedThreshold(TUNING.FIRE_WINDBLOWN_SPEED)
-    inst.components.blowinwindgust:SetGustStartFn(function(inst, windspeed)
-        if inst and inst.components.burnable and inst.components.burnable:IsBurning() and math.random() < TUNING.FIRE_BLOWOUT_CHANCE then
-            inst.components.burnable:Extinguish()
-        end
-    end)
-    inst.components.blowinwindgust:Start()
-    ]]
     return inst
 end
 

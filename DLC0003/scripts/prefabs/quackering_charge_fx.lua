@@ -8,7 +8,8 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	inst.persists = false
 
-	inst:AddTag("FX")
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 	inst:AddTag("NOCLICK")
 
     inst.entity:AddTransform()

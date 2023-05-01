@@ -44,7 +44,6 @@ local fn = function(inst)
     local tinkertab = {str = "TINKER", sort=999, icon = "tab_fabricate.tex"}
     inst.components.builder:AddRecipeTab(tinkertab)
 
-    inst.AnimState:AddOverrideBuild("player_wagstaff")
     inst:AddTag("wagstaff_inventor")
     
     inst.components.vision.nearsighted = true

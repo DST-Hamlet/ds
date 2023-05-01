@@ -1,14 +1,14 @@
 local assets=
 {
-	Asset("ANIM", "anim/feather_doydoy.zip"),
+    Asset("ANIM", "anim/feather_doydoy.zip"),
 }
 
 local function fn()
-	local inst = CreateEntity()
+    local inst = CreateEntity()
     
-	inst.entity:AddTransform()
-	inst.entity:AddAnimState()
-	inst.entity:AddSoundEmitter()
+    inst.entity:AddTransform()
+    inst.entity:AddAnimState()
+    inst.entity:AddSoundEmitter()
 
     MakeInventoryPhysics(inst)
     MakeInventoryFloatable(inst, "idle_water", "idle")
@@ -23,12 +23,19 @@ local function fn()
     inst:AddComponent("tradable")
 
     inst:AddComponent("stackable")
-	inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
+    inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
 
     inst:AddComponent("appeasement")
     inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_LARGE
 
-	return inst
+    MakeSmallBurnable(inst, TUNING.SMALL_BURNTIME)
+    MakeSmallPropagator(inst)
+    inst.components.burnable:MakeDragonflyBait(3)
+
+    inst:AddComponent("fuel")
+    inst.components.fuel.fuelvalue = TUNING.TINY_FUEL
+
+    return inst
 end
 
 return Prefab("objects/doydoyfeather", fn, assets)

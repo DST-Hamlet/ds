@@ -25,18 +25,13 @@ end
 
 local function RetargetFn(inst)
     return FindEntity(inst, TARGET_DIST, function(guy)
-        return inst.components.combat:CanTarget(guy)
-               and not guy:HasTag("prey")
-               and not guy:HasTag("smallcreature")
-               and (inst.components.knownlocations:GetLocation("targetbase") == nil or guy.components.combat.target == inst)
+        return inst.components.combat:CanTarget(guy) and guy:HasTag("player")
     end)
 end
-
 
 local function KeepTargetFn(inst, target)
     return inst.components.combat:CanTarget(target)
 end
-
 
 local function OnAttacked(inst, data)
     inst.components.combat:SetTarget(data.attacker)
@@ -142,6 +137,8 @@ local function fn(Sim)
     
     inst:AddComponent("combat")
     inst.components.combat:SetDefaultDamage(TUNING.ANCIENT_HERALD_DAMAGE)
+    inst.components.combat:SetRetargetFunction(3, RetargetFn)
+    inst.components.combat:SetKeepTargetFunction(KeepTargetFn)
     
     ------------------------------------------
 
@@ -155,8 +152,6 @@ local function fn(Sim)
     ------------------------------------------
     
     inst:ListenForEvent("attacked", OnAttacked)
-
-    inst.sg:GoToState("appear")
 
     inst:DoTaskInTime(0, function() 
         inst.home_pos = Point(inst.Transform:GetWorldPosition()) 

@@ -13,6 +13,7 @@ local function StopBubbles(inst)
 	inst.AnimState:PushAnimation("level"..inst.level.."_pst", false)
 	inst:RemoveEventCallback("animqueueover", StopBubbles)
 	inst:ListenForEvent("animqueueover", kill)
+	inst.persists = false
 end
 
 local function common(Sim, level, loop)
@@ -42,7 +43,7 @@ local function common(Sim, level, loop)
 
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/poisoned", "poisoned")
 
-	inst:AddTag("fx")
+	inst:AddTag("FX")
 
 	inst.StopBubbles = StopBubbles
 	

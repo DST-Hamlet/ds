@@ -1,6 +1,18 @@
 require "events"
 local Text = require "widgets/text"
 
+local function IgnoreMinisign(ent)
+    return ent:HasTag("sign")
+end
+
+local function PrioritizeMiniSign(ent)
+    if ent.prefab == "minisign" and not ent._imagename then
+        local activeitem = GetPlayer().components.inventory:GetActiveItem()
+
+        return activeitem and activeitem.prefab == "featherpencil" or false
+    end
+end
+
 Input = Class(function(self)
     self.onkey = EventProcessor()     -- all keys, down and up, with key param
     self.onkeyup = EventProcessor()   -- specific key up, no parameters
@@ -23,6 +35,14 @@ Input = Class(function(self)
     end
 
     self:DisableAllControllers()
+    
+    self.pickConditions = {}
+    
+    self:AddPickCondition("fishinhole", function(ent) return ent.prefab == "fishinhole" end, 2)
+
+    -- The mouse now tries to ignore mini signs. Solving the issue with mini signs and chests in the same place.
+    self:AddPickCondition("IgnoreMinisign",     IgnoreMinisign,    -1)
+    self:AddPickCondition("PrioritizeMiniSign", PrioritizeMiniSign, 2)
 end)
 
 function Input:DisableAllControllers()
@@ -266,28 +286,52 @@ function Input:GetAnalogControlValue(control)
     return TheSim:GetAnalogControl(control)
 end
 
-local function GetSortedEntitiesAtScreenPoint()
-    local function cmp(a, b)
-        if a == nil then return false end 
-        if b == nil then return true end 
-        return a.prefab ~= "fishinhole" and b.prefab == "fishinhole"
+function Input:AddPickCondition(name, condition, weight)
+	self.pickConditions[name] = {condition, weight}
+end
+
+function Input:RemovePickCondition(name, condition, weight)
+	self.pickConditions[name] = nil
+end
+
+local function GetSortedEntitiesAtScreenPoint(self)
+    local function PickWeight(ent)
+        local weight = 0
+
+        for i,v in pairs(self.pickConditions) do
+            local condition = v[1]
+            weight = weight + (condition(ent) and v[2] or 0)
+        end
+
+        return weight
     end
 
-    --print("GetSortedEntitiesAtScreenPoint before")
+    local function cmp(a, b)
+        return PickWeight(a) > PickWeight(b)
+    end
+
     local ents = TheSim:GetEntitiesAtScreenPoint(TheSim:GetPosition())
-    --dumptable(ents, 1, 1)
+
     table.insert(ents, nil)
     table.sort(ents, cmp)
-    --print("after")
-    --dumptable(ents, 1, 1)
+
     return ents
 end
 
 function Input:OnUpdate()
-	if PLATFORM == "PS4" then return end
+    if PLATFORM == "PS4" then return end
+
+	local useController = TheInput:ControllerAttached()
+    if useController ~= self.useController then
+        self.useController = useController
+        local world = GetWorld()
+        if world then
+            GetWorld():PushEvent("controllermode_changed", {enabled = useController})
+        end
+    end
 
 	if self.mouse_enabled then
-		self.entitiesundermouse = GetSortedEntitiesAtScreenPoint() --TheSim:GetEntitiesAtScreenPoint(TheSim:GetPosition())
+		self.entitiesundermouse = GetSortedEntitiesAtScreenPoint(self)
 	    
 		local inst = self.entitiesundermouse[1]
 		if inst ~= self.hoverinst then

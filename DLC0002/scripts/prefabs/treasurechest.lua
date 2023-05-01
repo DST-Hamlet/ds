@@ -102,7 +102,9 @@ local function oncloseocto(inst)
 			inst.AnimState:PushAnimation("closed", true)
 			return
 		else
-		
+			inst.persists = false
+			inst.components.container.canbeopened = false
+
 			inst.AnimState:PushAnimation("sink", false)
 			
 			inst:DoTaskInTime(96*FRAMES, function (inst)
@@ -153,7 +155,12 @@ end
 local joecounter = 1
 local function onload(inst, data)
 	if data and data.burnt then
-		inst.components.burnable.onburnt(inst)
+		if inst.components.burnable then
+			inst.components.burnable.onburnt(inst)
+		else
+			-- This chest is no longer burnable.
+			inst:Remove()
+		end
 	end
 
 	-- from the worldgen data
@@ -179,6 +186,14 @@ local octo_slotpos = {}
 for y = 0, 3 do
 	table.insert(octo_slotpos, Vector3(-162 +(75/2), -y*75 + 114 ,0))
 end
+
+local minotaur_slotpos = {}
+
+for y = 2.5, -0.5, -1 do
+	for x = 0, 2 do
+		table.insert(minotaur_slotpos, Vector3(75*x-75*2+75, 75*y-75*2+75,0))
+	end
+end
 		
 local function chest(style, aquatic)
 	local fn = function(Sim)
@@ -194,8 +209,6 @@ local function chest(style, aquatic)
 		inst.AnimState:SetBank(chests[style].bank)
 		inst.AnimState:SetBuild(chests[style].build)
 		inst.AnimState:PlayAnimation("closed", true)
-		
-		inst:AddComponent("floatable")
 
 		inst:AddComponent("inspectable")
 		inst:AddComponent("container")
@@ -226,6 +239,8 @@ local function chest(style, aquatic)
 			inst.components.container.onclosefn = oncloseocto
 			inst.components.container:SetNumSlots(#octo_slotpos, true)
 
+			inst:AddComponent("floatable")
+
 			inst.components.container.widgetslotpos = octo_slotpos
 			inst.components.container.widgetpos = Vector3(75,200,0)
 		    inst.components.container.widgetanimbank = "ui_thatchpack_1x4"
@@ -235,7 +250,7 @@ local function chest(style, aquatic)
 		inst:ListenForEvent( "onbuilt", onbuilt)
 		MakeSnowCovered(inst, .01)	
 
-		if style ~= "water_chest" then
+		if not aquatic then
 			MakeSmallBurnable(inst, nil, nil, true)
 			MakeSmallPropagator(inst)
 		end
@@ -247,6 +262,14 @@ local function chest(style, aquatic)
 			inst:AddTag("aquatic")
 			inst:AddComponent("waterproofer")
     		inst.components.waterproofer.effectiveness = 0
+		end
+
+		if style == "minotaur_chest" then
+			inst.components.container:SetNumSlots(#minotaur_slotpos, true)
+			inst.components.container.widgetslotpos = minotaur_slotpos
+			inst.components.container.widgetpos = Vector3(0, 200, 0)
+		    inst.components.container.widgetanimbank = "ui_chester_shadow_3x4"
+		    inst.components.container.widgetanimbuild = "ui_chester_shadow_3x4"			
 		end
 
 		return inst

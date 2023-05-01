@@ -309,7 +309,7 @@ function ItemTile:SetFuse(time)
         if JapaneseOnPS4() then
             self.fuse:SetHorizontalSqueeze(0.7)
         end
-        self.fuse:SetPosition(5,0,0)
+        self.fuse:SetPosition(4,0,0)
     end
 
     local val_to_show = time
@@ -320,7 +320,9 @@ function ItemTile:SetFuse(time)
 end
 
 function ItemTile:RemoveFuse()
-    self.fuse:Remove()
+    self:RemoveChild(self.fuse)
+    self.fuse:Kill()
+    self.fuse = nil
     self.fusebg:Hide()
 end
 

@@ -115,6 +115,10 @@ if PLATFORM == "PS4" then
     table.insert(assets, Asset("IMAGE", "images/fepanels_ps4.tex"))
 end
 
+for i, v in ipairs(BG_LOADING_IMAGES.MAIN_GAME) do
+	table.insert(assets, Asset("ATLAS", "images/bg_loading_"..v..".xml"))
+	table.insert(assets, Asset("IMAGE", "images/bg_loading_"..v..".tex"))
+end
 
 require "fonts"
 for i, font in ipairs( FONTS ) do

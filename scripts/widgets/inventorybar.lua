@@ -196,13 +196,19 @@ function Inv:Rebuild()
 		self.backpack = nil
 	end
 
+	local controller_attached = TheInput:ControllerAttached()
+    self.controller_build = controller_attached
+	self.integrated_backpack = controller_attached or Profile:GetIntegratedBackpack()
+
+	local overflow = self.owner.components.inventory.overflow and self.owner.components.inventory.overflow.components.container
+	overflow = (overflow ~= nil and overflow:IsOpenedBy(self.owner)) and overflow or nil
+
+	local do_integrated_backpack = overflow ~= nil and self.integrated_backpack
 
 	local new_backpack = self.owner.components.inventory.overflow
-	local do_integrated_backpack = TheInput:ControllerAttached() and new_backpack
+
 	if do_integrated_backpack then
 		local num = new_backpack.components.container.numslots
-
-
 
 		local x = - (num * (W+SEP) / 2)
 		--local offset = #self.inv >= num and 1 or 0 --math.ceil((#self.inv - num)/2)
@@ -247,20 +253,23 @@ function Inv:Rebuild()
 	    self.bgcover:SetPosition(Vector3(0, -135, 0))
 		self.toprow:SetPosition(Vector3(0,W/2 + YSEP/2,0))
 		self.bottomrow:SetPosition(Vector3(0,-W/2 - YSEP/2,0))
-		self.root:MoveTo(self.out_pos, self.in_pos, .5)
+
+		if self.rebuild_snapping then
+            self.root:SetPosition(self.in_pos)
+        else
+            self.root:MoveTo(self.out_pos, self.in_pos, .5)
+        end
 	else
 		self.bg:SetPosition(Vector3(0, -64, 0))
 	    self.bgcover:SetPosition(Vector3(0, -100, 0))
 		self.toprow:SetPosition(Vector3(0,0,0))
 		self.bottomrow:SetPosition(0,0,0)
 		
-		if TheInput:ControllerAttached() then
-			self.root:MoveTo(self.in_pos, self.out_pos, .2)
-		else
-			self.root:SetPosition(self.out_pos)
-		end
-		
-		
+		if do_integrated_backpack and not self.rebuild_snapping then
+            self.root:MoveTo(self.in_pos, self.out_pos, .2)
+        else
+            self.root:SetPosition(self.out_pos)
+        end
 	end
 	
 	self.actionstring:MoveToFront()
@@ -273,8 +282,8 @@ function Inv:Rebuild()
 		self.cursor:MoveToFront()
 	end
 
-
 	self.rebuild_pending = false
+	self.rebuild_snapping = false
 end
 
 function Inv:OnUpdate(dt)
@@ -509,7 +518,7 @@ function Inv:OnControl(control, down)
 				
 				if inv_item and not inv_item.components.inventoryitem.cangoincontainer and not active_item then
 					self.owner.components.inventory:DropItem(inv_item)
-					self:CloseControllerInventory()
+					self.owner.HUD:CloseControllerInventory()
 				else
 					self.active_slot:Click()
 				end
@@ -529,7 +538,7 @@ function Inv:OnControl(control, down)
 					local use_action = use_action_l or use_action_r
 					if use_action then
 						self.owner.components.locomotor:PushAction(use_action, true)
-						self:CloseControllerInventory()
+						self.owner.HUD:CloseControllerInventory()
 					end
 				end
 			

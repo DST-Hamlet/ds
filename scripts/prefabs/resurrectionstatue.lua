@@ -6,6 +6,21 @@ local assets=
 	Asset("MINIMAP_IMAGE", "resurrect"),
 }
 
+local function OnRemoved(inst)
+    -- Remove from save index
+	SaveGameIndex:DeregisterResurrector(inst)
+
+	-- Remove penalty if not used
+	if inst.components.resurrector then 
+		inst.components.resurrector.penalty = 0 
+		if not inst.components.resurrector.used then
+			local player = GetPlayer()
+			if player and player.components.health then
+				player.components.health:RecalculatePenalty()
+			end
+		end
+	end
+end
 
 local function onhammered(inst, worker)
 	if inst.components.lootdropper and not inst.components.resurrector.used then
@@ -13,20 +28,8 @@ local function onhammered(inst, worker)
 	end
 	SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
 	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
-	inst.components.resurrector.penalty = 0
+
 	inst:Remove()
-
-	-- Remove from save index
-	SaveGameIndex:DeregisterResurrector(inst)
-
-	
-	if not inst.components.resurrector.used then
-		local player = GetPlayer()
-		if player then
-			player.components.health:RecalculatePenalty()
-		end
-	end
-	
 end
 
 local function makeused(inst)
@@ -162,8 +165,10 @@ local function fn(Sim)
     inst.components.workable:SetWorkLeft(4)
 	inst.components.workable:SetOnFinishCallback(onhammered)
 	inst.components.workable:SetOnWorkCallback(onhit)
-	MakeSnowCovered(inst, .01)    
+	MakeSnowCovered(inst, .01)
+
 	inst:ListenForEvent( "onbuilt", onbuilt)
+	inst:ListenForEvent("onremove", OnRemoved)
 	
     return inst
 end

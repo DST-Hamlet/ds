@@ -14,6 +14,7 @@ local function fn()
     inst.entity:AddAnimState()
 
     MakeInventoryPhysics(inst)
+    MakeInventoryFloatable(inst, "idle_water", "idle")
 
     inst.AnimState:SetBank("feather_pencil")
     inst.AnimState:SetBuild("feather_pencil")

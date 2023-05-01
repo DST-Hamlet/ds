@@ -168,7 +168,7 @@ function SeasonManager:onEnterInterior(data)
 
     self.hurricaneoutside = self:IsHurricaneStorm()
     if self.hurricaneoutside then
-    	self:StopHurricaneStorm()
+    	self:StopHurricaneStorm(true)
     end
 end
 
@@ -179,7 +179,7 @@ function SeasonManager:onExitInterior(data)
     end
 
     if self.hurricaneoutside then
-    	self:StartHurricaneStorm()
+    	self:StartHurricaneStorm(nil, true)
     end
 end
 
@@ -1740,22 +1740,24 @@ function SeasonManager:UpdateHurricaneTease(dt)
 	end
 end
 
-function SeasonManager:StartHurricaneStorm(duration_override)
+function SeasonManager:StartHurricaneStorm(duration_override, continuation)
 	if not self:IsHurricaneStorm() then
+		if continuation then
+			self.hurricane = true
+			self:StartPrecip(true)
+			self.inst:PushEvent("hurricanestart")
+			
+			return
+		end
+
 		self.hurricane = true
 		
 		self.atmo_moisture = self.moisture_limit
-		--self.precipmode = "hurricane"
-		--self.lightningmode = "hurricane"
 		self:StartPrecip()
-		--local season_floor_scale = 0.25
-		--self.moisture_floor = (.25 + math.random()*.5) * (self.atmo_moisture*season_floor_scale)
-		
 		self.hurricane_peak_intensity = 100
 		self.hurricane_rate = 0
 		self.hurricane_timer = 0
-		self.hurricane_duration = duration_override or math.random(TUNING.HURRICANE_LENGTH_MIN, TUNING.HURRICANE_LENGTH_MAX) --math.random(16, 2.5 * 16) * TUNING.SEG_TIME -- 1 to 2.5 days in segment time
-		--self.hurricane_duration = 4 * TUNING.SEG_TIME
+		self.hurricane_duration = duration_override or math.random(TUNING.HURRICANE_LENGTH_MIN, TUNING.HURRICANE_LENGTH_MAX)
 
 		self.hurricane_wind = 0.0
 		self.hurricane_gust_speed = 0.0
@@ -1764,28 +1766,27 @@ function SeasonManager:StartHurricaneStorm(duration_override)
 		self.hurricane_gust_peak = 0.0 --GetRandomWithVariance(0.5, 0.25)
 		self.hurricane_gust_state = HURRICANE_GUST_WAIT
 
-		--print("Hurricane: " .. self.hurricane_duration)
-
 		self.inst:PushEvent("hurricanestart")
 	end
 end
 
-function SeasonManager:StopHurricaneStorm()
+function SeasonManager:StopHurricaneStorm(will_continue)
 	if self:IsHurricaneStorm() then
 		--stop hurricane weather things
 		self:StopPrecip()
 		self.hurricane = false
-		self.hurricane_wind = 0.0
-		self.hurricane_gust_speed = 0.0
-		self.hurricane_gust_timer = 0.0
-		self.hurricane_gust_period = 0.0
-		self.hurricane_gust_peak = 0.0
-		self.hurricane_gust_state = HURRICANE_GUST_WAIT
-		self.atmo_moisture = 0.0
-		--self.atmo_moisture = self.moisture_limit --let rain linger off
-		--self.precipmode = "dynamic"
-		--self.lightningmode = "precip"
-		--self:DefaultLightningDelays()
+
+		if not will_continue then
+			self.hurricane_wind = 0.0
+			self.hurricane_gust_speed = 0.0
+			self.hurricane_gust_timer = 0.0
+			self.hurricane_gust_period = 0.0
+			self.hurricane_gust_peak = 0.0
+			self.hurricane_gust_state = HURRICANE_GUST_WAIT
+		
+			self.atmo_moisture = 0.0
+		end
+
 		self.inst:PushEvent("hurricanestop")
 	end
 end
@@ -1838,6 +1839,9 @@ function SeasonManager:OnUpdate( dt )
 		self.percent_season = self.target_percent
 		self:UpdateSegs()
 		self.target_percent = nil
+
+		-- We just transitioned in, set us up at approx the right point in the season
+		dt = self:GetDaysIntoSeason() * TUNING.TOTAL_DAY_TIME
 	end
 
 	local pt = GetPlayer():GetPosition()
@@ -2389,7 +2393,6 @@ function SeasonManager:StartMild()
 	if self.mildlength > 0 then
 		self:EnqueueSeasonChange()
 		self:StopHurricaneStorm()
-		self:ApplySummerDSP(5)
 		self:UpdateSegs()
 		self.hurricanetease_start = math.random(6, 15) / 20
 		self.hurricanetease_started = false
@@ -2413,7 +2416,6 @@ function SeasonManager:StartWet()
 
 	if self.wetlength > 0 then
 		self:EnqueueSeasonChange()
-		self:ApplySummerDSP(5)
 		self:UpdateSegs()
 
 		if GetWorld() and GetWorld().components.ambientsoundmixer then
@@ -2436,7 +2438,6 @@ function SeasonManager:StartGreen()
 	if self.greenlength > 0 then
 		self:EnqueueSeasonChange()
 		self:StopHurricaneStorm()
-		self:ApplySummerDSP(5)
 		self:UpdateSegs()
 
 		if GetWorld() and GetWorld().components.ambientsoundmixer then
@@ -2459,7 +2460,6 @@ function SeasonManager:StartDry()
 	if self.drylength > 0 then
 		self:EnqueueSeasonChange()
 		self:StopHurricaneStorm()
-		self:ApplySummerDSP(5)
 		self:UpdateSegs()
 
 		if GetWorld() and GetWorld().components.ambientsoundmixer then
@@ -2515,6 +2515,10 @@ function SeasonManager:IsHumidSeason()
 end
 
 function SeasonManager:IsLushSeason()
+	return false
+end
+
+function SeasonManager:IsAporkalypse()
 	return false
 end
 

@@ -14,7 +14,10 @@ local function fn()
     anim:SetFinalOffset(-1)
     inst:AddTag("fx")
     
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
+    
     return inst
 end
 

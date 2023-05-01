@@ -20,7 +20,9 @@ local function fn()
     inst.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
 
     inst.persists = false
-    inst:AddTag("fx")
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
+
     inst:ListenForEvent("animover", function() 
         inst.AnimState:ClearBloomEffectHandle()
         inst:Remove() 

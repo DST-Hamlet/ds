@@ -1,5 +1,3 @@
-local PopupDialogScreen = require "screens/popupdialog"
-
 local assets=
 {
 	Asset("ANIM", "anim/cave_entrance.zip"),
@@ -13,7 +11,8 @@ local assets=
 local prefabs = 
 {
 	"bat",
-	"exitcavelight"
+	"exitcavelight",
+	"cave_regenerator",
 }
 
 local function GetVerb(inst)

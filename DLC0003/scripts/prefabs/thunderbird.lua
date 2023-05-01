@@ -1,5 +1,5 @@
-require "brains/perdbrain"
-require "stategraphs/SGperd"
+require "brains/thunderbirdbrain"
+require "stategraphs/SGthunderbird"
 
 local assets=
 {
@@ -90,12 +90,13 @@ local function fn()
     inst.components.eater:SetVegetarian()
     table.insert(inst.components.eater.foodprefs, "RAW")
     table.insert(inst.components.eater.ablefoods, "RAW")
-    
+
     inst:AddComponent("sleeper")
-    inst.components.sleeper:SetWakeTest( function() return true end)    --always wake up if we're asleep
+    inst.components.sleeper.onlysleepsfromitems = true
 
     inst:AddComponent("combat")
-    inst.components.combat.hiteffectsymbol = "pig_torso"
+    inst.components.combat.hiteffectsymbol = "body"
+
     inst:AddComponent("health")
     inst.components.health:SetMaxHealth(TUNING.PERD_HEALTH)
     inst.components.combat:SetDefaultDamage(TUNING.PERD_DAMAGE)
@@ -121,8 +122,8 @@ local function fn()
     inst:DoTaskInTime(0.1, function() spawnfx(inst) end)
 
     inst.DoLightning = DoLightning
-    MakeMediumFreezableCharacter(inst, "pig_torso")
-    MakeMediumBurnableCharacter(inst, "pig_torso")
+    MakeMediumFreezableCharacter(inst, "body")
+    MakeMediumBurnableCharacter(inst, "body")
 
     inst.components.burnable.lightningimmune = true
     

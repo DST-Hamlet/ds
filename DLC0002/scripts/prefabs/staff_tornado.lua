@@ -16,9 +16,17 @@ end
 
 local function cantornado(staff, caster, target, pos)
     return target and (
-        (target.components.health and target.components.combat and caster.components.combat:CanTarget(target)) 
-        or target.components.workable or target.components.hackable
+        (
+            target.components.health and target.components.combat and caster.components.combat:CanTarget(target)
+        ) 
+        or (
+            target.components.workable and not table.contains(
+                {ACTIONS.NET, ACTIONS.FISH},
+                target.components.workable:GetWorkAction()
+            )
         )
+        or target.components.hackable
+    )
 end
 
 local function spawntornado(staff, target, pos)
@@ -111,6 +119,7 @@ local function tornado_fn()
 	inst:AddComponent("locomotor")
     inst.components.locomotor.walkspeed = TUNING.TORNADO_WALK_SPEED * 0.33
     inst.components.locomotor.runspeed = TUNING.TORNADO_WALK_SPEED
+    inst.components.locomotor.pathcaps = { ignorecreep = true }
 
     inst:SetStateGraph("SGtornado")
     inst:SetBrain(require "brains/tornadobrain")

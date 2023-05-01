@@ -16,35 +16,12 @@ local function growtree(inst)
 	end
 end
 
-local function plant(inst, growtime)
+local function digup(inst, digger)
+    inst.components.lootdropper:DropLoot()
+    inst:Remove()
+end
 
-    --[[if not SaveGameIndex:IsModeShipwrecked() then
-        inst.AnimState:PlayAnimation("idle_planted")
-        inst.AnimState:PushAnimation("idle_planted")
-        inst.AnimState:PushAnimation("idle_planted")
-        inst.AnimState:PushAnimation("idle_planted")
-        inst.AnimState:PushAnimation("death", false)
-        inst:ListenForEvent("animqueueover", function()
-            local player = GetPlayer()
-            if player and player.components.talker then
-                player.components.talker:Say(GetString(player.prefab, "ANNOUNCE_OTHER_WORLD_PLANT"))
-            end
-            local time_to_erode = 4
-            local tick_time = TheSim:GetTickTime()
-            inst:StartThread( function()
-                local ticks = 0
-                while ticks * tick_time < time_to_erode do
-                    local erode_amount = ticks * tick_time / time_to_erode
-                    inst.AnimState:SetErosionParams( erode_amount, 0.1, 1.0 )
-                    ticks = ticks + 1
-                    Yield()
-                end
-                inst:Remove()
-            end)
-        end)
-        return
-    end]]
-    
+local function plant(inst, growtime)
     inst:RemoveComponent("inventoryitem")
     inst:RemoveComponent("locomotor")
     RemovePhysicsColliders(inst)
@@ -54,10 +31,23 @@ local function plant(inst, growtime)
     inst.growtime = GetTime() + growtime
     -- print ("PLANT", growtime)
     inst.growtask = inst:DoTaskInTime(growtime, growtree)
+
+    inst:AddComponent("lootdropper")
+    inst.components.lootdropper:SetLoot({"twigs"})
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
 end
 
 local function ondeploy (inst, pt) 
     inst = inst.components.stackable:Get()
+
+    if inst.components.inventoryitem then
+        inst.components.inventoryitem:OnRemoved()
+    end
+
     inst.Transform:SetPosition(pt:Get() )
     local timeToGrow = GetRandomWithVariance(TUNING.JUNGLETREESEED_GROWTIME.base, TUNING.JUNGLETREESEED_GROWTIME.random)
     plant(inst, timeToGrow)
@@ -73,7 +63,7 @@ local function stopgrowing(inst)
 end
 
 local function restartgrowing(inst)
-    if inst and not inst.growtask then
+    if inst and not inst.growtask and not inst.components.inventoryitem then -- It won't have inventoryitem component if it's already a sapling.
         local growtime = GetRandomWithVariance(TUNING.JUNGLETREESEED_GROWTIME.base, TUNING.JUNGLETREESEED_GROWTIME.random)
         inst.growtime = GetTime() + growtime
         inst.growtask = inst:DoTaskInTime(growtime, growtree)
@@ -144,6 +134,7 @@ local function fn(Sim)
     inst.AnimState:SetBank("jungletreeseed")
     inst.AnimState:SetBuild("jungletreeseed")
     inst.AnimState:PlayAnimation("idle")
+    MakeInventoryFloatable(inst, "idle_water", "idle")
     
 
     --inst:AddComponent("edible")

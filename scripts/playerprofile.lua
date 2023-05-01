@@ -450,6 +450,23 @@ function PlayerProfile:GetHamletWarned()
 	end
 end
 
+function PlayerProfile:SetModsWarning(enabled)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "modswarning", tostring(enabled))
+   else
+	   self:SetValue("modswarning", enabled)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetModsWarning()
+	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "modswarning") ~= "false"
+	else
+		return GetValueOrDefault( self.persistdata.modswarning, true )
+	end
+end
+
 function PlayerProfile:GetWorldCustomizationPresets(world)
 	local worldnames = {MAIN_GAME = true, REIGN_OF_GIANTS = true, CAPY_DLC = true, PORKLAND_DLC = true}
 	assert(worldnames[world]) 
@@ -534,6 +551,23 @@ end
 
 function PlayerProfile:GetSkipToSlot()
 	return TheSim:GetSetting("misc", "skip_to_slot")
+end
+
+function PlayerProfile:SetIntegratedBackpack(enabled)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "integratedbackpack", tostring(enabled))
+   else
+	   self:SetValue("integratedbackpack", enabled)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetIntegratedBackpack()
+	if USE_SETTINGS_FILE then
+	   return TheSim:GetSetting("misc", "integratedbackpack") == "true"
+   else
+	   return self:GetValue("integratedbackpack")
+   end
 end
 
 ----------------------------

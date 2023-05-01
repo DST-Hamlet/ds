@@ -66,7 +66,7 @@ function Container:OnRemoveEntity()
 		if self.opener and self.opener.HUD then
 			local opener = self.opener
 			self.opener = nil
-			opener.HUD:CloseContainer(self.inst)
+			opener.HUD:CloseContainer(self.inst, self.side_widget)
 		end
 		self:OnClose(old_opener)
 	end
@@ -126,8 +126,8 @@ function Container:DropEverything()
     end 
 end
 
-function Container:DropItem(itemtodrop)
-    local item = self:RemoveItem(itemtodrop)
+function Container:DropItem(itemtodrop, wholestack)
+    local item = self:RemoveItem(itemtodrop, wholestack)
     if item then 
         local pos = Vector3(self.inst.Transform:GetWorldPosition())
         item.Transform:SetPosition(pos:Get())
@@ -287,13 +287,12 @@ function Container:GetItemSlot(item)
 end
 
 function Container:Close(doer)	
-
 	if self.open then
 		local old_opener = self.opener
 		if self.opener and self.opener.HUD then
 			local opener = self.opener
 			self.opener = nil
-			opener.HUD:CloseContainer(self.inst)
+			opener.HUD:CloseContainer(self.inst, self.side_widget)
 		end
 		self:OnClose(old_opener)
 	end
@@ -320,9 +319,11 @@ function Container:OnOpen()
     
 	if self.opener and self.opener.components.inventory then
 		self.opener.components.inventory.opencontainers[self.inst] = true
+        self.opener:PushEvent("refreshcrafting")
 	end
     
-    self.inst:PushEvent("onopen", {doer = self.opener})    
+    self.inst:PushEvent("onopen", {doer = self.opener})
+
     if self.onopenfn then
         self.onopenfn(self.inst)
     end
@@ -335,6 +336,7 @@ end
 function Container:OnClose(old_opener)
    	if old_opener and old_opener.components.inventory then
    		old_opener.components.inventory.opencontainers[self.inst] = nil
+        old_opener:PushEvent("refreshcrafting")
    	end
 
     if self.open then
@@ -448,6 +450,50 @@ function Container:GetItemByName(item, amount)
     return items
 end
 
+local function GetStackSize(inst)
+    if inst.components.stackable == nil then
+        return 1
+    end
+
+    return inst.components.stackable:StackSize()
+end
+
+local function crafting_priority_fn(a, b)
+    if a.stacksize == b.stacksize then
+        return a.slot < b.slot
+    end
+    return a.stacksize < b.stacksize --smaller stacks first
+end
+
+function Container:GetCraftingIngredient(item, amount, reverse_search_order)
+    local items = {}
+    for i = 1, self.numslots do
+        local v = self.slots[i]
+		if v ~= nil and v.prefab == item then
+            table.insert(items, {
+                item = v,
+                stacksize = GetStackSize(v),
+                slot = reverse_search_order and (self.numslots - (i - 1)) or i,
+            })
+        end
+    end
+
+    table.sort(items, crafting_priority_fn)
+
+    local crafting_items = {}
+    local total_num_found = 0
+    for i, v in ipairs(items) do
+        local stacksize = math.min(v.stacksize, amount - total_num_found)
+        crafting_items[v.item] = stacksize
+        total_num_found = total_num_found + stacksize
+        if total_num_found >= amount then
+            break
+        end
+    end
+
+    return crafting_items
+end
+
 function Container:ConsumeByName(item, amount)
     
     local total_num_found = 0
@@ -479,6 +525,8 @@ function Container:ConsumeByName(item, amount)
             break
         end
     end
+
+    return total_num_found
 end
 
 function Container:OnSave()
@@ -615,6 +663,7 @@ function Container:RemoveItem(item, wholestack)
 	local slot = self:GetItemSlot(item)
     if dec_stack then
         local dec = item.components.stackable:Get()
+        dec.components.inventoryitem:OnRemoved()
         dec.prevslot = slot
         dec.prevcontainer = self
         return dec

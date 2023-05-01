@@ -32,7 +32,7 @@ local function fn(Sim)
     inst:AddComponent("inspectable")
     
     inst:AddComponent("balloonmaker")
-    inst:DoTaskInTime(0, function() if not GetPlayer() or GetPlayer().prefab ~= "wes" then inst:Remove() end end)
+
     return inst
 end
 

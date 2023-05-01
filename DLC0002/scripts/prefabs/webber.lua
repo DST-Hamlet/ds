@@ -37,7 +37,6 @@ local function custom_init(inst)
 
 	local nest_recipe = Recipe("spidereggsack", {Ingredient("silk", 12), Ingredient("spidergland", 6), Ingredient("papyrus", 6)}, RECIPETABS.TOWN, TECH.NONE, RECIPE_GAME_TYPE.COMMON)
 	nest_recipe.sortkey = 1
-	STRINGS.RECIPE_DESC.SPIDEREGGSACK = "Get a little help from your friends."
 
     inst:AddComponent("beard")
     inst.components.beard.insulation_factor = TUNING.WEBBER_BEARD_INSULATION_FACTOR

@@ -25,9 +25,13 @@ local function retargetfn(inst)
 end
 
 local function ShouldSleep(inst)
-	return false -- frogs either go to their home, or just sit on the ground.
-end
+    if inst.components.knownlocations:GetLocation("home") ~= nil then
+        return false
+    end
 
+    -- Homeless frogs will sleep at night.
+    return GetClock():IsNight()
+end
 
 local function OnAttacked(inst, data)
     inst.components.combat:SetTarget(data.attacker)

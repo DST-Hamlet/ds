@@ -29,10 +29,12 @@ if PLATFORM == "WIN32_STEAM" or PLATFORM == "WIN32" then
 	global_broadcastnig_widget:SetVAnchor(ANCHOR_TOP)
 end
 
+global_loading_widget = nil
 LoadingWidget = require "widgets/loadingwidget"
 global_loading_widget = LoadingWidget()
 global_loading_widget:SetHAnchor(ANCHOR_LEFT)
 global_loading_widget:SetVAnchor(ANCHOR_BOTTOM)
+global_loading_widget:SetScaleMode(SCALEMODE_PROPORTIONAL)
 
 local DeathScreen = require "screens/deathscreen"
 local PopupDialogScreen = require "screens/popupdialog"
@@ -80,7 +82,7 @@ local function DoAgeWorld()
 end
 
 local function KeepAlive()
-	if global_loading_widget then 
+	if global_loading_widget and global_loading_widget.is_enabled then 
 		global_loading_widget:ShowNextFrame()
 		TheSim:RenderOneFrame()
 		global_loading_widget:ShowNextFrame()
@@ -106,7 +108,10 @@ local function LoadAssets(asset_set)
 	
 	if LOAD_UPFRONT_MODE then return end
 	
-	ShowLoading()
+	-- The Adventure Mode needs to show a title instead of background images.
+	if SaveGameIndex:GetCurrentMode() ~= "adventure" then
+		ShowLoading()
+	end
 	
 	assert(asset_set)
 	Settings.current_asset_set = asset_set
@@ -328,6 +333,7 @@ local function OnPlayerDeath(wilson, data)
 			res = SaveGameIndex:GetResurrector()
 			if res then
 				DoAgeWorld()
+				TrySpawnSkeleton(wilson)
 
 				local fadetime = 8.3
 				if cause == "file_load" then
@@ -393,6 +399,7 @@ end
 
 local function StartGame(wilson)
 	TheFrontEnd:GetSound():KillSound("FEMusic") -- just in case...
+	TheFrontEnd:GetSound():KillSound("worldgensound")
 	
 	start_game_time = GetTime()
 	SetUpPlayerCharacterCallbacks(wilson)
@@ -490,6 +497,16 @@ function PopulateWorld(savedata, profile, playercharacter, playersavedataoverrid
 		elseif travel_direction == "descend_volcano" then
 			if savedata.ents["volcano"] then
 				spawn_ent = savedata.ents["volcano"][1]
+			end
+
+			-- Mount the boat used when we climbed the volcano.
+			if playerdata.driver and playerdata.driver.lastvehicle then
+				for k, ent in pairs(savedata.ents[playerdata.driver.lastvehicle_prefab]) do
+					if ent.id == playerdata.driver.lastvehicle then
+						-- The LoadPostPass of the drivable component will do the job.
+						ent.data.drivable.driver = savedata.playerinfo.id
+					end
+				end
 			end
 		end
 
@@ -1374,14 +1391,13 @@ function DoInitGame(playercharacter, savedata, profile, next_world_playerdata, f
 	end
 end
 
-function TravelBetweenWorlds(targetmode, playerevent, waittime, dropitems, customoptions, mergefromslot)
-	
+function TravelBetweenWorlds(targetmode, playerevent, waittime, dropitems_tag, customoptions, mergefromslot)
 	-- Replaced traveldirection with target mode to avoid confusion, check the DLC002 version if you want some reference
 	local function onentered()
-		local res = SaveGameIndex:GetWorldEntranceForOtherWorld(playerevent, targetmode)
-		if res then
+		local entrance = SaveGameIndex:GetWorldEntranceForOtherWorld(playerevent, targetmode)
+		if entrance then
 			-- ensure we load the right slot for this worthy (caves, volcano)
-			SaveGameIndex:GotoWorldEntrance(playerevent)
+			SaveGameIndex:GotoWorldEntrance(playerevent, entrance)
 		end
 		StartNextInstance({reset_action=RESET_ACTION.LOAD_SLOT, save_slot = SaveGameIndex:GetCurrentSaveSlot(), playerevent = playerevent}, true)
 	end
@@ -1403,15 +1419,12 @@ function TravelBetweenWorlds(targetmode, playerevent, waittime, dropitems, custo
 
 	SetPause(false)
 
-	if dropitems ~= nil then
-		for i,item in ipairs(dropitems) do
-			local itemlist = GetPlayer().components.inventory:GetItemByName(item, 1)
-			if itemlist and next(itemlist) then
-				local actualitem = next(itemlist)
-				local owner = actualitem.components.inventoryitem:GetContainer()
-				if owner then
-					owner:DropItem(actualitem)
-				end
+	if dropitems_tag ~= nil and type(dropitems_tag) == "string" then
+		local itemlist = GetPlayer().components.inventory:FindItems(function(item) return item:HasTag(dropitems_tag) end)
+		for i, item in pairs(itemlist) do
+			local owner = item.components.inventoryitem:GetContainer()
+			if owner then
+				owner:DropItem(item)
 			end
 		end
 	end
@@ -1642,6 +1655,12 @@ Print(VERBOSITY.DEBUG, "[Loading Morgue]")
 Morgue:Load( function(did_it_load) 
 	--print("Morgue loaded....[",did_it_load,"]")
 end )
+
+--Now let's setup debugging!!!
+if DEBUGGER_ENABLED then
+    local startResult, breakerType = Debuggee.start()
+    print('Debuggee start ->', startResult, breakerType )
+end
 
 Print(VERBOSITY.DEBUG, "[Loading profile and save index]")
 Profile:Load( function() 

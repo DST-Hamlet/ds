@@ -1,11 +1,12 @@
 
-BufferedAction = Class(function(self, doer, target, action, invobject, pos, recipe, distance)
+BufferedAction = Class(function(self, doer, target, action, invobject, pos, recipe, distance, rotation)
     self.doer = doer
     self.target = target
     self.initialtargetowner = self.target and self.target.components.inventoryitem and self.target.components.inventoryitem.owner
     self.action = action
     self.invobject = invobject
     self.pos = pos
+    self.rotation = rotation
     self.onsuccess = {}
     self.onfail = {}
     self.recipe = recipe

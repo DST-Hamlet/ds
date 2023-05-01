@@ -14,7 +14,7 @@ AddTask("CavesStart", {
 			--["BGCaveRoom"] = 4+math.random(2),
 		},
 		room_bg=GROUND.WALL_ROCKY,
-		background_room="PitRoom",--"BGCaveRoom",
+		background_room="BGCaveRoom",
 		colour={r=1,g=0.7,b=1,a=1},
 	})
 
@@ -27,7 +27,7 @@ AddTask("CavesAlternateStart", {
 			["RockLobsterPlains"] = 1+math.random(2),
 		},
 		room_bg=GROUND.SINKHOLE,
-		background_room="PitRoom",--"BGCaveRoom",
+		background_room="BGCaveRoom",
 		colour={r=1,g=0.5,b=1,a=1},
 	})
 
@@ -40,7 +40,7 @@ AddTask("BatCaves", {
 			["BatCaveRoom"] = 2+math.random(2),
 		},
 		room_bg=GROUND.CAVE,
-		background_room="PitRoom",--"BGCaveRoom",
+		background_room="BGCaveRoom",
 		colour={r=1,g=0.6,b=1,a=1},
 	})
 
@@ -53,7 +53,7 @@ AddTask("FungalBatCave", {
 			["BatCaveRoom"] = 1+math.random(2),
 		},
 		room_bg=GROUND.FUNGUS,
-		background_room="PitRoom",--"BGFungusRoom",
+		background_room="BGFungusRoom",
 		colour={r=1,g=0,b=0.5,a=1},
 	})
 
@@ -65,7 +65,7 @@ AddTask("TentacledCave", {
 			["TentacleCave"] = 1+math.random(4),
 		},
 		room_bg=GROUND.MARSH,
-		background_room="PitRoom",--"BGFungusRoom",
+		background_room="BGFungusRoom",
 		colour={r=0.5,g=0,b=1,a=1},
 	})
 
@@ -131,7 +131,7 @@ AddTask("RabbitsAndFungs", {
 			["BGCaveRoom"] = 2+math.random(2),	
 		},
 		room_bg=GROUND.WALL_ROCKY,
-		background_room="PitRoom",--"BGFungusRoom",
+		background_room="BGFungusRoom",
 		colour={r=0.8,g=0,b=1,a=1},
 	})
 AddTask("SingleBatCaveTask", {
@@ -159,7 +159,7 @@ AddTask("FungalPlain", {
 			["RockLobsterPlains"] = 1+math.random(2),
 		},
 		room_bg=GROUND.WALL_ROCKY,
-		background_room="PitRoom",--(math.random() > 1 and "BGFungusRoom") or "BGNoisyFungus",
+		background_room= (math.random() > 0.5 and "BGFungusRoom") or "BGNoisyFungus",
 		colour={r=1,g=0,b=0.6,a=1},
 	})
 
@@ -171,7 +171,7 @@ AddTask("Cavern", {
 			["RockLobsterPlains"] = 1,
 		},
 		room_bg=GROUND.CAVE_NOISE,
-		background_room="PitRoom",--"BGNoisyCave",
+		background_room="BGNoisyCave",
 		colour={r=1,g=0,b=0.7,a=1},
 	})
 
@@ -188,7 +188,7 @@ AddTask("FungalRabitCityPlain", {
 			["RabbitCity"] = 4+math.random(2),
 		},
 		room_bg=GROUND.UNDERROCK,
-		background_room="PitRoom",--(math.random() > 1 and "BGFungusRoom") or "BGNoisyFungus",
+		background_room= (math.random() > 0.5 and "BGFungusRoom") or "BGNoisyFungus",
 		colour={r=1,g=0,b=0.6,a=1},
 	})
 

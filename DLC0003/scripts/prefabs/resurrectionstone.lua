@@ -50,16 +50,36 @@ local function doresurrect(inst, dude)
     ProfileStatsSet("resurrectionstone_used", true)
 
 	GetClock():MakeNextDay()
-    dude.Transform:SetPosition(inst.Transform:GetWorldPosition())
     dude:Hide()
-    TheCamera:SetDistance(12)
+
 	dude.components.hunger:Pause()
 
 	if(dude == GetPlayer()) then --Would this ever be false? 
 		if dude.components.driver:GetIsDriving() then 
 			dude.components.driver:OnDismount()
 		end 
-	end 
+	end
+
+	dude:DoTaskInTime(0, function()
+		local snapcam = true
+
+		-- Do not transition to the same room.
+		if (TheCamera.interior and not inst:GetIsInInterior()) or inst.interior  then
+			GetInteriorSpawner():PlayTransition(dude, nil, inst.interior, inst, true)
+			snapcam = false
+		end
+
+		dude.Transform:SetPosition(inst.Transform:GetWorldPosition())
+
+		if snapcam then
+			TheCamera:Snap()
+			TheFrontEnd:DoFadeIn(1)
+		end
+
+		if not TheCamera.interior then
+			TheCamera:SetDistance(12)	
+		end
+	end)
 	
     scheduler:ExecuteInTime(3, function()
         dude:Show()

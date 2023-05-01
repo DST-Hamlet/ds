@@ -144,6 +144,16 @@ local function creatInterior(inst)
             table.insert(addprops, { name = "cave_fern", x_offset = getlocationoutofcenter(height*0.7,3,true), z_offset = getlocationoutofcenter(width*0.7,3,true) } )
         end
 
+        for i=1,math.random(0,2) do
+            table.insert(addprops, { name = "blue_mushroom", x_offset = getlocationoutofcenter(height*0.8,3,true), z_offset = getlocationoutofcenter(width*0.8,3,true) } )
+        end
+        for i=1,math.random(0,2) do
+            table.insert(addprops, { name = "red_mushroom", x_offset = getlocationoutofcenter(height*0.8,3,true), z_offset = getlocationoutofcenter(width*0.8,3,true) } )
+        end
+        for i=1,math.random(0,2) do
+            table.insert(addprops, { name = "green_mushroom", x_offset = getlocationoutofcenter(height*0.8,3,true), z_offset = getlocationoutofcenter(width*0.8,3,true) } )
+        end
+
 --        table.insert(addprops, { name = "vampirebat", x_offset = (math.random()*height*0.7) - height*0.7/2, z_offset = (math.random()*width*0.7) - width*0.7/2 } )
 
         interior_spawner:CreateRoom("generic_interior", width, 10, height, name, newID, addprops, {}, walltexture, floortexture, minimaptexture, nil, "images/colour_cubes/pigshop_interior_cc.tex", true, nil, "batcave","BAT_CAVE","DIRT", nil, nil, true)        

@@ -3,7 +3,7 @@ local Vacuum = Class(function(self, inst)
     self.vacuumradius = 5
     self.vacuumspeed = 30 
     self.consumeradius = 1
-    self.noTags = {"FX", "NOCLICK", "DECOR", "INLIMBO", "STUMP", "BIRD", "NOVACUUM", "player"}
+    self.noTags = {"FX", "NOCLICK", "DECOR", "INLIMBO", "STUMP", "BIRD", "NOVACUUM", "player", "irreplaceable"}
     self.ignoreplayer = true
     self.playervacuumdamage = 50
     self.playervacuumsanityhit = 0
@@ -84,7 +84,7 @@ function Vacuum:OnUpdate(dt)
   		local windProofness = player.components.inventory:GetWindproofness()
   		--Allow the player to get closer if they're wearing something with windproofness
   		local playerDistanceMultiplier =  1 - (windProofness * 0.25)
-	    if dist < self.player_hold_distance or self.spitplayer then
+	    if (dist < self.player_hold_distance and player.sg:HasStateTag("vacuum")) or self.spitplayer then
 	    	--hold player inside
 	    	self.holdingplayertimer = self.holdingplayertimer + dt
 
@@ -105,7 +105,6 @@ function Vacuum:OnUpdate(dt)
 	    
   		elseif not player:HasTag("NOVACUUM") and (self.vacuuming_player or (dist < (self.playervacuumradius * playerDistanceMultiplier) and CheckLOSFromPoint(self.inst:GetPosition(), player:GetPosition()))) then --Pull player in 
   			--print("trying to vacuum in the player")
-  			
 
   			player.Transform:SetRotation(0) 
   			player.Physics:SetMotorVelOverride(math.cos(angle) * self.vacuumspeed, 0, math.sin(angle) * self.vacuumspeed)

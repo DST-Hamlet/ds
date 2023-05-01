@@ -30,6 +30,8 @@ local states=
             inst.Physics:Stop()            
             inst.AnimState:PlayAnimation("death")
             inst.sg:SetTimeout(3)
+            inst.components.playercontroller:Enable(false)
+            inst.components.health:SetInvincible(true)
             inst.SoundEmitter:PlaySound("dontstarve/characters/woodie/death_beaver")
             inst.components.beaverness.doing_transform = true
         end,
@@ -52,6 +54,9 @@ local states=
                 inst.components.beaverness.doing_transform = false
                 inst.sg:GoToState("wakeup")
                 TheFrontEnd:Fade(true,1)
+
+                inst.components.health:SetInvincible(false)
+                inst.components.playercontroller:Enable(true)
             end)
         end
     },
@@ -61,7 +66,7 @@ local states=
         tags = {"busy"},
         onenter = function(inst)
 			inst.components.playercontroller:Enable(false)
-            inst.Physics:Stop()            
+            inst.Physics:Stop()
             inst.AnimState:PlayAnimation("transform_pst")
             inst.components.health:SetInvincible(true)
         end,

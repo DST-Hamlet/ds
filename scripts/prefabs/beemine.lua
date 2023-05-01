@@ -39,7 +39,10 @@ local function OnExplode(inst)
     inst.AnimState:PlayAnimation("explode")
     inst.SoundEmitter:PlaySound("dontstarve/bee/beemine_launch")
     inst:DoTaskInTime(9*FRAMES, SpawnBees)
-    inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
+
     if METRICS_ENABLED then
 		FightStat_TrapSprung(inst,nil,0)
 	end

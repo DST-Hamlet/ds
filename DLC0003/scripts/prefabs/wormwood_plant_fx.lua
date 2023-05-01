@@ -17,6 +17,7 @@ local function fn(Sim)
 
     inst:AddTag("NOCLICK")
     inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
     inst:AddTag("wormwood_plant_fx")
     
     inst.persists = false

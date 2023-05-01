@@ -131,7 +131,7 @@ local function fn(Sim)
     inst.structuresDestroyed = 0
     inst.shouldGoAway = false
 	
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "deerclops_body")
 	MakeCharacterPhysics(inst, 1000, .5)
     inst.Physics:SetCollisionCallback(oncollide)
 

@@ -45,7 +45,7 @@ local function LaunchProjectile(inst, targetpos)
 end
 
 local function OnFindFire(inst, firePos)
-	dumptable(firePos)
+	--dumptable(firePos)
 	inst:PushEvent("putoutfire", {firePos = firePos})
 end
 
@@ -145,7 +145,7 @@ local function onhammered(inst, worker)
 	inst.SoundEmitter:KillSound("idleloop")
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
 
 	RemoveAllWitherProtection(inst)
 

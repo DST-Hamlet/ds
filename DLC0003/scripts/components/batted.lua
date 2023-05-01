@@ -58,6 +58,10 @@ function Batted:SetDiffMod(diff)
 end
 
 function Batted:LongUpdate(dt)
+	if self.neverattack then
+		return 
+	end
+
 	if not POPULATING then
 		local dtbat = dt
 		while dtbat > 0 do
@@ -92,9 +96,8 @@ function Batted:LongUpdate(dt)
 end 
 
 function Batted:OnUpdate(dt)
-
 	-- slowly fill bat caves on a timer. 
-	if self.neverattack == true then 
+	if self.neverattack then
 		self.inst:StopUpdatingComponent(self)
 		return 
 	end

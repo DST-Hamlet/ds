@@ -97,7 +97,7 @@ end
 
 local function ransack(inst)
     local pt = Vector3(inst.Transform:GetWorldPosition())
-    local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, TUNING.POG_SEE_FOOD, {"structure"},{"pogproof"})
+    local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, TUNING.POG_SEE_FOOD, {"structure"},{"pogproof", "aquatic"})
     local containers = {}
     for i, ent in ipairs(ents) do
         if ent.components.container then

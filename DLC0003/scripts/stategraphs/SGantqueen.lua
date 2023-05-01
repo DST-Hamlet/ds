@@ -190,17 +190,6 @@ local states=
             inst.SoundEmitter:KillSound("insane")         
         end,
     },    
-
-
-    State {
-        name = "frozen",
-        tags = {"busy"},
-
-        onenter = function(inst)
-            inst.AnimState:PlayAnimation("frozen")
-            inst.Physics:Stop()
-        end,
-    },
     
     State{
         name = "death",
@@ -210,30 +199,30 @@ local states=
             inst.AnimState:PlayAnimation("death")
             inst.Physics:Stop()
             RemovePhysicsColliders(inst)
-            inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
         end,
 
         timeline = 
         {
 
-            TimeEvent(6*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/death") end),
-            TimeEvent(6*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.2) end),
+            TimeEvent(6*FRAMES,  function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/death") end),
+            TimeEvent(6*FRAMES,  function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.2) end),
             TimeEvent(10*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.3) end),
             TimeEvent(14*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.4) end),
             TimeEvent(18*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.5) end),
             TimeEvent(22*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.6) end),
             TimeEvent(26*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode",nil,.7) end),
             TimeEvent(28*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/explode") end),
-            TimeEvent(43*FRAMES, function (inst)  inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/land") end),
-            TimeEvent(1*FRAMES, function(inst)
-                inst:DoTaskInTime(2, function() 
-                    local throne = SpawnPrefab("antqueen_throne")
-                    local x,y,z = inst.Transform:GetWorldPosition()
-                    throne.Transform:SetPosition( x-0.025, y, z )
+            TimeEvent(43*FRAMES, function (inst) 
+                inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/antqueen/land")
+                inst.components.lootdropper:DropLoot()
+            end),
+            TimeEvent(2, function(inst)
+                local throne = SpawnPrefab("antqueen_throne")
+                local x,y,z = inst.Transform:GetWorldPosition()
+                throne.Transform:SetPosition( x-0.025, y, z )
 
-                    inst.AnimState:ClearOverrideBuild("throne")
-                end)
-            end ),
+                inst.AnimState:ClearOverrideBuild("throne")
+            end),
         },
     },
     

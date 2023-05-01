@@ -10,12 +10,12 @@ local Propagator = Class(function(self, inst)
     self.damages = false
     self.damagerange = 3
 
+    self.pauseheating = nil
+
     self.acceptsheat = false
     self.spreading = false
     self.delay = false
-
 end)
-
 
 function Propagator:SetOnFlashPoint(fn)
     self.onflashpoint = fn
@@ -34,7 +34,7 @@ function Propagator:StopUpdating()
 end
 
 function Propagator:StartUpdating()
-    if not self.task and self.inst:IsValid()  then
+    if not self.task and self.inst:IsValid() then
         local dt = .5
         self.task = self.inst:DoPeriodicTask(dt, function() self:OnUpdate(dt) end, dt + math.random()*.67)
     end
@@ -49,7 +49,7 @@ function Propagator:StopSpreading(reset, heatpct)
     self.spreading = false
     if reset then
         self.currentheat = heatpct and (heatpct * self.flashpoint) or 0
-        self.acceptsheat = true
+        self.pauseheating = nil
     end
 end
 
@@ -66,7 +66,7 @@ function Propagator:AddHeat(amount)
     self.currentheat = self.currentheat + amount
 
     if self.currentheat > self.flashpoint then
-        self.acceptsheat = false
+        self.pauseheating = true
         if self.onflashpoint then
             self.onflashpoint(self.inst)
         end
@@ -74,13 +74,12 @@ function Propagator:AddHeat(amount)
 end
 
 function Propagator:Flash()
-    if self.acceptsheat and not self.delay then
+    if self.acceptsheat and not self.pauseheating and not self.delay then
         self:AddHeat(self.flashpoint+1)
     end
 end
 
 function Propagator:OnUpdate(dt)
-    
     if self.currentheat > 0 then
         self.currentheat = self.currentheat - dt*self.decayrate
     end
@@ -89,38 +88,45 @@ function Propagator:OnUpdate(dt)
         
         local pos = Vector3(self.inst.Transform:GetWorldPosition())
         local prop_range = self.propagaterange
+        local isendothermic = self.inst.components.heater ~= nil and self.inst.components.heater.iscooler
+
         if (GetSeasonManager():IsSpring() or GetSeasonManager():IsGreenSeason()) then prop_range = prop_range * TUNING.SPRING_FIRE_RANGE_MOD end
         local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, prop_range, nil, {"FX", "NOCLICK", "DECOR", "INLIMBO"})
         
         for k,v in pairs(ents) do
             if not v:IsInLimbo() then
 
-			    if v ~= self.inst and v.components.propagator and v.components.propagator.acceptsheat then
-                    v.components.propagator:AddHeat(self.heatoutput*dt)
-			    end
+                if v ~= self.inst then
+                    if v.components.propagator ~= nil and
+                        v.components.propagator.acceptsheat and
+                        not v.components.propagator.pauseheating then
+                        v.components.propagator:AddHeat(self.heatoutput * dt)
+                    end
 
-                if v ~= self.inst and v.components.freezable then
-                    v.components.freezable:AddColdness((-self.heatoutput/4)*dt)
-                    if v.components.freezable:IsFrozen() and v.components.freezable.coldness <= 0 then
-                        v.components.freezable:Unfreeze()
+                    if v.components.freezable ~= nil then
+                        v.components.freezable:AddColdness(-.25 * self.heatoutput *dt)
+                        if v.components.freezable:IsFrozen() and v.components.freezable.coldness <= 0 then
+                            --Skip thawing
+                            v.components.freezable:Unfreeze()
+                        end
+                    end
+
+                    if not isendothermic and (v:HasTag("frozen") or v:HasTag("meltable")) then
+                        v:PushEvent("firemelt")
+                        v:AddTag("firemelt")
                     end
                 end
-
-                if v ~= self.inst and v:HasTag("frozen") and not (self.inst.components.heater and self.inst.components.heater.iscooler) then
-                    v:PushEvent("firemelt")
-                    if not v:HasTag("firemelt") then v:AddTag("firemelt") end
-                end
-    			
-			    if self.damages and v.components.health and v.components.health.vulnerabletoheatdamage then
-				    local dsq = distsq(pos, Vector3(v.Transform:GetWorldPosition()))
+                
+                if self.damages and v.components.health and v.components.health.vulnerabletoheatdamage then
+                    local dsq = distsq(pos, Vector3(v.Transform:GetWorldPosition()))
                     local dmg_range = self.damagerange*self.damagerange
                     if (GetSeasonManager():IsSpring() or GetSeasonManager():IsGreenSeason()) then dmg_range = dmg_range * TUNING.SPRING_FIRE_RANGE_MOD end
-				    if dsq < dmg_range then
-					    --local percent_damage = math.min(.5, 1- (math.min(1, dsq / self.damagerange*self.damagerange)))
-					    v.components.health:DoFireDamage(self.heatoutput*dt)
-				    end
-			    end
-			end
+                    if dsq < dmg_range then
+                        --local percent_damage = math.min(.5, 1- (math.min(1, dsq / self.damagerange*self.damagerange)))
+                        v.components.health:DoFireDamage(self.heatoutput*dt)
+                    end
+                end
+            end
         end
     end
         
@@ -137,7 +143,6 @@ function Propagator:OnUpdate(dt)
             self:StopUpdating()
         end
     end
-    
 end
 
 return Propagator

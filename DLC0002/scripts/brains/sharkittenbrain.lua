@@ -85,6 +85,7 @@ end)
 function SharkittenBrain:OnStart()
     local root =
     PriorityNode({
+        WhileNode(function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
         EventNode(self.inst, "gohome", 
             DoAction(self.inst, GoHomeAction, "go home", true )),
         DoAction(self.inst, EatFoodAction),

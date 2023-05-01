@@ -18,16 +18,18 @@ local function fn()
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
 	local anim = inst.entity:AddAnimState()
-    inst.Transform:SetTwoFaced()
 	
     anim:SetBank("meteorimpact")
     anim:SetBuild("meteor_impact")
     anim:PlayAnimation("idle_loop")
-    anim:SetFinalOffset(-1)
+    
     inst:AddTag("fx")
+
+    anim:SetFinalOffset(-1)
+    anim:SetLayer(LAYER_BACKGROUND)
+    anim:SetSortOrder(3)
     
     inst:AddComponent("colourtweener")
-
     inst:AddComponent("timer")
 
     inst:ListenForEvent("timerdone", ontimerdone)

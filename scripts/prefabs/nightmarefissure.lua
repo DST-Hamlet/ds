@@ -151,6 +151,8 @@ local states =
 
 
 local function phasechange(inst, data)
+    if POPULATING then return end
+
     local statefn = states[data.newphase]
 
     if statefn then
@@ -201,14 +203,18 @@ local function nextphase(inst)
 
 end
 
+local function changestateinstant(inst, state)
+    inst.state = state
+    spawnfx(inst)
+    states[inst.state](inst, true)
+end
+
 local function onload(inst, data)
     if not data then
         return
     end
     if data.state then
-        inst.state = data.state
-        spawnfx(inst)
-        states[inst.state](inst, true)
+        changestateinstant(inst, data.state)
     end
 
     if data.timeleft then
@@ -226,6 +232,14 @@ local function onsave(inst, data)
 
     if inst.taskinfo then
         data.timeleft = inst:TimeRemainingInTask(inst.taskinfo)
+    end
+end
+
+local function SyncNightmarePhase(inst)
+    local clock = GetWorld().components.nightmareclock
+
+    if clock then
+        changestateinstant(inst, clock.phase)
     end
 end
 
@@ -276,6 +290,8 @@ local function lower()
     inst.state = "calm"
     inst.fxprefab = "nightmarefissurefx"
     inst:ListenForEvent("phasechange", function(world, data) phasechange(inst, data) end, GetWorld())
+    inst:DoTaskInTime(0, SyncNightmarePhase)
+
 	return inst
 end
 

@@ -27,9 +27,9 @@ local loot_cold =
 local function Hatch(inst)
     inst.components.inventoryitem.canbepickedup = false
     inst.AnimState:PlayAnimation("hatch")
-    inst:ListenForEvent("animover", function(inst, data)
-        inst:Remove()
-    end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
     inst:DoTaskInTime(50/30, function()
         local stone = SpawnPrefab("ro_bin_gizzard_stone")
@@ -154,6 +154,7 @@ local function commonfn()
     inst.components.inventoryitem:ChangeImageName("roc_egg")
     
     inst:AddTag("irreplaceable")
+    inst:AddTag("dropontravel")
 
     MakeInventoryFloatable(inst, "idle_water", "idle")
 

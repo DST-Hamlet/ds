@@ -41,6 +41,16 @@ local function onextinguish(inst)
     end
 end
 
+local function OnSave(inst, data)
+    data.queued_charcoal = inst.queued_charcoal or nil
+end
+
+local function OnLoad(inst, data)
+    if data ~= nil and data.queued_charcoal then
+        inst.queued_charcoal = true
+    end
+end
+
 local function fn(Sim)
 
 	local inst = CreateEntity()
@@ -101,14 +111,31 @@ local function fn(Sim)
         
     inst.components.fueled:SetSectionCallback( function(section)
         if section == 0 then
-            inst.components.burnable:Extinguish() 
+            inst.components.burnable:Extinguish()
+
+            if inst.queued_charcoal then
+                inst.queued_charcoal = nil
+
+                local interior = GetInteriorSpawner():getPropInterior(inst)
+
+                for i=1, 2 do
+                    local charcoal = inst.components.lootdropper:SpawnLootPrefab("charcoal")
+
+                    if interior then
+                        GetInteriorSpawner():AddPrefabToInterior(charcoal, interior)
+                    end
+                end
+            end
         else
             if not inst.components.burnable:IsBurning() then
                 inst.components.burnable:Ignite()
             end
             
             inst.components.burnable:SetFXLevel(section, inst.components.fueled:GetSectionPercent())
-            
+
+            if section == inst.components.fueled.sections then
+                inst.queued_charcoal = true
+            end
         end
     end)
         
@@ -141,7 +168,10 @@ local function fn(Sim)
         end
     end)
     inst.components.blowinwindgust:Start()
-    
+
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
+
     return inst
 end
 

@@ -197,7 +197,7 @@ end
 
 function Spinner:Disable()
 	self._base.Disable(self)
-	self.text:SetColour(.7,.7,.7,1)
+	self.text:SetColour(.4,.4,.4,1)
 	self.leftimage:Disable()
 	self.rightimage:Disable()
 end

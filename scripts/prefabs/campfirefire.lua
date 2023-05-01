@@ -23,6 +23,8 @@ local function fn(Sim)
     inst.AnimState:SetRayTestOnBB(true)
     
     inst:AddTag("fx")
+    inst:AddTag("INTERIOR_LIMBO_IMMUNE")
+    inst.persists = false
 
     inst:AddComponent("heater")
     inst.components.heater.heatfn = GetHeatFn

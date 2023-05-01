@@ -48,19 +48,19 @@ local SlotDetailsScreen = Class(Screen, function(self, slotnum, worlds)
         self.text = self.root:AddChild(Text(TITLEFONT, 50))
     end
 
-    self.text:SetPosition( 75, 135, 0)
+    self.text:SetPosition( 100, 140, 0)
     self.text:SetRegionSize(250,60)
     self.text:SetHAlign(ANCHOR_LEFT)
 
 	self.portraitbg = self.root:AddChild(Image("images/saveslot_portraits.xml", "background.tex"))
-	self.portraitbg:SetPosition(-120, 135, 0)	
+	self.portraitbg:SetPosition(-110, 140, 0)	
 	self.portraitbg:SetClickable(false)	
 
 	self.portrait = self.root:AddChild(Image())
 	self.portrait:SetClickable(false)		
 	local atlas = (table.contains(MODCHARACTERLIST, character) and "images/saveslot_portraits/"..character..".xml") or "images/saveslot_portraits.xml"
 	self.portrait:SetTexture(atlas, character..".tex")
-	self.portrait:SetPosition(-120, 135, 0)
+	self.portrait:SetPosition(-110, 140, 0)
     
     print("Loading slot",slotnum,"details my DLC is RoG = ", self.RoG, " Capy = ", self.capyDLC, " Pork = ", self.porkDLC)
 
@@ -90,8 +90,7 @@ local SlotDetailsScreen = Class(Screen, function(self, slotnum, worlds)
 		new_shield:SetTexture("images/ui.xml", used_shields[i])
 		new_shield:SetScale(.75,.75,1)
 
-
-		new_shield:SetPosition(x_offset, 45, 0)
+		new_shield:SetPosition(x_offset, 30, 0)
 		x_offset = x_offset + 72
 
 		table.insert(self.dlcindicators, new_shield)
@@ -106,7 +105,7 @@ local SlotDetailsScreen = Class(Screen, function(self, slotnum, worlds)
   --   end
       
     self.menu = self.root:AddChild(Menu(nil, -70))
-	self.menu:SetPosition(0, -50, 0)
+	self.menu:SetPosition(0, -90, 0)
 	
 	self.default_focus = self.menu
 end)
@@ -242,6 +241,7 @@ function SlotDetailsScreen:OnControl( control, down )
 	if SlotDetailsScreen._base.OnControl(self, control, down) then return true end
 	
 	if control == CONTROL_CANCEL and not down then
+		EnableAllDLC()
 		TheFrontEnd:PopScreen(self)
 		return true
 	end

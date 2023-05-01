@@ -71,12 +71,7 @@ local function onfar(inst)
 end
 
 local function testfn(testinst)
-    local result = true
-
-    if not testinst:HasTag("locomotor") then
-        result = false
-    end
-    return result
+    return testinst:HasTag("locomotor") and not testinst:HasTag("notraptrigger")
 end
 
 local function turnoff(inst, light)

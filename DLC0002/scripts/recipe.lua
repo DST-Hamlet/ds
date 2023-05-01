@@ -5,8 +5,12 @@ Ingredient = Class(function(self, type, amount, atlas)
     self.type = type
     self.amount = amount
 	self.atlas = (atlas and resolvefilepath(atlas))
-					or resolvefilepath("images/inventoryimages.xml")
 end)
+
+function Ingredient:GetAtlas(imagename)
+	self.atlas = self.atlas or resolvefilepath(GetInventoryItemAtlas(imagename))
+	return self.atlas
+end
 
 local num = 0
 Recipes = {} -- Don't use this directly, call GetAllRecipes instead
@@ -15,6 +19,12 @@ Shipwrecked_Recipes = {}
 RoG_Recipes = {}
 Vanilla_Recipes = {}
 Recipes_Merged = false
+
+local function primerecipe(recipe, gametype, name)
+    if not Common_Recipes[name] then
+        Common_Recipes[name]      = recipe
+    end
+end
 
 local function sortrecipe(recipe, gametype, name)
     if gametype == RECIPE_GAME_TYPE.COMMON then
@@ -37,10 +47,20 @@ Recipe = Class(function(self, name, ingredients, tab, level, game_type, placer, 
     self.product       = name
     self.tab           = tab
 
-    self.atlas         = resolvefilepath("images/inventoryimages.xml")
-
     self.image         = name .. ".tex"
-    self.sortkey       = num
+
+    local oldsortkey = nil
+    if Common_Recipes[name] then
+        oldsortkey = Common_Recipes[name].sortkey
+    elseif Shipwrecked_Recipes[name] then
+        oldsortkey = Shipwrecked_Recipes[name].sortkey
+    elseif RoG_Recipes[name] then
+        oldsortkey = RoG_Recipes[name].sortkey
+    elseif Vanilla_Recipes[name] then
+        oldsortkey = Vanilla_Recipes[name].sortkey
+    end
+
+    self.sortkey = oldsortkey or num
     self.level         = level or {}
     
     self.level.ANCIENT = self.level.ANCIENT or 0
@@ -63,18 +83,46 @@ Recipe = Class(function(self, name, ingredients, tab, level, game_type, placer, 
 
     self.game_type = game_type or RECIPE_GAME_TYPE.COMMON
 
-    if type(self.game_type) == "table" then
-        for i,gametype in ipairs(self.game_type) do
-           sortrecipe(self,gametype, name) 
+    local copy = deepcopy(self)
+    copy.game_type = RECIPE_GAME_TYPE.COMMON
+    copy.tab = self.tab
+    copy.level = {}
+    copy.level = TECH.LOST
+
+    local insert = true
+
+    if self.game_type == RECIPE_GAME_TYPE.ROG and IsDLCInstalled and not IsDLCInstalled(REIGN_OF_GIANTS) then    
+        print("REMOVING ROG",name)
+        insert = false
+    end
+
+    if insert then
+        primerecipe(copy,"common", name)
+    
+        if type(self.game_type) == "table" then
+            for i,gametype in ipairs(self.game_type) do
+               sortrecipe(self,gametype, name) 
+            end
+        else
+            sortrecipe(self,self.game_type, name) 
         end
-    else
-        sortrecipe(self,self.game_type, name) 
     end
 end)
+
+function Recipe:GetAtlas()
+	self.atlas = self.atlas or resolvefilepath(GetInventoryItemAtlas(self.image))
+	return self.atlas
+end
 
 function Recipe:GetLevel()
     return self.level
 end
+
+DeconstructRecipe = Class(Recipe, function(self, name, return_ingredients)
+    Recipe._ctor(self, name, return_ingredients, nil, TECH.NONE)
+    self.is_deconstruction_recipe = true
+    self.nounlock = true
+end)
 
 function MergeRecipes()
 
@@ -93,14 +141,14 @@ function MergeRecipes()
     end
 
     -- This has to happen first, since ROG overwrites Vanilla and Shipwrecked overwrites both
-    if not SaveGameIndex:IsModeShipwrecked() then
+    if SaveGameIndex:IsModeShipwrecked() then
+        valid_recipes = MergeMaps(valid_recipes, Shipwrecked_Recipes)
+    else
         valid_recipes = MergeMaps(valid_recipes, Vanilla_Recipes)
 
         if rog_enabled then
-            valid_recipes = MergeMaps(valid_recipes, RoG_Recipes)
+            valid_recipes = MergeMaps(valid_recipes, RoG_Recipes)            
         end
-    else
-        valid_recipes = MergeMaps(valid_recipes, Shipwrecked_Recipes)
     end
 
     return valid_recipes

@@ -144,7 +144,7 @@ end
 
 local function ironactionstring(inst, action)
     if action.action.id == "CHARGE_UP" then
-        return action.action.str
+        return STRINGS.ACTIONS.CHARGE_UP
     end
     return STRINGS.ACTIONS.PUNCH
 end
@@ -289,7 +289,7 @@ local function BecomeIronLord(inst,instant)
     player.ActionStringOverride = ironactionstring
     player:AddTag("ironlord")
     player:AddTag("has_gasmask")
-    
+    player:AddTag("fireimmune")
 
     player:SetStateGraph("SGironlord")
 
@@ -332,6 +332,7 @@ local function BecomeIronLord(inst,instant)
     inst.wasnearsighted = player.components.vision.nearsighted
 
     player.components.vision.nearsighted = false
+    player.components.vision:CheckForGlasses()
 
     if player:HasTag("lightsource") then       
         player:RemoveTag("lightsource")    
@@ -376,6 +377,7 @@ local function Revert(inst)
     local player = GetPlayer()
 
     player.components.vision.nearsighted = inst.wasnearsighted
+    player.components.vision:CheckForGlasses()
 
     player.components.poisonable:SetBlockAll(nil)
 
@@ -386,11 +388,15 @@ local function Revert(inst)
     player:RemoveTag("ironlord")
     player:RemoveTag("laser_immune")
     player:RemoveTag("mech")    
-    player:RemoveTag("has_gasmask")    
+    player:RemoveTag("has_gasmask")
+    player:RemoveTag("fireimmune")
 
     player:RemoveComponent("worker")
     player.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED
     player.components.combat:SetDefaultDamage(TUNING.UNARMED_DAMAGE)
+
+    player.components.moisture.moisture = 0
+    player.components.temperature:SetTemperature(TUNING.STARTING_TEMP)
     
     player.components.playercontroller.actionbuttonoverride = nil
     player.components.playeractionpicker.leftclickoverride = nil

@@ -3,6 +3,7 @@ local Repairer = Class(function(self, inst)
     self.workrepairvalue = 0
     self.healthrepairvalue = 0
     self.perishrepairvalue = 0
+    self.finiteusesrepairvalue = 0
 	self.repairmaterial = nil
 
 end)
@@ -17,8 +18,12 @@ function Repairer:CollectUseActions(doer, target, actions, right)
             self.workrepairvalue > 0) or
         
             (target.components.perishable and target.components.perishable:GetPercent() < 1 and
-            self.perishrepairvalue > 0) then
-                table.insert(actions, ACTIONS.REPAIR)
+            self.perishrepairvalue > 0) or
+
+            (target.components.finiteuses and target.components.finiteuses:GetPercent() < 1 and
+            self.finiteusesrepairvalue > 0)
+        then
+            table.insert(actions, ACTIONS.REPAIR)
         end
     elseif not right and target.components.repairable and target.components.repairable.repairmaterial == self.repairmaterial and target.components.boathealth and 
         self.healthrepairvalue > 0 then

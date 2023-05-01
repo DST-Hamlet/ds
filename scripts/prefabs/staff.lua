@@ -10,6 +10,8 @@ local prefabs =
     "fire_projectile",
     "staffcastfx",
     "stafflight",
+    "sand_puff_large_front",
+    "sand_puff_large_back",
 }
 
 ---------RED STAFF---------
@@ -47,6 +49,8 @@ local function onattack_red(inst, attacker, target)
     end
 
     attacker.SoundEmitter:PlaySound("dontstarve/wilson/fireball_explo")
+
+    target:PushEvent("attacked", { attacker = attacker, damage = 0, weapon = inst})
 end
 
 local function onlight(inst, target)
@@ -58,26 +62,30 @@ end
 ---------BLUE STAFF---------
 
 local function onattack_blue(inst, attacker, target)
-
     if attacker and attacker.components.sanity then
         attacker.components.sanity:DoDelta(-TUNING.SANITY_SUPERTINY)
     end
-    
-    if target.components.freezable then
-        target.components.freezable:AddColdness(1)
-        target.components.freezable:SpawnShatterFX()
+
+    if not target:IsValid() then
+        --target killed or removed in combat damage phase
+        return
     end
+    
     if target.components.sleeper and target.components.sleeper:IsAsleep() then
         target.components.sleeper:WakeUp()
     end
+    
     if target.components.burnable and target.components.burnable:IsBurning() then
         target.components.burnable:Extinguish()
     end
-    if target.components.combat then
-        target.components.combat:SuggestTarget(attacker)
-        if target.sg and not target.sg:HasStateTag("frozen") and target.sg.sg.states.hit then
-            target.sg:GoToState("hit")
-        end
+
+    if target.sg ~= nil and not target.sg:HasStateTag("frozen") then
+        target:PushEvent("attacked", { attacker = attacker, damage = 0, weapon = inst})
+    end
+
+    if target.components.freezable then
+        target.components.freezable:AddColdness(1)
+        target.components.freezable:SpawnShatterFX()
     end
 end
 
@@ -403,7 +411,7 @@ local function cancreatelight(staff, caster, target, pos)
     local ground = GetWorld()
     if ground and pos then
         local tile = ground.Map:GetTileAtPoint(pos.x, pos.y, pos.z)
-        return tile ~= GROUND.IMPASSIBLE and tile < GROUND.UNDERGROUND
+        return tile ~= GROUND.IMPASSABLE and tile < GROUND.UNDERGROUND
     end
     return false
 end
@@ -485,9 +493,11 @@ local function red()
     local inst = commonfn("red")
 
     inst:AddTag("firestaff")
+    inst:AddTag("projectile")
     inst:AddTag("rangedfireweapon")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     inst.components.weapon:SetOnAttack(onattack_red)
@@ -506,8 +516,10 @@ local function blue()
     local inst = commonfn("blue")
     
     inst:AddTag("icestaff")
+    inst:AddTag("projectile")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     inst.components.weapon:SetOnAttack(onattack_blue)

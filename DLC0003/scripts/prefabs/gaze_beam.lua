@@ -60,15 +60,14 @@ local function fn(Sim)
 	inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/pugalisk/gaze_LP","gaze")
 
 	inst:ListenForEvent("animover", function(inst, data)
-						if inst.components.creatureprox.enabled then
-							 inst.components.creatureprox.enabled = false
-							 inst.AnimState:PlayAnimation("loop_pst")
-							 inst.SoundEmitter:KillSound("gaze")
-						else
-							inst:Remove()
-						end
-                    end)    
-                    
+		if inst.components.creatureprox.enabled then
+				inst.components.creatureprox.enabled = false
+				inst.AnimState:PlayAnimation("loop_pst")
+				inst.SoundEmitter:KillSound("gaze")
+		else
+			inst:Remove()
+		end
+	end)
 
 	return inst
 end

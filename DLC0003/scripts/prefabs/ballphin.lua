@@ -99,7 +99,7 @@ local function ShouldAcceptItem(inst, item)
         return false
     end
 
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         
         if item.components.edible.foodtype == "MEAT" then
 		   if not item:HasTag("fishmeat") then
@@ -128,7 +128,7 @@ end
 
 local function OnGetItemFromPlayer(inst, giver, item)
     --I eat food
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
 
         --meat makes us friends (unless I'm a guard)
         if item:HasTag("fishmeat") then

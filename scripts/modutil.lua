@@ -297,6 +297,23 @@ local function InsertPostInitFunctions(env)
 		initprint("RemapSoundEvent", name, new_name)
 		TheSim:RemapSoundEvent(name, new_name)
 	end
+	
+	env.RegisterInventoryItemAtlas = function(atlas, prefabname)
+		--[[
+			Associate an atlas with a prefab, so the atlas will be used in the inventory item image.
+
+			The texture within the atlas and the prefab name must be the same for it to work correctly.
+
+			You will need an ATLAS_BUILD asset loaded if you want your images to appear on mini signs and shelves.
+				E.g.: Asset("ATLAS_BUILD", "images/inventoryimages.xml", 256)
+
+			Parameters:
+				- atlas (string): the atlas path. E.g.: "images/inventoryimages.xml"
+				- prefabname (string): the texture and prefab name. E.g.: "axe.tex"
+		]]
+		initprint("RegisterInventoryItemAtlas", atlas, prefabname)
+		RegisterInventoryItemAtlas(resolvefilepath(atlas), prefabname)
+	end
 
 	env.postinitfns.TreasurePreInit = {}
 	env.AddTreasurePreInit = function(treasurename, fn)

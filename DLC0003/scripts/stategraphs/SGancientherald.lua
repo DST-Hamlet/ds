@@ -224,7 +224,13 @@ CommonStates.AddCombatStates(states,
     },
     deathtimeline = 
     {
-        TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/ancient_herald/death") end),
+        TimeEvent(0*FRAMES, function(inst)
+            inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/ancient_herald/death")
+            local aporkalypse = GetAporkalypse()
+            if aporkalypse then
+                aporkalypse:CancelFrogRain()
+            end
+        end),
         TimeEvent(32*FRAMES, function(inst) 
             local pt = Vector3(inst.Transform:GetWorldPosition())
             inst.components.lootdropper.speed = 3

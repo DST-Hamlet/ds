@@ -34,7 +34,9 @@ local function OnInvestigated(inst, doer)
 		GetWorld().components.whalehunter:OnDirtInvestigated(pt)
 	end
 	inst.AnimState:PlayAnimation("bubble_pst")
-    inst:ListenForEvent("animover", inst.Remove)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 end
 
 local function commonfn()
@@ -92,12 +94,12 @@ local function trackfn()
 
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/whale_bubble_trail/whale_trail_bubble_pop")
 
-    inst:ListenForEvent("animover", inst.Remove)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
 	inst:AddTag("FX")
 	inst:AddTag("NOCLICK")
-
-    inst.persists = false
 
 	return inst
 end

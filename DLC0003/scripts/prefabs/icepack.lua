@@ -29,9 +29,9 @@ end
 
 local slotpos = {}
 
-for y = 0, 2 do
-	table.insert(slotpos, Vector3(-162, -y*75 + 75 ,0))
-	table.insert(slotpos, Vector3(-162 +75, -y*75 + 75 ,0))
+for y = 0, 3 do
+	table.insert(slotpos, Vector3(-162, -y*75 + 114 ,0))
+	table.insert(slotpos, Vector3(-162 +75, -y*75 + 114 ,0))
 end
 
 local function fn()
@@ -68,31 +68,14 @@ local function fn()
     inst:AddComponent("container")
     inst.components.container:SetNumSlots(#slotpos)
     inst.components.container.widgetslotpos = slotpos
-    inst.components.container.widgetanimbank = "ui_icepack_2x3"
-    inst.components.container.widgetanimbuild = "ui_icepack_2x3"
+    inst.components.container.widgetanimbank = "ui_backpack_2x4"
+    inst.components.container.widgetanimbuild = "ui_backpack_2x4"
     inst.components.container.widgetpos = Vector3(-5,-70,0)
     inst.components.container.side_widget = true
     inst.components.container.type = "pack"
    
     inst.components.container.onopenfn = onopen
     inst.components.container.onclosefn = onclose
-
-    MakeSmallBurnable(inst)
-    MakeSmallPropagator(inst)
-    inst.components.burnable:SetOnBurntFn(function()
-        if inst.inventoryitemdata then inst.inventoryitemdata = nil end
-
-        if inst.components.container then
-            inst.components.container:DropEverything()
-            inst.components.container:Close()
-            inst:RemoveComponent("container")
-        end
-        
-        local ash = SpawnPrefab("ash")
-        ash.Transform:SetPosition(inst.Transform:GetWorldPosition())
-
-        inst:Remove()
-    end)
 
 	return inst
 end

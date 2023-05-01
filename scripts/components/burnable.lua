@@ -229,4 +229,8 @@ function Burnable:OnRemoveFromEntity()
     end
 end
 
+function Burnable:IsLightable()
+    return self.canlight
+end 
+
 return Burnable

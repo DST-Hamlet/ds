@@ -11,7 +11,7 @@ local Hounded = Class(function(self, inst)
 	self.inst:StartUpdatingComponent(self)
 	self.warnmode = nil
 
-	self.attackdelayfn = self.attack_delays.occasional
+	self.attackdelayfn = self.attack_delays.light
 	self.attacksizefn = self.attack_levels.light.numhounds
 	self.warndurationfn = self.attack_levels.light.warnduration
 	self.spawnmode = "escalating"
@@ -21,19 +21,24 @@ end)
 
 Hounded.attack_levels=
 {
-	intro={warnduration= function() return 120 end, numhounds = function() return 2 end},
-	light={warnduration= function() return 60 end, numhounds = function() return 2 + math.random(2) end},
-	med={warnduration= function() return 45 end, numhounds = function() return 3 + math.random(3) end},
-	heavy={warnduration= function() return 30 end, numhounds = function() return 4 + math.random(3) end},
-	crazy={warnduration= function() return 30 end, numhounds = function() return 6 + math.random(4) end},
+	intro={warnduration= function() return 120 end, numhounds = function() return 1 end},
+	light={warnduration= function() return 60  end, numhounds = function() return 2 + math.random(2) end},
+	med=  {warnduration= function() return 45  end, numhounds = function() return 3 + math.random(3) end},
+	heavy={warnduration= function() return 30  end, numhounds = function() return 4 + math.random(3) end},
+	crazy={warnduration= function() return 30  end, numhounds = function() return 6 + math.random(4) end},
 }
 
-Hounded.attack_delays=
+--attack delays actually go from shorter to longer, to account for stronger waves
+--these names are describing the strength of the houndwave more than the duration
+Hounded.attack_delays =
 {
-	rare = function() return TUNING.TOTAL_DAY_TIME * 6 + math.random() * TUNING.TOTAL_DAY_TIME * 7 end,
-	occasional = function() return TUNING.TOTAL_DAY_TIME * 4 + math.random() * TUNING.TOTAL_DAY_TIME * 7 end,
-	frequent = function() return TUNING.TOTAL_DAY_TIME * 3 + math.random() * TUNING.TOTAL_DAY_TIME * 5 end,
+	intro 		= function() return TUNING.TOTAL_DAY_TIME * 5, math.random() * TUNING.TOTAL_DAY_TIME * 3 end,
+	light 		= function() return TUNING.TOTAL_DAY_TIME * 5, math.random() * TUNING.TOTAL_DAY_TIME * 5 end,
+	med 		= function() return TUNING.TOTAL_DAY_TIME * 7, math.random() * TUNING.TOTAL_DAY_TIME * 5 end,
+	heavy 		= function() return TUNING.TOTAL_DAY_TIME * 9, math.random() * TUNING.TOTAL_DAY_TIME * 5 end,
+	crazy 		= function() return TUNING.TOTAL_DAY_TIME * 11, math.random() * TUNING.TOTAL_DAY_TIME * 5 end,
 }
+
 local HOUND_SPAWN_DIST = 30
 
 local function getHoundPrefab(inst)
@@ -128,7 +133,7 @@ end
 
 function Hounded:SpawnModeHeavy()
 	self.spawnmode = "constant"
-	self.attackdelayfn = self.attack_delays.frequent
+	self.attackdelayfn = self.attack_delays.heavy
 	self.attacksizefn = self.attack_levels.heavy.numhounds
 	self.warndurationfn = self.attack_levels.heavy.warnduration
 	self:PlanNextHoundAttack()
@@ -136,7 +141,7 @@ end
 
 function Hounded:SpawnModeMed()
 	self.spawnmode = "constant"
-	self.attackdelayfn = self.attack_delays.occasional
+	self.attackdelayfn = self.attack_delays.med
 	self.attacksizefn = self.attack_levels.med.numhounds
 	self.warndurationfn = self.attack_levels.med.warnduration
 	self:PlanNextHoundAttack()
@@ -144,7 +149,7 @@ end
 
 function Hounded:SpawnModeLight()
 	self.spawnmode = "constant"
-	self.attackdelayfn = self.attack_delays.rare
+	self.attackdelayfn = self.attack_delays.light
 	self.attacksizefn = self.attack_levels.light.numhounds
 	self.warndurationfn = self.attack_levels.light.warnduration
 	self:PlanNextHoundAttack()
@@ -299,27 +304,26 @@ function Hounded:CalcEscalationLevel()
 	local day = GetClock().numcycles
 	
 	if day < 10 then
-		self.attackdelayfn = self.attack_delays.rare
+		self.attackdelayfn = self.attack_delays.intro
 		self.attacksizefn = self.attack_levels.intro.numhounds
 		self.warndurationfn = self.attack_levels.intro.warnduration
 	elseif day < 25 then
-		self.attackdelayfn = self.attack_delays.rare
+		self.attackdelayfn = self.attack_delays.light
 		self.attacksizefn = self.attack_levels.light.numhounds
 		self.warndurationfn = self.attack_levels.light.warnduration
 	elseif day < 50 then
-		self.attackdelayfn = self.attack_delays.occasional
+		self.attackdelayfn = self.attack_delays.med
 		self.attacksizefn = self.attack_levels.med.numhounds
 		self.warndurationfn = self.attack_levels.med.warnduration
 	elseif day < 100 then
-		self.attackdelayfn = self.attack_delays.occasional
+		self.attackdelayfn = self.attack_delays.heavy
 		self.attacksizefn = self.attack_levels.heavy.numhounds
 		self.warndurationfn = self.attack_levels.heavy.warnduration
 	else
-		self.attackdelayfn = self.attack_delays.frequent
+		self.attackdelayfn = self.attack_delays.crazy
 		self.attacksizefn = self.attack_levels.crazy.numhounds
 		self.warndurationfn = self.attack_levels.crazy.warnduration
 	end
-	
 end
 
 function Hounded:PlanNextHoundAttack()
@@ -396,7 +400,6 @@ function Hounded:GetHoundSpawnPoint(pt)
 	end
 end 
 
-
 function Hounded:GetWaterHoundSpawnPoint(pt)
 
     local theta = math.random() * 2 * PI
@@ -410,8 +413,6 @@ function Hounded:GetWaterHoundSpawnPoint(pt)
 	end
 
 end 
-
-
 
 function Hounded:ReleaseHound(dt)
 	local pt = Vector3(GetPlayer().Transform:GetWorldPosition())
@@ -429,9 +430,11 @@ function Hounded:ReleaseHound(dt)
     
 end 
 
-
-
 function Hounded:LongUpdate(dt)
+	if POPULATING then
+		return
+	end
+	
 	--I don't think we want to make hounds accumulate here...
 	
 	--don't actually spawn lots and lots of hounds all at once... just make the next hound attack queue up for next real update

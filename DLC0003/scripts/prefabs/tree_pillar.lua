@@ -16,7 +16,7 @@ local function spawncocoons(inst)
         local pt = inst:GetPosition()
         local range = 5 + math.random()*10
         local angle =  math.random() * 2 * PI
-        local offset = FindWalkableOffset(pt,angle, range, 10)
+        local offset = FindGroundOffset(pt,angle, range, 10)
 
         if offset then
             local newpoint = pt+offset
@@ -24,12 +24,14 @@ local function spawncocoons(inst)
                 for i=1, math.random(6,10) do
                     range = math.random()*8
                     angle =  math.random() * 2 * PI
-                    local suboffset = FindWalkableOffset(newpoint,angle, range, 10)
-                    local cocoon = SpawnPrefab("glowfly")
+                    local suboffset = FindGroundOffset(newpoint,angle, range, 10)
                     local spawnpt = newpoint + suboffset
-                    cocoon.Physics:Teleport(spawnpt.x,spawnpt.y,spawnpt.z)                    
-                    cocoon:AddTag("cocoonspawn")
-                    cocoon.forceCocoon(cocoon)     
+                    if not IsPointCloseToWaterOrImpassable(spawnpt.x, spawnpt.y, spawnpt.z, 3) then
+                        local cocoon = SpawnPrefab("glowfly")
+                        cocoon.Physics:Teleport(spawnpt.x,spawnpt.y,spawnpt.z)
+                        cocoon:AddTag("cocoonspawn")
+                        cocoon.forceCocoon(cocoon)
+                    end
                 end
             end
         end

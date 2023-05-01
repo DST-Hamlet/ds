@@ -43,34 +43,6 @@ local function getScale(inst,build)
     return {0.75,0.75,0.75}
 end
 
-local function LightsOn(inst)
-    if not inst:HasTag("burnt") then
-        inst.Light:Enable(true)
-        inst.AnimState:PlayAnimation("lit", true)
-        -- inst.SoundEmitter:PlaySound("dontstarve/pig/pighut_lighton")
-        inst.lightson = true
-    end
-end
-
-local function LightsOff(inst)
-    if not inst:HasTag("burnt") then
-        inst.Light:Enable(false)
-        inst.AnimState:PlayAnimation("idle", true)
-        -- inst.SoundEmitter:PlaySound("dontstarve/pig/pighut_lightoff")
-        inst.lightson = false
-    end
-end
-
-local function onfar(inst)
-    --[[
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOn(inst)
-        end
-    end
-    ]]
-end
-
 local function getstatus(inst)
     if inst:HasTag("burnt") then
         return "BURNT"
@@ -78,48 +50,6 @@ local function getstatus(inst)
         return "SOLD"
     else
         return "FORSALE"
-    end
-end
-
-local function onnear(inst)
-    --[[
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOff(inst)
-        end
-    end
-    ]]
-end
-
-local function onwere(child)
-    if child.parent and not child.parent:HasTag("burnt") then
-        child.parent.SoundEmitter:KillSound("pigsound")
-        -- child.parent.SoundEmitter:PlaySound("dontstarve/pig/werepig_in_hut", "pigsound")
-    end
-end
-
-local function onnormal(child)
-    if child.parent and not child.parent:HasTag("burnt") then
-        child.parent.SoundEmitter:KillSound("pigsound")
-        -- child.parent.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/city_pig/pig_in_house_LP", "pigsound")
-    end
-end
-
-local function onoccupied(inst, child)
-    if not inst:HasTag("burnt") then
-    	-- inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/city_pig/pig_in_house_LP", "pigsound")
-        -- inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
-    	
-        if inst.doortask then
-            inst.doortask:Cancel()
-            inst.doortask = nil
-        end
-    	--inst.doortask = inst:DoTaskInTime(1, function() if not inst.components.playerprox:IsPlayerClose() then LightsOn(inst) end end)
-        inst.doortask = inst:DoTaskInTime(1, function() LightsOn(inst) end)
-    	if child then
-    	    inst:ListenForEvent("transformwere", onwere, child)
-    	    inst:ListenForEvent("transformnormal", onnormal, child)
-    	end
     end
 end
 
@@ -154,8 +84,8 @@ end
 
 local function onhit(inst, worker)
     if not inst:HasTag("burnt") then
-    	inst.AnimState:PlayAnimation("hit")
-    	inst.AnimState:PushAnimation("idle")
+        inst.AnimState:PlayAnimation("hit")
+        inst.AnimState:PushAnimation("idle")
     end
 end
 
@@ -227,14 +157,6 @@ local function onload(inst, data)
         inst.interiorID = data.interiorID
     end
 
-    if data and data.burnt then
-        inst.components.burnable.onburnt(inst)
-    end
-
-    if data and data.burning == true then
-        inst:DoTaskInTime(0, function() inst.components.burnable:Ignite(true) end)
-    end
-
     if data and data.build then
         inst.build = data.build
         inst.AnimState:SetBuild(inst.build)
@@ -268,6 +190,13 @@ local function onload(inst, data)
         inst.MiniMapEntity:SetIcon( inst.minimapicon )
     end
 
+    if data and data.burning == true then
+        inst:DoTaskInTime(0, function() inst.components.burnable:Ignite(true) end)
+    end
+    
+    if data and data.burnt then
+        inst.components.burnable.onburnt(inst)
+    end
 end
 
 local function creatInterior(inst, name)
@@ -514,14 +443,13 @@ local function makefn()
 end
 
 local function placetestfn(inst)
-    local pt = inst:GetPosition()
-    local tile = GetWorld().Map:GetTileAtPoint(pt.x,pt.y,pt.z)
-    if tile == GROUND.INTERIOR then
-        return false
-    end
+    return not TheCamera.interior
+end
 
-    return true
+local function HideLayers(inst)
+    inst.AnimState:Hide("snow")
+    inst.AnimState:Hide("boards")
 end
 
 return Prefab( "common/objects/playerhouse_city", makefn(), assets, prefabs),
-       MakePlacer("common/playerhouse_city_placer", "pig_house_sale", "pig_house_sale", "idle",nil,nil,nil,0.75,nil,nil,nil,nil,nil, placetestfn)
+       MakePlacer("common/playerhouse_city_placer", "pig_house_sale", "pig_house_sale", "idle",nil,nil,nil,0.75,nil,nil,nil,nil,nil, placetestfn, nil, HideLayers)

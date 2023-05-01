@@ -143,6 +143,7 @@ local function makefn(fadeout)
         inst.UpdateIsInInterior = UpdateIsInInterior
 
         inst:AddTag("NOCLICK")
+        inst:AddTag("NOBLOCK")
 
         inst:ListenForEvent("daytime", function() timechange(inst) end, GetWorld())
         inst:ListenForEvent("dusktime", function() timechange(inst) end, GetWorld())

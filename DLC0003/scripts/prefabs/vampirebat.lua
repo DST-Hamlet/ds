@@ -167,13 +167,13 @@ local function OnAttackOther(inst, data)
     inst.components.combat:ShareTarget(data.target, SHARE_TARGET_DIST, function(dude) return dude:HasTag("vampirebat") and not dude.components.health:IsDead() end, 5)
 end
 
-local function OnWaterChange(inst, onwater)
+--[[ local function OnWaterChange(inst, onwater)
     if onwater then
         inst.onwater = true
     else
         inst.onwater = false        
     end
-end
+end ]]
 
 local function onsave(inst, data)    
     if inst:HasTag("batfrenzy") then
@@ -182,19 +182,33 @@ local function onsave(inst, data)
     if inst.sg:HasStateTag("sleeping") then
         data.forcesleep = true
     end
+    if inst.sg:HasStateTag("flying") then
+        data.flying = true
+    end
 end
 
 local function onload(inst, data)
-  if data then
-    if data.batfrenzy then
-        inst:AddTag("batfrenzy")
+    if data then
+        if data.batfrenzy then
+            inst:AddTag("batfrenzy")
+        end
+
+        if data.forcesleep then
+            inst.sg:GoToState("forcesleep")
+            inst.components.sleeper.hibernate = true
+            inst.components.sleeper:GoToSleep()
+        end
+
+        if data.flying then
+            inst.sg:GoToState("glide")
+        end
     end
-    if data.forcesleep then
-        inst.sg:GoToState("forcesleep")
-        inst.components.sleeper.hibernate = true
-        inst.components.sleeper:GoToSleep()
-    end    
-  end
+end
+
+local function OnGasChange(inst, onGas)
+	if onGas and inst.components.poisonable then
+		inst.components.poisonable:Poison(true, nil, true)
+	end
 end
 
 local function fn()
@@ -211,6 +225,7 @@ local function fn()
     
     --MakeGhostPhysics(inst, 1, .5)
     MakeAmphibiousCharacterPhysics(inst, 1, .5)
+    MakePoisonableCharacter(inst, "bat_body")
    -- inst.Physics:SetCollisionGroup(COLLISION.FLYERS)
     --inst.Physics:CollidesWith(COLLISION.FLYERS) 
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
@@ -274,7 +289,9 @@ local function fn()
     --inst:ListenForEvent("death", OnKilled)
 
     inst:AddComponent("tiletracker")
-    inst.components.tiletracker:SetOnWaterChangeFn(OnWaterChange)    
+    --inst.components.tiletracker:SetOnWaterChangeFn(OnWaterChange)
+	inst.components.tiletracker:SetOnGasChangeFn(OnGasChange)
+	inst.components.tiletracker:Start()
 
     inst:AddComponent("teamattacker")
     inst.components.teamattacker.team_type = "vampirebat"
@@ -306,23 +323,29 @@ local function dodive(inst)
         end
         inst:Remove()
     else
-        inst.task = inst:DoTaskInTime(5+(math.random()*2),function() dodive(inst) end)
+        inst.task, inst.taskinfo = inst:ResumeTask(5+(math.random()*2), dodive)
     end
 end
 
 
-local function onsaveshadow(inst, data)    
-    if inst.task then
-        data.task = inst:TimeRemainingInTask(inst.task)
+local function onsaveshadow(inst, data)
+    if inst.taskinfo then
+        data.time = inst:TimeRemainingInTask(inst.taskinfo)
     end
 end
 
 local function onloadshadow(inst, data)
-  if data then
-    if data.task then
-        inst.task = inst:DoTaskInTime(data.task,function() dodive(inst) end)
-    end  
-  end
+    if data then
+        if data.time then
+            inst.task, inst.taskinfo = inst:ResumeTask(data.time, dodive)
+        end
+    end
+end
+
+local function onloadpostpassshadow(inst)
+    inst.components.circler:SetCircleTarget(GetPlayer())
+    inst.components.circler.dontfollowinterior = true
+    inst.components.circler:Start()
 end
 
 local function circlingbatfn()
@@ -359,8 +382,6 @@ local function circlingbatfn()
         inst.components.colourtweener:StartTween({1,1,1,1}, 3)
     end
 
-    inst.persists = false
-
     inst:ListenForEvent("wingdown", OnWingDownShadow)
     -- flap sound
     inst:DoPeriodicTask(10/30, function() inst:PushEvent("wingdown") end)
@@ -377,10 +398,11 @@ local function circlingbatfn()
             inst.components.colourtweener:StartTween({1,1,1,0}, 3)
     end, GetWorld())
 
-    inst.task = inst:DoTaskInTime(20+(math.random()*2),function() dodive(inst) end)
+    inst.task, inst.taskinfo = inst:ResumeTask(20+(math.random()*2), dodive)
 
     inst.OnSave = onsaveshadow
     inst.OnLoad = onloadshadow
+    inst.OnLoadPostPass = onloadpostpassshadow
 
     return inst
 end

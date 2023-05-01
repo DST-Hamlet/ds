@@ -244,7 +244,7 @@ end
 function Melter:CollectSceneActions(doer, actions, right)
 	if not doer.components.rider or not doer.components.rider:IsRiding() then
 		if not self.inst:HasTag("burnt") then
-		    if self.done then
+		    if self:CanBeHarvested() then
 		        table.insert(actions, ACTIONS.HARVEST)
 		    elseif right and self:CanCook() then
 				table.insert(actions, ACTIONS.COOK)
@@ -277,6 +277,9 @@ function Melter:StopCooking(reason)
 	self.targettime = nil
 end
 
+function Melter:CanBeHarvested()
+	return self.done and not (self.cancollect and not self.cancollect(self.inst)) and not self.inst:HasTag("burnt")
+end
 
 function Melter:Harvest( harvester )
 	print("HERE?")

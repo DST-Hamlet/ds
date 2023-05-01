@@ -131,18 +131,7 @@ local function fn(Sim)
     inst:AddComponent("characterspecific")
     inst.components.characterspecific:SetOwner("wendy")
 
-
-    inst:DoTaskInTime(0, function() 
-		if not GetPlayer() or GetPlayer().prefab ~= "wendy" then inst:Remove() end 
-		
-		for k,v in pairs(Ents) do
-			if v.prefab == "abigail" then
-				v:Remove()
-			end
-		end
-		
-		updateimage(inst)
-	end)
+    inst:DoTaskInTime(0, updateimage)
 
     return inst
 end

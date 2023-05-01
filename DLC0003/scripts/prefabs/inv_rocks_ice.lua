@@ -3,8 +3,6 @@ local assets=
 	Asset("ANIM", "anim/ice.zip"),
 }
 
-local names = {"f1","f2","f3"}
-
 local function onsave(inst, data)
 	data.anim = inst.animname
 end
@@ -24,12 +22,14 @@ local function onperish(inst)
             player.components.moisture:DoDelta(2*stacksize)
         end
         inst:Remove()
-    elseif inst.components.inventoryitem:GetContainer() then
+    elseif inst.components.inventoryitem:GetContainer() or inst:HasTag("aquatic") then
         inst:Remove()
     else
         inst.components.inventoryitem.canbepickedup = false
         inst.AnimState:PlayAnimation("melt")
-        inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+        inst.persists = false
+        inst:ListenForEvent("animover", inst.Remove)
+        inst:ListenForEvent("entitysleep", inst.Remove)
     end
 end
 
@@ -60,6 +60,8 @@ end
 local function onhitground_hail(inst, onwater)
     if not onwater then
         playfallsound(inst)
+    else
+        inst:Remove()
     end
 end
 
@@ -68,7 +70,9 @@ local function onhitground_haildrop(inst, onwater)
         if math.random() < TUNING.HURRICANE_HAIL_BREAK_CHANCE then
             inst.components.inventoryitem.canbepickedup = false
             inst.AnimState:PlayAnimation("break")
-            inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+            inst.persists = false
+            inst:ListenForEvent("animover", inst.Remove)
+            inst:ListenForEvent("entitysleep", inst.Remove)
         else
             inst.components.blowinwind:Start()
             inst:RemoveEventCallback("onhitground", onhitground_haildrop)
@@ -103,14 +107,10 @@ local function commonfn(Sim)
 	inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
     MakeInventoryPhysics(inst)
-
     MakeBlowInHurricane(inst, TUNING.WINDBLOWN_SCALE_MIN.MEDIUM, TUNING.WINDBLOWN_SCALE_MAX.MEDIUM)
     
     inst.AnimState:SetBank("ice")
     inst.AnimState:SetBuild("ice")
-    inst.animname = names[math.random(#names)]
-    inst.AnimState:PlayAnimation(inst.animname)
-    -- MakeInventoryFloatable(inst, inst.animname.."_water", inst.animname)
 
     inst:AddComponent("smotherer")
 
@@ -154,8 +154,9 @@ local function commonfn(Sim)
     return inst
 end
 
-local function icefn(Sim) 
+local function icefn(Sim)
     local inst = commonfn(Sim)
+
     
     inst:AddComponent("repairer")
     inst.components.repairer.repairmaterial = "ICE"
@@ -163,6 +164,10 @@ local function icefn(Sim)
 
     inst:AddComponent("bait")
     inst:AddTag("molebait")
+
+    inst.animname = "ice".. math.random(3)
+    inst.AnimState:PlayAnimation(inst.animname)
+    MakeInventoryFloatable(inst, inst.animname.."_water", inst.animname)
 
     inst:ListenForEvent("onhitground", onhitground_ice)
     
@@ -172,12 +177,15 @@ end
 local function hailfn(Sim)
     local inst = commonfn(Sim)
 
-
     inst.components.perishable:SetPerishTime(TUNING.PERISH_ONE_DAY)
 
     inst.components.edible.healthvalue = 0
     inst.components.edible.hungervalue = TUNING.CALORIES_TINY/8
     inst.components.edible.foodtype = "ELEMENTAL"
+
+    inst.animname = "hail".. math.random(3)
+    inst.AnimState:PlayAnimation(inst.animname)
+    MakeInventoryFloatable(inst, inst.animname.."_water", inst.animname)
     
     inst:ListenForEvent("onhitground", onhitground_hail)
 

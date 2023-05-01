@@ -231,6 +231,7 @@ local function commonfn(Sim)
     inst:AddTag("mech")
     inst:AddTag("monster")
     inst:AddTag("ancient_robots_assembly")
+    inst:AddTag("dontteleporttointerior")
 
     anim:SetBank("metal_hulk_merge")
     anim:SetBuild("metal_hulk_merge")

@@ -203,7 +203,7 @@ local foods=
 
 	ratatouille =
 	{
-		test = function(cooker, names, tags) return not tags.meat and tags.veggie and not tags.inedible end,
+		test = function(cooker, names, tags) return not tags.meat and not tags.fish and tags.veggie and not tags.inedible end,
 		priority = 0,
 		foodtype = "VEGGIE",
 		health = TUNING.HEALING_SMALL,
@@ -226,7 +226,7 @@ local foods=
 	
 	fruitmedley =
 	{
-		test = function(cooker, names, tags) return tags.fruit and tags.fruit >= 3 and not tags.meat and not tags.veggie end,
+		test = function(cooker, names, tags) return tags.fruit and tags.fruit >= 3 and not tags.meat and not tags.veggie and not tags.fish end,
 		priority = 0,
 		foodtype = "VEGGIE",
 		health = TUNING.HEALING_MED,

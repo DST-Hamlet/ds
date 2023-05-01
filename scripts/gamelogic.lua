@@ -22,10 +22,12 @@ if PLATFORM == "WIN32_STEAM" or PLATFORM == "WIN32" then
 	global_broadcastnig_widget:SetVAnchor(ANCHOR_TOP)
 end
 
+global_loading_widget = nil
 LoadingWidget = require "widgets/loadingwidget"
 global_loading_widget = LoadingWidget()
 global_loading_widget:SetHAnchor(ANCHOR_LEFT)
 global_loading_widget:SetVAnchor(ANCHOR_BOTTOM)
+global_loading_widget:SetScaleMode(SCALEMODE_PROPORTIONAL)
 
 local DeathScreen = require "screens/deathscreen"
 local PopupDialogScreen = require "screens/popupdialog"
@@ -73,7 +75,7 @@ local function DoAgeWorld()
 end
 
 local function KeepAlive()
-	if global_loading_widget then 
+	if global_loading_widget and global_loading_widget.is_enabled then 
 		global_loading_widget:ShowNextFrame()
 		TheSim:RenderOneFrame()
 		global_loading_widget:ShowNextFrame()
@@ -90,7 +92,10 @@ local function LoadAssets(asset_set)
 	
 	if LOAD_UPFRONT_MODE then return end
 	
-	ShowLoading()
+	-- The Adventure Mode needs to show a title instead of background images.
+	if SaveGameIndex:GetCurrentMode() ~= "adventure" then
+		ShowLoading()
+	end
 	
 	assert(asset_set)
 	Settings.current_asset_set = asset_set
@@ -370,6 +375,7 @@ end
 
 local function StartGame(wilson)
 	TheFrontEnd:GetSound():KillSound("FEMusic") -- just in case...
+	TheFrontEnd:GetSound():KillSound("worldgensound")
 	
 	start_game_time = GetTime()
 	SetUpPlayerCharacterCallbacks(wilson)
@@ -951,8 +957,7 @@ function DoInitGame(playercharacter, savedata, profile, next_world_playerdata, f
 				max.task = max:StartThread(function()	max.components.maxwelltalker:DoTalk() end) 
 				--PlayNIS("maxwellintro", savedata.map.maxwell)
 			end
-			
-			
+
 			local title = STRINGS.UI.SANDBOXMENU.ADVENTURELEVELS[SaveGameIndex:GetSlotLevelIndexFromPlaylist()]
 			local subtitle = STRINGS.UI.SANDBOXMENU.CHAPTERS[SaveGameIndex:GetSlotWorld()]
 			local showtitle = SaveGameIndex:GetCurrentMode() == "adventure" and title
@@ -1193,6 +1198,12 @@ Print(VERBOSITY.DEBUG, "[Loading Morgue]")
 Morgue:Load( function(did_it_load) 
 	--print("Morgue loaded....[",did_it_load,"]")
 end )
+
+--Now let's setup debugging!!!
+if DEBUGGER_ENABLED then
+    local startResult, breakerType = Debuggee.start()
+    print('Debuggee start ->', startResult, breakerType )
+end
 
 Print(VERBOSITY.DEBUG, "[Loading profile and save index]")
 Profile:Load( function() 

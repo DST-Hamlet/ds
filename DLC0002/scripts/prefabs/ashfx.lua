@@ -42,7 +42,9 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
 	local emitter = inst.entity:AddParticleEmitter()
-	inst:AddTag("FX")
+
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 
 	InitEnvelope()
 

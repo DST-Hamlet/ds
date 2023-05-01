@@ -26,6 +26,7 @@ local MinionSpawner = Class(function(self, inst)
 	self.timeuntilspawn = nil
 	self.minionpositions = nil
 	self.validtiletypes = {2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,30}
+	self.addpositiondelay = 3
 	
 	self.freepositions = generatefreepositions(self.maxminions * pos_modifier)
 end)
@@ -156,8 +157,7 @@ end
 
 function MinionSpawner:OnLostMinion(minion)
 	if minion then
-
-		self.inst:DoTaskInTime(3, self:AddPosition(minion.minionnumber))
+		self.inst:DoTaskInTime(self.addpositiondelay, function() self:AddPosition(minion.minionnumber) end)
 
 		if self.onminionattacked then
 			self.inst:RemoveEventCallback("attacked", minion.attackedfn, minion)
@@ -272,33 +272,32 @@ function MinionSpawner:SpawnNewMinion(force)
 		return
 	end
 
-	if (force or self.shouldspawn) and not self:MaxedMinions() then
-		self.spawninprogress = false
+	if (force or self.shouldspawn) and not self:MaxedMinions() and #self.freepositions > 0 then
+        self.spawninprogress = false
 
-		local minion = self:MakeMinion()
+        local num = self.freepositions[math.random(#self.freepositions)]
+        local pos = self:GetSpawnLocation(num)
+        if pos ~= nil then
+            local minion = self:MakeMinion()
+            if minion ~= nil then
+                minion.sg:GoToState("spawn")
+                minion.minionnumber = num
+                self:TakeOwnership(minion)
+                minion.Transform:SetPosition(pos:Get())
+                self:RemovePosition(num)
 
-		if minion then
-			minion.sg:GoToState("spawn")
-			self:TakeOwnership(minion)
-			local pos = self:GetSpawnLocation(minion.minionnumber)
-			if pos then
-				minion.Transform:SetPosition(pos.x, pos.y, pos.z)
-				self:RemovePosition(minion.minionnumber)
-				
-				if self.onspawnminionfn then
-					self.onspawnminionfn(self.inst, minion)
-				end
-			else
-				-- self:RemovePosition(minion.minionnumber)
-				-- minion:Remove()
-				self.minionpositions = self:MakeSpawnLocations()
-			end
-		end
+                if self.onspawnminionfn ~= nil then
+                    self.onspawnminionfn(self.inst, minion)
+                end
+            end
+        elseif self.miniontype ~= nil and not self:MaxedMinions() then
+            self.minionpositions = self:MakeSpawnLocations()
+        end
 
-		if not self:MaxedMinions() and self.shouldspawn then
-			self:StartNextSpawn()
-		end
-	end
+        if self.shouldspawn and not self:MaxedMinions() then
+            self:StartNextSpawn()
+        end
+    end
 end
 
 

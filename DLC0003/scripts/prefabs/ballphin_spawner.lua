@@ -96,6 +96,8 @@ local function fn(Sim)
 	inst.OnSave = onsave
 	inst.OnLoad = onload
 
+	inst:AddTag("NOBLOCK")
+
 	local spawntime = TUNING.TOTAL_DAY_TIME*15 + TUNING.TOTAL_DAY_TIME*math.random()
 
 	inst.targettime = GetTime() + spawntime

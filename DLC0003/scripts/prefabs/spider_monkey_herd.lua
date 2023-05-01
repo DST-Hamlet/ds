@@ -18,10 +18,6 @@ local function OnSpawned(inst, newent)
     end
 end
 
-local function OnHomeDestroyed(inst)
-    RefreshHomeTree(inst)
-end
-
 local function ReplaceTree(tree)
     local treePos = Vector3(tree.Transform:GetWorldPosition())
     tree:Remove()
@@ -86,7 +82,7 @@ local function RefreshHerdMemberHomeLocations(inst)
 end
 
 local function RefreshHomeTree(inst)
-    if not inst.homeTree or inst.homeTree:HasTag("stump") or inst.homeTree:HasTag("burnt") then
+    if not inst.homeTree or not inst.homeTree:IsValid() or inst.homeTree:HasTag("stump") or inst.homeTree:HasTag("burnt") then
         inst.homeTree = GetNewHomeTree(inst)
 
         if inst.homeTree then
@@ -99,8 +95,20 @@ local function RefreshHomeTree(inst)
     end
 end
 
-local function OnEmpty(inst)
-    inst:Remove()
+local function OnSave(inst, data)
+    if inst.homeTree and inst.homeTree:IsValid() and not inst.homeTree:HasTag("stump") and not inst.homeTree:HasTag("burnt") then
+        data.homeTree = inst.homeTree.GUID
+        return {inst.homeTree.GUID}
+    end
+end
+
+local function OnLoadPostPass(inst, ents, data)
+    if data and data.homeTree and ents[data.homeTree] then
+        inst.homeTree = ents[data.homeTree].entity
+        inst.homeTree.spiderMonkeyHerd = inst
+
+        RefreshHerdMemberHomeLocations(inst)
+    end
 end
 
 local function fn(Sim)
@@ -108,12 +116,13 @@ local function fn(Sim)
 	local trans = inst.entity:AddTransform()
 
     inst:AddTag("herd")
+    inst:AddTag("NOBLOCK")
 
     inst:AddComponent("herd")
     inst.components.herd:SetMemberTag("spider_monkey")
     inst.components.herd:SetGatherRange(40)
     inst.components.herd:SetUpdateRange(20)
-    inst.components.herd:SetOnEmptyFn(OnEmpty)
+    inst.components.herd:SetOnEmptyFn(inst.Remove)
     inst.components.herd:SetAddMemberFn(OnAddMember)
 
     inst:AddComponent("periodicspawner")
@@ -126,7 +135,10 @@ local function fn(Sim)
     inst.components.periodicspawner:Start()
 
     inst.RefreshHomeTreeFn = RefreshHomeTree
-    inst.RefreshHomeTreeTask = inst:DoPeriodicTask(5, RefreshHomeTree)
+    inst.RefreshHomeTreeTask = inst:DoPeriodicTask(5, inst.RefreshHomeTreeFn)
+
+    inst.OnSave = OnSave
+    inst.OnLoadPostPass = OnLoadPostPass
 
     return inst
 end

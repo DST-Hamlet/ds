@@ -4,18 +4,19 @@ local assets =
 }
 
 local function delete(inst, user)
-     inst:Remove() 
-     if user then
+    inst:Remove() 
+    if user then
         user.armsfx = nil
     end
 end
 
 local function stopfx(inst, user)
     inst.AnimState:PlayAnimation("out")
-    inst:ListenForEvent("animover", function() 
-        inst.SoundEmitter:KillSound("fix")   
+    inst:ListenForEvent("animover", function()
+        inst.SoundEmitter:KillSound("fix")
         delete(inst, user) 
-    end)   
+    end)
+    inst.persists = false
 end
 
 local function fn(Sim)
@@ -26,12 +27,15 @@ local function fn(Sim)
 
     anim:SetFinalOffset(10)
 
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
+
     anim:SetBank("sea_yard_tools")
     anim:SetBuild("sea_yard_tools")
     anim:PlayAnimation("in")
     anim:PushAnimation("loop", true)
     inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/seacreature_movement/splash_medium")
-    inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/shipyard/fix_LP", "fix")   
+    inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/shipyard/fix_LP", "fix")
 
     inst.stopfx = stopfx
     return inst

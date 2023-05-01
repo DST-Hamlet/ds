@@ -92,6 +92,8 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
 
+	inst:AddTag("NOBLOCK")
+
 	inst.OnLongUpdate = LongUpdate
 	inst.OnSave = onsave
 	inst.OnLoad = onload

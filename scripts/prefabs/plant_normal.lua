@@ -25,7 +25,11 @@ local function onmatured(inst)
 	inst.SoundEmitter:PlaySound("dontstarve/common/farm_harvestable")
 	inst.AnimState:OverrideSymbol("swap_grown", inst.components.crop.product_prefab,inst.components.crop.product_prefab.."01")
 end
-    
+
+local function digup(inst, digger)
+    inst.components.crop:ForceHarvest()
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -49,6 +53,11 @@ local function fn(Sim)
     end
     
     anim:SetFinalOffset(-1)
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
     
     return inst
 end

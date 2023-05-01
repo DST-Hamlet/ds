@@ -13,11 +13,12 @@ local prefabs =
 {
     "fish_cooked",
     "spoiled_food",
-    "tropical_fish_cooked",
 }
 
 local function stopkicking(inst)
-    inst.AnimState:PlayAnimation("dead")
+    if inst.components.floatable.landanim ~= "dead" then
+        inst.components.floatable:UpdateAnimations(nil, "dead")
+    end
 end
 
 local function makefish(bank_and_build, rodbuild, cooked_prod)
@@ -73,7 +74,7 @@ local function makefish(bank_and_build, rodbuild, cooked_prod)
     end
 
     local function rawfn()
-	    local inst = commonfn(bank_and_build)
+	    local inst = commonfn()
         inst.AnimState:PlayAnimation("idle", true)
 
         MakeInventoryFloatable(inst, "idle_water", "idle")
@@ -88,16 +89,14 @@ local function makefish(bank_and_build, rodbuild, cooked_prod)
         inst.components.dryable:SetProduct("smallmeat_dried")
         inst.components.dryable:SetDryTime(TUNING.DRY_FAST)
         inst:DoTaskInTime(5, stopkicking)
-        inst.components.inventoryitem:SetOnPickupFn(function(pickupguy) stopkicking(inst) end)
-        inst.OnLoad = function() stopkicking(inst) end
+        inst.components.inventoryitem:SetOnPickupFn(stopkicking)
+        inst.OnLoad = stopkicking
 
-        MakeInventoryFloatable(inst, "idle_water", "dead")
-        
         return inst
     end
 
     local function cookedfn()
-	    local inst = commonfn(bank_and_build)
+	    local inst = commonfn()
         inst.AnimState:PlayAnimation("cooked")
 
         MakeInventoryFloatable(inst, "idle_cooked_water", "cooked")

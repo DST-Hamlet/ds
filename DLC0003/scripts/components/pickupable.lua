@@ -21,7 +21,6 @@ end
 
 -- If this function retrns true then it has destroyed itself and you shouldnt give it to the player
 function Pickupable:OnPickup(pickupguy)
-	
 	if self.inst.components.burnable and self.inst.components.burnable:IsSmoldering() then
 		self.inst.components.burnable:StopSmoldering()
 		if pickupguy.components.health then
@@ -30,11 +29,12 @@ function Pickupable:OnPickup(pickupguy)
 		end
 	end
 
-	self.inst.Transform:SetPosition(0,0,0)
-	self.inst:PushEvent("onpickup", {owner = pickupguy})
 	if self.onpickupfn and type(self.onpickupfn) == "function" then
 		return self.onpickupfn(self.inst, pickupguy)
 	end
+	
+	self.inst.Transform:SetPosition(0,0,0)
+	self.inst:PushEvent("onpickup", {owner = pickupguy})
 end
 
 function Pickupable:CollectSceneActions(doer, actions, right)

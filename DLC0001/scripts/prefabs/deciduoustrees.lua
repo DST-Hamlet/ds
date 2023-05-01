@@ -13,6 +13,8 @@ local assets =
     Asset("ANIM", "anim/dust_fx.zip"),
     Asset("SOUND", "sound/forest.fsb"),
     Asset("MINIMAP_IMAGE", "tree_leaf"),
+    Asset("MINIMAP_IMAGE", "tree_leaf_burnt"),
+    Asset("MINIMAP_IMAGE", "tree_leaf_stump"),
 }
 
 local prefabs =
@@ -550,7 +552,7 @@ local function chop_down_tree(inst, chopper)
     else
         inst.AnimState:PlayAnimation(inst.anims.fallright)
         if inst.components.growable and inst.components.growable.stage == 3 and inst.leaf_state == "colorful" then
-            inst.components.lootdropper:SpawnLootPrefab("acorn", pt - TheCamera:GetRightVec())
+            inst.components.lootdropper:SpawnLootPrefab("acorn", pt + TheCamera:GetRightVec())
         end
         inst.components.lootdropper:DropLoot(pt + TheCamera:GetRightVec())
     end
@@ -562,6 +564,7 @@ local function chop_down_tree(inst, chopper)
     
     RemovePhysicsColliders(inst)
     inst.AnimState:PushAnimation(inst.anims.stump)
+    inst.MiniMapEntity:SetIcon("tree_leaf_stump.png")
 
     if inst.leaveschangetask then
         inst.leaveschangetask:Cancel()
@@ -636,6 +639,8 @@ local function onburntchanges(inst)
             inst:RemoveComponent("propagator")
         end
     end)
+
+    inst.MiniMapEntity:SetIcon("tree_leaf_burnt.png")
 end
 
 local function OnBurnt(inst, imm)
@@ -852,33 +857,40 @@ local function OnEntitySleep(inst)
 end
 
 local function OnEntityWake(inst)
-
-    if not inst:HasTag("burnt") and not inst:HasTag("fire") and not inst:HasTag("stump") then
+    if not inst:HasTag("burnt") and not inst:HasTag("fire") then
         if not inst.components.burnable then
-            MakeLargeBurnable(inst)
-            inst.components.burnable:SetFXLevel(5)
-            inst.components.burnable:SetOnBurntFn(tree_burnt)
-            inst.components.burnable.extinguishimmediately = false
-            inst.components.burnable.onignite = function(inst) 
-                if inst.monster and not inst:HasTag("stump") then 
-                    inst.sg:GoToState("burning_pre") 
-                end 
-                if inst.components.deciduoustreeupdater then
-                    inst.components.deciduoustreeupdater:SpawnIgniteWave()
+            if inst:HasTag("stump") then
+                MakeSmallBurnable(inst)
+            else
+                MakeLargeBurnable(inst)
+                inst.components.burnable:SetFXLevel(5)
+                inst.components.burnable:SetOnBurntFn(tree_burnt)
+                inst.components.burnable.extinguishimmediately = false
+                inst.components.burnable.onignite = function(inst) 
+                    if inst.monster and not inst:HasTag("stump") then 
+                        inst.sg:GoToState("burning_pre") 
+                    end 
+                    if inst.components.deciduoustreeupdater then
+                        inst.components.deciduoustreeupdater:SpawnIgniteWave()
+                    end
                 end
-            end
-            inst.components.burnable.onextinguish = function(inst) 
-                if inst.monster and not inst:HasTag("stump") then
-                    inst.sg:GoToState("gnash_idle")
+                inst.components.burnable.onextinguish = function(inst) 
+                    if inst.monster and not inst:HasTag("stump") then
+                        inst.sg:GoToState("gnash_idle")
+                    end
                 end
             end
         end
-
+    
         if not inst.components.propagator then
-            MakeLargePropagator(inst)
+            if inst:HasTag("stump") then
+                MakeSmallPropagator(inst)
+            else
+                MakeLargePropagator(inst)
+            end
         end
 
-        if not inst.components.deciduoustreeupdater then
+        if not inst:HasTag("stump") and not inst.components.deciduoustreeupdater then
             inst:AddComponent("deciduoustreeupdater")
         end
     end
@@ -1002,6 +1014,7 @@ local function onload(inst, data)
 
         if data.burnt then
             inst:AddTag("fire") -- Add the fire tag here: OnEntityWake will handle it actually doing burnt logic
+            inst.MiniMapEntity:SetIcon("tree_leaf_burnt.png")
         elseif data.stump then
             while inst:HasTag("shelter") do inst:RemoveTag("shelter") end
             while inst:HasTag("cattoyairborne") do inst:RemoveTag("cattoyairborne") end
@@ -1018,6 +1031,7 @@ local function onload(inst, data)
                 end
             end
             inst.AnimState:PlayAnimation(inst.anims.stump)
+            inst.MiniMapEntity:SetIcon("tree_leaf_stump.png")
 
             MakeSmallBurnable(inst)
             inst:RemoveComponent("workable")
@@ -1220,6 +1234,7 @@ local function makefn(build, stage, data)
             inst:RemoveComponent("growable")
             RemovePhysicsColliders(inst)
             inst.AnimState:PlayAnimation(inst.anims.stump)
+            inst.MiniMapEntity:SetIcon("tree_leaf_stump.png")
             inst:AddTag("stump")
             inst:AddComponent("workable")
             inst.components.workable:SetWorkAction(ACTIONS.DIG)

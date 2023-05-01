@@ -490,7 +490,7 @@ local function common_house_door_fn()
     inst:AddComponent("lootdropper")
 
     inst:AddComponent("workable")
-    inst.components.workable.canbeworkedbyfn = function(worker, numworks)
+    inst.components.workable.canbeworkedby = function(worker, numworks)
     	return worker == GetPlayer()
    	end
    	

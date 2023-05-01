@@ -202,6 +202,12 @@ function Recipe:GetLevel()
     return self.level
 end
 
+DeconstructRecipe = Class(Recipe, function(self, name, return_ingredients)
+    Recipe._ctor(self, name, return_ingredients, nil, TECH.NONE)
+    self.is_deconstruction_recipe = true
+    self.nounlock = true
+end)
+
 function MergeRecipes()
     local valid_recipes = Common_Recipes
     local rog_enabled = true

@@ -1,4 +1,10 @@
+local function OnKilled(inst)
+	local poisonable = inst.components.poisonable
 
+	if poisonable then
+		poisonable:KillFX()
+	end
+end
 
 --Binary state problematic for non-players? should have a timer that gets set to infinite for players and some discrete time for non-players
 local Poisonable = Class(function(self, inst)
@@ -27,7 +33,7 @@ local Poisonable = Class(function(self, inst)
 
 	self.blockall = nil
 
-	--self.inst:ListenForEvent("death", OnKilled)		
+	self.inst:ListenForEvent("death", OnKilled)
 end)
 
 local function IsPoisonDisabled()
@@ -381,6 +387,12 @@ function Poisonable:OnLoad(data)
 	if data.poisoned and data.poisontimeleft then
 		self:Poison(false, data.poisontimeleft)
 	end
+end
+
+function Poisonable:OnProgress()
+	if SaveGameIndex:GetCurrentMode(Settings.save_slot) ~= "adventure" then
+		self:Cure()
+	end 
 end
 
 return Poisonable

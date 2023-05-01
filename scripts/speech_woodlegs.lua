@@ -431,6 +431,7 @@ return
 			OPEN = "I bet thar ain't no sea down there.",
 		},
 		CAVE_EXIT = "Back ta open air.",
+		CAVE_REGENERATOR = "Got a funny feelin' about bringin' it back to the mouth o'this cave.",
 		CAVE_FERN = "How did ye grow doon here wit' no light?",
 		CHARCOAL = "Burnt ta a brickette.",
 		CHESSJUNK1 = "Somebody's a sore loser.",
@@ -1665,6 +1666,17 @@ return
 		SHADOWSKITTISH_WATER = "Back, beast!",
 		SHIPWRECKED_ENTRANCE = "Ahoy me mateys!",
 		SHIPWRECKED_EXIT = "Farewell ye land lubbers!",
+
+		BOOK_BIRDS = "This book means to bewitch the birds!",
+		BOOK_TENTACLES = "I've seen enough o'them ship sinkers to last me lifetime!",
+		BOOK_GARDENING = "Th'dirt's only good fer buryin' me treasure.",
+		BOOK_SLEEP = "It'll put ye into a cursed slumber.",
+		BOOK_BRIMSTONE = "It'll spell me doom, mark me words!",
+		BOOK_METEOR = "Devil magic thet summons demons from th'sky!",
+
+		WATHGRITHRHAT = "'Tis no hat fer this ol'sea dog.",
+		SPEAR_WATHGRITHR = "Aye, it's sharp!",
+
 		SNAKESKINSAIL = "Thet be a sail.",
 		SNAKE_FIRE = "Aye, thet's a foul creature.",
 		SPEAR_LAUNCHER = "Load a spear an'let'er fly!",
@@ -2589,6 +2601,7 @@ return
     	HARDSHELL_TACOS = "Full o' tha crunch.",
     	GUMMY_CAKE = "More chewy than'a week ol' shark fin.",
     	STEAMEDHAMSANDWICH = "'Tis a'unforgettable luncheon.",
+		MEATED_NETTLE = "A bite o' meat to go with th'nose clearin'!",
 
     	ROC_NEST_DEBRIS1 = "A stick.",
     	ROC_NEST_DEBRIS2 = "It be'a stick.",
@@ -2668,6 +2681,7 @@ return
         BILL_QUILL = "'Tis a part o' tha spiky beastie.",
 
         ANTLER = "Fer tha'callin' o'tha big feather'd beastie.",
+        ANTLER_CORRUPTED = "Fer chasin' off tha big feather'd beastie.",
 
         PUGALISK_SKULL = "Bigger than me crows nest.",
         PUGALISK_CORPSE = "'es danc'd the hemp'n jig.",
@@ -2754,6 +2768,13 @@ return
         FIRECRACKERS = "Yar, is'a small cannon, it'is.",
         REDLANTERN = "Ol' Woodlegs loves a party.",
 
+		-------------Wormwood Specific-------
+
+		COMPOSTWRAP = "Someone be tryin' t'make a fool of ol'Woodlegs!",
+		POISONBALM = "Aye, that'll take the sting out.",
+		ARMOR_BRAMBLE = "I'll be a fearsome sight with that thorny hull!",
+		TRAP_BRAMBLE = "Best not t'get me legs caught in that.",
+
         -------rewards update-------
 
 		TURF_DEEPRAINFOREST_NOCANOPY = "Me ain't no ground lubber.",
@@ -2767,7 +2788,7 @@ return
             GENERIC = "Fer tha tinkerin' about me ship.",
             BURNING = "Goin' down!",
         },
-        ARMORVORTEXCLOAK = "'t be like starin' into th'ocean depths.",    
+        ARMORVORTEXCLOAK = "T'be like starin' into th'ocean depths.",    
         ANCIENT_REMNANT = "Like Davey Jones' sailcloth.",
 
         GOGGLESNORMALHAT = "T'be of no use t'me.",

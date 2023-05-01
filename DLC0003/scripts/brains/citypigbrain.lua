@@ -272,28 +272,26 @@ end
 
 local function shouldPanic(inst)
     local x,y,z = inst.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x,y,z, 20, {"hostile"},{"city_pig"},{"LIMBO"}) 
+    local ents = TheSim:FindEntities(x,y,z, 20, {"hostile"}, {"city_pig", "INLIMBO", "shadowcreature", "bramble"}) 
     if #ents > 0 then
-        print("CAUSE PANIC")
-        dumptable(ents,1,1,1)
         return true
     end
-        
+
     if inst.components.combat.target then
         local threat = inst.components.combat.target
         if threat then
-            local myPos = Vector3(inst.Transform:GetWorldPosition() )
-            local threatPos = Vector3(threat.Transform:GetWorldPosition() )
-            local dist = distsq(threatPos, myPos)
-            if dist < FAR_ENOUGH*FAR_ENOUGH then
-                if dist > STOP_RUN_AWAY_DIST*STOP_RUN_AWAY_DIST then
-                    return true
-                end
-            else
+            local dist = inst:GetHorzDistanceSqToInst(threat)
+
+            if dist >= FAR_ENOUGH * FAR_ENOUGH then
                 inst.components.combat:GiveUp()
+
+            elseif dist > STOP_RUN_AWAY_DIST * STOP_RUN_AWAY_DIST then
+                -- Panic instead of running away.
+                return true
             end
         end
     end
+
     return false
 end
 
@@ -448,6 +446,17 @@ local function RescueLeaderAction(inst)
     return BufferedAction(inst, GetLeader(inst), ACTIONS.UNPIN)
 end
 
+local function GoToIdleStateWrap(inst, fn)
+    return function(...)
+        local ret = fn(...)
+        if ret and inst:HasTag("atdesk") then
+            inst.sg:GoToState("idle")
+        end
+
+        return ret
+    end
+end
+
 function CityPigBrain:OnStart()
     --print(self.inst, "CityPigBrain:OnStart")
     local clock = GetClock()
@@ -485,12 +494,12 @@ function CityPigBrain:OnStart()
                 DoAction(self.inst, FindFoodAction )),
             
             -- after hours shop pig wants you to leave
-            IfNode(function() return self.inst:HasTag("shopkeep") or self.inst:HasTag("pigqueen") end, "shopkeeper closing",
+            IfNode(function() return (self.inst:HasTag("shopkeep") or self.inst:HasTag("pigqueen")) and self.inst:GetIsInInterior() end, "shopkeeper closing",
                 Wander(self.inst, GetNoLeaderHomePos, MAX_WANDER_DIST)),
 
-            IfNode(function() return not self.inst:HasTag("guard") and not (GetAporkalypse() and GetAporkalypse():GetFiestaActive()) end, "gohome",
+            IfNode(function() return not self.inst:HasTag("guard") and not self.inst:HasTag("shopkeep") and not (GetAporkalypse() and GetAporkalypse():GetFiestaActive()) end, "gohome",
                 ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_GO_HOME),
-                    DoAction(self.inst, GoHomeAction, "go home", true ))),
+                    DoAction(self.inst, GoHomeAction, "go home"))),
             
             WhileNode(function() return needlight(self.inst) end, "NeedLight",
                 ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_FIND_LIGHT),
@@ -504,16 +513,9 @@ function CityPigBrain:OnStart()
     local root = 
         PriorityNode(
         {
-            WhileNode(function() return self.inst.components.health.takingfiredamage end, "OnFire",
+            WhileNode(GoToIdleStateWrap(self.inst, function() return self.inst.components.health.takingfiredamage end), "OnFire",
 				ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_PANICFIRE),
 					Panic(self.inst))),
-
-            WhileNode(function() return ReplaceStockCondition(self.inst) end, "replenish",            
-                    DoAction(self.inst, ReplenishStockAction,"restock", true)),
-
-            -- For the shop pig when they're at their desk.            
-            WhileNode(function() return self.inst:HasTag("atdesk") end, "AtDesk", 
-                ActionNode(function() end) ),
 
             -- FOLLOWER CODE
             ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_FOLLOWWILSON), 
@@ -524,15 +526,22 @@ function CityPigBrain:OnStart()
             -- END FOLLOWER CODE
 
             ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_FLEE),
-                WhileNode(function() return shouldpanicwithspeech(self.inst) end, "Threat Panic",
+                WhileNode(GoToIdleStateWrap(self.inst, function() return shouldpanicwithspeech(self.inst) end), "Threat Panic",
                     Panic(self.inst) ),"alarmed"),
 
             ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_FLEE),
-                WhileNode( function() return (self.inst.components.combat.target and not self.inst:HasTag("guard")) end, "Dodge",
+                WhileNode(GoToIdleStateWrap(self.inst, function() return (self.inst.components.combat.target and not self.inst:HasTag("guard")) end), "Dodge",
                     RunAway(self.inst, function() return self.inst.components.combat.target end, RUN_AWAY_DIST, STOP_RUN_AWAY_DIST) ), "alarmed" ),                                
 
             ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_FLEE),
-                RunAway(self.inst, function(guy) return guy:HasTag("pig") and guy.components.combat and guy.components.combat.target == self.inst end, RUN_AWAY_DIST, STOP_RUN_AWAY_DIST ),"alarmed"),
+                RunAway(self.inst, GoToIdleStateWrap(self.inst, function(guy) return guy:HasTag("pig") and guy.components.combat and guy.components.combat.target == self.inst end), RUN_AWAY_DIST, STOP_RUN_AWAY_DIST ),"alarmed"),
+
+            WhileNode(function() return ReplaceStockCondition(self.inst) end, "replenish",            
+                DoAction(self.inst, ReplenishStockAction,"restock", true)),
+
+            -- For the shop pig when they're at their desk.            
+            WhileNode(function() return self.inst:HasTag("atdesk") end, "AtDesk", 
+                ActionNode(function() end) ),
 
             IfNode( function() return self.inst.poop_tip and not self.inst.tipping and not self.inst:HasTag("pigqueen") end, "poop_tip", 
                 DoAction(self.inst, PoopTip, "poop_tip", true)),
@@ -543,7 +552,7 @@ function CityPigBrain:OnStart()
 
             IfNode(
                 function()
-                    if self.inst:HasTag("shopkeep") then
+                    if self.inst:HasTag("shopkeep") or self.inst:HasTag("pigqueen") then
                         return false
                     end
 

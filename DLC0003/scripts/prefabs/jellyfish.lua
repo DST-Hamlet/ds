@@ -195,8 +195,8 @@ local function driedfn(sim)
     inst:AddComponent("edible")
     inst.components.edible.foodtype = "MEAT"
     inst.components.edible.foodstate = "DRIED"
-    inst.components.edible.hungervalue = TUNING.CALORIES_MEDSMALL
-    inst.components.edible.sanityvalue = 0--TUNING.SANITY_SMALL
+    inst.components.edible.hungervalue = TUNING.CALORIES_MED
+    inst.components.edible.sanityvalue = TUNING.SANITY_MEDLARGE
     inst.components.perishable:SetPerishTime(TUNING.PERISH_PRESERVED)
     inst.components.perishable:StartPerishing()
     inst.components.perishable.onperishreplacement = "spoiled_food"

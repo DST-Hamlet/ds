@@ -9,7 +9,9 @@ local function ongustblowawayfn(inst)
 		inst:RemoveComponent("inspectable")
 		inst.SoundEmitter:PlaySound("dontstarve/common/dust_blowaway")
 		inst.AnimState:PlayAnimation("disappear")
-		inst:ListenForEvent("animover", function() inst:Remove() end)
+		inst.persists = false
+		inst:ListenForEvent("animover", inst.Remove)
+		inst:ListenForEvent("entitysleep", inst.Remove)
 	end 
 end
 

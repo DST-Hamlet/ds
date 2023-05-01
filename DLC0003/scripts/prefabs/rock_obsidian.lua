@@ -130,7 +130,7 @@ local function obsidianfn(Sim)
 	inst.AnimState:PlayAnimation("full")
 	inst.MiniMapEntity:SetIcon("rock_obsidian.png")
 
-	inst.components.workable:SetWorkAction(nil)
+	inst.components.workable:SetWorkAction(ACTIONS.BLANK) -- To be breakable by the living artifact.
 	inst.components.workable:SetOnFinishCallback(onfinish_obsidian)
 	inst.components.lootdropper:SetChanceLootTable("rock_obsidian")
 	return inst

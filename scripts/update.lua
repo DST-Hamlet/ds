@@ -222,11 +222,14 @@ function LongUpdate(dt, ignore_player)
 					if grand_owner == player then
 						should_ignore = true
 					end
-					if grand_owner and grand_owner.prefab == "chester" then
-						local leader = grand_owner.components.follower.leader
-						if leader and leader == player then
-							should_ignore = true
-						end
+	
+					if  grand_owner and
+						grand_owner.components.follower and  -- Container Companion.
+						grand_owner.components.follower.leader and -- Following this item.
+						grand_owner.components.follower.leader.components.inventoryitem and
+						grand_owner.components.follower.leader.components.inventoryitem:GetGrandOwner() == player
+					then
+						should_ignore = true
 					end
 				end
 				

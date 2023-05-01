@@ -53,6 +53,16 @@ local function destroy(inst)
 	end)
 end
 
+local function OnSave(inst, data)
+    data.queued_charcoal = inst.queued_charcoal or nil
+end
+
+local function OnLoad(inst, data)
+    if data ~= nil and data.queued_charcoal then
+        inst.queued_charcoal = true
+    end
+end
+
 local function fn(Sim)
 
 	local inst = CreateEntity()
@@ -107,8 +117,12 @@ local function fn(Sim)
                 anim:PlayAnimation("dead") 
                 RemovePhysicsColliders(inst)             
 
-				local ash = SpawnPrefab("ash")
-				ash.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                if inst.queued_charcoal then
+                    SpawnPrefab("charcoal").Transform:SetPosition(inst.Transform:GetWorldPosition())
+                    inst.queued_charcoal = nil
+                else
+                    SpawnPrefab("ash").Transform:SetPosition(inst.Transform:GetWorldPosition())
+                end
 
                 inst.components.fueled.accepting = false
                 inst:RemoveComponent("cooker")
@@ -123,6 +137,10 @@ local function fn(Sim)
                 local output = {2,5,5,10}
                 inst.components.propagator.propagaterange = ranges[section]
                 inst.components.propagator.heatoutput = output[section]
+
+                if section == inst.components.fueled.sections then
+                    inst.queued_charcoal = true
+                end
             end
         end)
         
@@ -149,6 +167,9 @@ local function fn(Sim)
         anim:PushAnimation("idle",false)
         inst.SoundEmitter:PlaySound("dontstarve/common/fireAddFuel")
     end)
+
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
     
     return inst
 end

@@ -177,8 +177,8 @@ function MakeHat(name)
         end)
     end
 
-    local function tryproc(inst, owner)
-        if not inst.active and math.random() < --[[ Chance to proc ]] TUNING.ARMOR_RUINSHAT_PROC_CHANCE then
+    local function tryproc(inst, owner, data)
+        if not inst.active and math.random() < TUNING.ARMOR_RUINSHAT_PROC_CHANCE and not data.redirected then
            ruinshat_proc(inst, owner)
         end
     end
@@ -207,7 +207,7 @@ function MakeHat(name)
         
         owner.AnimState:Show("HEAD")
         owner.AnimState:Hide("HEAD_HAIR")
-        inst.procfn = function() tryproc(inst, owner) end
+        inst.procfn = function(owner, data) tryproc(inst, owner, data) end
         owner:ListenForEvent("attacked", inst.procfn)
     end
 

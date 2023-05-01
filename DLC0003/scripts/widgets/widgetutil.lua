@@ -19,6 +19,8 @@ function CanPrototypeRecipe(recipetree, buildertree)
     return true
 end
 
+local lastsoundtime = nil
+
 function DoRecipeClick(owner, recipe)
     if recipe and owner and owner.components.builder then
         local knows = owner.components.builder:KnowsRecipe(recipe.name)
@@ -42,9 +44,12 @@ function DoRecipeClick(owner, recipe)
                     owner.components.builder:MakeRecipe(recipe)
                 end
             elseif can_build then
-                --TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")           
+                -- Learn "non-learnable" recipes from the current DLC so you can craft them in other DLCs. Especially useful for Wickerbottom.
+                if owner.components.builder:CanLearnRecipe(recipe) then
+                    owner.components.builder:AddRecipe(recipe.name)
+                end
+
                 if recipe.placer then
-                    --owner.HUD.controls.crafttabs.tabs:DeselectAll()
                     owner.components.builder:BufferBuild(recipe.name)
                     owner.components.playercontroller:StartBuildPlacementMode(recipe, function(pt) return owner.components.builder:CanBuildAtPoint(pt, recipe) end)
                 else
@@ -58,14 +63,16 @@ function DoRecipeClick(owner, recipe)
             local tech_level = owner.components.builder.accessible_tech_trees
             
             if can_build and CanPrototypeRecipe(recipe.level, tech_level) then
-                owner.SoundEmitter:PlaySound("dontstarve/HUD/research_unlock")
-                
-                
+                if lastsoundtime == nil or GetTime() - lastsoundtime >= 1 then
+                    lastsoundtime = GetTime()
+                    owner.SoundEmitter:PlaySound("dontstarve/HUD/research_unlock")
+                end
+
                 local onsuccess = function()
                     owner.components.builder:ActivateCurrentResearchMachine()
                     owner.components.builder:UnlockRecipe(recipe.name)
-                end                 
-                
+                end
+
                 if recipe.placer then
                     owner.components.builder:BufferBuild(recipe.name)
                     owner.components.playercontroller:StartBuildPlacementMode(recipe, function(pt) return owner.components.builder:CanBuildAtPoint(pt, recipe) end)

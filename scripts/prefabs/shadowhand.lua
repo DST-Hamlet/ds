@@ -25,6 +25,11 @@ local function Retreat(inst)
 end
 
 local function Dissipate(inst)
+    if inst.dissipating then
+        return
+    end
+    inst.dissipating = true
+    
     inst.SoundEmitter:PlaySound("dontstarve/sanity/shadowhand_snuff")
 	inst.SoundEmitter:KillSound("creeping")
 	inst.SoundEmitter:KillSound("retreat")
@@ -35,7 +40,9 @@ local function Dissipate(inst)
     if inst.arm then
         inst.arm.AnimState:PlayAnimation("arm_scare")
     end
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 end
 
 local function Retract(inst)
@@ -49,7 +56,9 @@ local function Retract(inst)
     if inst.arm then
         inst.components.locomotor:GoToEntity(inst.arm)
     end
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 end
 
 local function SeekFire(inst)
@@ -141,6 +150,10 @@ local function create_hand()
 
     if IsDLCEnabled(PORKLAND_DLC) then
         MakeSpecialGhostPhysics(inst, 10, .5)
+
+    elseif IsDLCEnabled(CAPY_DLC) then
+        MakeAmphibiousGhostPhysics(inst, 10, .5)
+        
     else
         MakeCharacterPhysics(inst, 10, .5)
     end
@@ -161,6 +174,7 @@ local function create_hand()
     inst.components.playerprox:SetOnPlayerFar(Regroup)
     
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
+	inst.components.locomotor:SetTriggersCreep(false)
     inst.components.locomotor.walkspeed = 2
     inst.components.locomotor.directdrive = true
 	inst.components.locomotor.slowmultiplier = 1

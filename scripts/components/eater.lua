@@ -84,16 +84,23 @@ function Eater:Eat( food )
 
         if self.inst.components.health then
             if food.components.edible.healthvalue > 0 or not self.strongstomach then
-                self.inst.components.health:DoDelta(food.components.edible:GetHealth(self.inst), nil, food.prefab)
+                local delta = food.components.edible:GetHealth(self.inst) * self.healthabsorption
+                self.inst.components.health:DoDelta(delta * stack_mult, nil, food.prefab) 
             end
         end
 
         if self.inst.components.hunger then
-            self.inst.components.hunger:DoDelta(food.components.edible:GetHunger(self.inst))
+            local delta = food.components.edible:GetHunger(self.inst) * self.hungerabsorption
+            if delta ~= 0 then
+                self.inst.components.hunger:DoDelta(delta * stack_mult)
+            end
         end
         
         if self.inst.components.sanity then
-            self.inst.components.sanity:DoDelta(food.components.edible:GetSanity(self.inst))
+            local delta = food.components.edible:GetSanity(self.inst) * self.sanityabsorption
+            if delta ~= 0 then
+                self.inst.components.sanity:DoDelta(delta * stack_mult)
+            end
         end
         
         self.inst:PushEvent("oneat", {food = food})

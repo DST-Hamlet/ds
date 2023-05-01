@@ -80,6 +80,7 @@ local function fn(Sim)
     --anim:PlayAnimation("arrow_loop", true)
 
     inst:AddTag("herd")
+    inst:AddTag("NOBLOCK")
     
     inst:AddComponent("herd")
     inst.components.herd:SetMemberTag("beefalo")

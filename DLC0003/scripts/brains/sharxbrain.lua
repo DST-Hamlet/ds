@@ -49,17 +49,19 @@ local function GetWanderPoint(inst)
     end 
 end
 
+local function HarvestAction(inst)
+    local target = FindEntity(inst, SEE_DIST, function(item) return item.components.breeder and item.components.breeder.volume > 0 end)
+    if target then
+        return BufferedAction(inst, target, ACTIONS.HARVEST)
+    end
+end
 
 function SharxBrain:OnStart()
-    
     local root = PriorityNode(
     {
-        --WhileNode(function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst) ),
-        --WhileNode(function() return not GetLeader(self.inst) end, "NoLeader", AttackWall(self.inst) ),
-
         ChaseAndAttack(self.inst, 100),
-        
 
+        DoAction(self.inst, HarvestAction, "harvest", true ),
         DoAction(self.inst, EatFoodAction, "eat food", true ),
         Follow(self.inst, GetLeader, MIN_FOLLOW_LEADER, TARGET_FOLLOW_LEADER, MAX_FOLLOW_LEADER),
         FaceEntity(self.inst, GetLeader, GetLeader),

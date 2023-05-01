@@ -20,20 +20,22 @@ SetSharedLootTable( 'grabbing_vine',
     {'rope',  0.4},
 })
 
-local function retargetfn(inst)
+local function KeepTargetFn(inst, target)
+    return inst.components.combat:CanTarget(target) and inst:IsNear(target, 30)
+end
+
+local function RetargetFn(inst)
 	if not inst.components.health:IsDead() then
 		local notags = {"FX", "NOCLICK","INLIMBO"}
-		return FindEntity(inst, TUNING.GRABBING_VINE_TARGET_DIST, function(guy) 
-			if guy.components.combat and guy.components.health and not guy.components.health:IsDead() then
-				return guy.components.inventory ~= nil and not guy:HasTag("plantkin")
-			end
+		return FindEntity(inst, TUNING.GRABBING_VINE_TARGET_DIST, function(guy)
+			return guy.components.inventory ~= nil and not guy:HasTag("plantkin")
 		end, nil, notags)
 	end
 end
 
 local function OnAttacked(inst, data)
 	inst.components.combat:SetTarget(data.attacker)
-	inst.components.combat:ShareTarget(data.attacker, 30, function(dude) return dude:HasTag("frog") and not dude.components.health:IsDead() end, 5)
+	inst.components.combat:ShareTarget(data.attacker, 30, function(dude) return dude:HasTag("hangingvine") end, 5)
 end
 
 local function OnGoingHome(inst)
@@ -143,7 +145,8 @@ local function commonfn(Sim)
 	inst.components.combat:SetDefaultDamage(TUNING.GRABBING_VINE_DAMAGE)
 	inst.components.combat:SetAttackPeriod(TUNING.GRABBING_VINE_ATTACK_PERIOD)
 	inst.components.combat:SetRange(3, 4)
-	inst.components.combat:SetRetargetFunction(1, retargetfn)
+	inst.components.combat:SetRetargetFunction(1, RetargetFn)
+	inst.components.combat:SetKeepTargetFunction(KeepTargetFn)
 	inst.components.combat.canbeattackedfn = canbeattackedfn
 
 	inst.components.combat.onhitotherfn = function(inst, other, damage) inst.components.thief:StealItem(other, nil, nil, true) end

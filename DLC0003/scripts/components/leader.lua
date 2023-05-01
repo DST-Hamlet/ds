@@ -1,12 +1,28 @@
+local function OnNewCombatTarget(inst, data)
+    inst.components.leader:OnNewTarget(data.target)
+end
+
+local function OnAttacked(inst, data)
+    inst.components.leader:OnAttacked(data.attacker)
+end
+
+local function OnDeath(inst)
+    inst.components.leader:RemoveAllFollowers()
+end
+
 local Leader = Class(function(self, inst)
     self.inst = inst
     self.followers = {}
     self.numfollowers = 0
-    
-    self.inst:ListenForEvent("newcombattarget", function(inst, data) self:OnNewTarget(data.target) end)
-    self.inst:ListenForEvent("attacked", function(inst, data) self:OnAttacked(data.attacker) end)  
-    self.inst:ListenForEvent("death", function(inst) self:RemoveAllFollowers() end)
 
+	--self.loyaltyeffectiveness = nil
+
+    inst:ListenForEvent("newcombattarget", OnNewCombatTarget)
+    inst:ListenForEvent("attacked", OnAttacked)
+    inst:ListenForEvent("death", OnDeath)
+
+    self._onfollowerdied = function(follower)    self:RemoveFollower(follower)       end
+    self._onfollowerremoved = function(follower) self:RemoveFollower(follower, true) end
 end)
 
 function Leader:IsFollower(guy)
@@ -45,35 +61,38 @@ function Leader:OnNewTarget(target)
     end
 end
 
-function Leader:RemoveFollower(follower)
+function Leader:RemoveFollower(follower, invalid)
     if follower and self.followers[follower] then
-        follower:PushEvent("stopfollowing", {leader = self.inst} )
         self.followers[follower] = nil
         self.numfollowers = self.numfollowers - 1
-        follower.components.follower:SetLeader(nil)
+
+        self.inst:RemoveEventCallback("death", self._onfollowerdied, follower)
+        self.inst:RemoveEventCallback("onremove", self._onfollowerremoved, follower)
+
         if self.onremovefollower then
             self.onremovefollower(self.inst, follower)
         end
+
+        if not invalid then
+            follower:PushEvent("stopfollowing", { leader = self.inst })
+	        follower.components.follower:SetLeader(nil)
+		end
     end
 end
 
 function Leader:AddFollower(follower)
-
-    print ("ADDING FOLLOWER ", follower.prefab)
-
     if self.followers[follower] == nil and follower.components.follower then
         self.followers[follower] = true
         self.numfollowers = self.numfollowers + 1
         follower.components.follower:SetLeader(self.inst)
         follower:PushEvent("startfollowing", {leader = self.inst} )
-       
-		follower:ListenForEvent("death", function(inst, data) self:RemoveFollower(follower) end, self.inst)
-        self.inst:ListenForEvent("death", function(inst, data) self:RemoveFollower(follower) end, follower)
+
+        self.inst:ListenForEvent("death", self._onfollowerdied, follower)
+        self.inst:ListenForEvent("onremove", self._onfollowerremoved, follower)
 
 	    if self.inst:HasTag( "player" ) and follower.prefab then
 		    ProfileStatsAdd("befriend_"..follower.prefab)
 	    end
-
 	end
 end
 
@@ -171,6 +190,13 @@ end
 
 function Leader:OnRemoveEntity()
 	self:RemoveAllFollowers()
+end
+
+function Leader:OnRemoveFromEntity()
+    self.inst:RemoveEventCallback("newcombattarget", OnNewCombatTarget)
+    self.inst:RemoveEventCallback("attacked", OnAttacked)
+    self.inst:RemoveEventCallback("death", OnDeath)
+    self:RemoveAllFollowers()
 end
 
 return Leader

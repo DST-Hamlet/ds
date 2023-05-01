@@ -78,7 +78,7 @@ local function onthrown(inst, thrower, pt)
 	inst.LightTask = inst:DoPeriodicTask(FRAMES, function()
 		local pos = inst:GetPosition()
 
-		if pos.y <= 0.1 then
+		if pos.y <= 0.3 then
 			inst.components.floatable:UpdateAnimations("idle_water", "idle")
 		inst:DoTaskInTime(2, function()
 				if inst and inst.LightTask then
@@ -129,6 +129,16 @@ local function onignite(inst)
     end
 end
 
+local function OnExtinguished(inst)
+	inst.SoundEmitter:KillSound("hiss")
+	removefirefx(inst)
+	inst.components.fuse:StopFuse()
+
+	if inst.LightTask then
+		inst.LightTask:Cancel()
+	end
+end
+
 local function ondepleted(inst)
 	inst.components.explosive:OnBurnt()
 end
@@ -158,6 +168,7 @@ local function commonfn()
 
 	inst:AddTag("thrown")
 	inst:AddTag("projectile")
+	inst:AddTag("coconade")
 
 	inst:AddComponent("inspectable")
 	inst.components.inspectable.getstatus = getstatus
@@ -172,6 +183,7 @@ local function commonfn()
 
 	inst:AddComponent("burnable")
 	inst.components.burnable.onignite = onignite
+	inst.components.burnable:SetOnExtinguishFn(OnExtinguished)
 	inst.components.burnable.nofx = true
 
 	inst:AddComponent("equippable")

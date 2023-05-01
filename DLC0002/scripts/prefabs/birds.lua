@@ -67,17 +67,8 @@ local function OnAttacked(inst, data)
 	end
 end
 
-local function seedspawntest(inst)
-	local ground = GetWorld()
-	local onwater = false
-	local isWinter = GetWorld().components.seasonmanager:IsWinter()
-	if ground and ground.components.birdspawner then
-		local x, y, z = inst.Transform:GetWorldPosition()
-		local ground = GetWorld()
-		local tile = ground.Map:GetTileAtPoint(x, y, z)
-		onwater = ground.components.birdspawner:IsWaterTileType(tile)
-	end
-	return not (onwater or isWinter)
+local function seedspawntest()
+	return not GetWorld().components.seasonmanager:IsWinter()
 end
 
 local function makebirdex(name, feathername, takeoff_soundname, chirp_soundname, land_sound)
@@ -243,7 +234,7 @@ local function makebirdex(name, feathername, takeoff_soundname, chirp_soundname,
 
 		MakeInventoryFloatable(inst, "takeoff_diagonal_pre", "stunned_loop")
 
-		MakePoisonableCharacter(inst)
+		MakePoisonableCharacter(inst, "crow_body")
 		inst.components.poisonable.damge_per_interval = TUNING.POISON_DAMAGE_PER_INTERVAL*50
 
 		inst:AddTag("bird")
@@ -376,7 +367,7 @@ local function makebirdex(name, feathername, takeoff_soundname, chirp_soundname,
 		end
 		inst.components.periodicspawner:SetDensityInRange(20, 2)
 		inst.components.periodicspawner:SetMinimumSpacing(8)
-		--inst.components.periodicspawner:SetSpawnTestFn( seedspawntest )
+		inst.components.periodicspawner:SetSpawnTestFn( seedspawntest )
 
 		inst.TrackInSpawner = TrackInSpawner
 

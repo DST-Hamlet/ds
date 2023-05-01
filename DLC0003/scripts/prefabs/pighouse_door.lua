@@ -32,10 +32,8 @@ local function LightsOff(inst)
 end
 
 local function onfar(inst) 
-    if not inst:HasTag("burnt") then
-        if inst.components.spawner and inst.components.spawner:IsOccupied() then
-            LightsOn(inst)
-        end
+    if inst.components.spawner and inst.components.spawner:IsOccupied() and not GetClock():IsDay() then
+        LightsOn(inst)
     end
 end
 

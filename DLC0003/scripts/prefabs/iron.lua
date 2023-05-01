@@ -41,6 +41,7 @@ local function fn(Sim)
     inst:AddComponent("bait")
     inst:AddTag("molebait")
 
+    inst:AddTag("smeltable") -- Smelter
 --[[
 	inst:AddComponent("repairer")
 	inst.components.repairer.repairmaterial = "orp"

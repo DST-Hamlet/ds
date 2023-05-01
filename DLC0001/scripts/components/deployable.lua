@@ -41,10 +41,10 @@ function Deployable:CanDeploy(pt, atdeploy)
     return self.test and self.test(self.inst, pt) or default_test(self.inst, pt, atdeploy)
 end
 
-function Deployable:Deploy(pt, deployer)
-    if not self.test or self.test(self.inst, pt, deployer) then
+function Deployable:Deploy(pt, deployer, rot)
+    if not self.test or self.test(self.inst, pt, deployer, rot) then
 		if self.ondeploy then
-	        self.ondeploy(self.inst, pt, deployer)
+	        self.ondeploy(self.inst, pt, deployer, rot)
 		end
 		return true
 	end

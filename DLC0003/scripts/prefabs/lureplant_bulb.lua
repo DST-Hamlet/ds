@@ -64,6 +64,7 @@ local function fn(Sim)
     end
 
     inst.components.deployable.ondeploy = ondeploy
+    inst.components.deployable.deploydistance = 1.5
 
     return inst
 end

@@ -62,7 +62,9 @@ local function explosionfn()
 
     inst.Transform:SetScale(0.85,0.85,0.85)
 
-    inst:ListenForEvent("animover", function(inst) inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
     return inst
 end

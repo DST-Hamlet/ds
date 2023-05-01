@@ -31,7 +31,12 @@ function InvSlot:OnControl(control, down)
 
         elseif control == CONTROL_SECONDARY and self.tile and self.tile.item then
             --alt use (usually RMB)
-            GetPlayer().components.inventory:UseItemFromInvTile(self.tile.item)
+            local inventory = GetPlayer().components.inventory
+            if TheInput:IsControlPressed(CONTROL_FORCE_TRADE) then
+                inventory:DropItemFromInvTile(self.tile.item, TheInput:IsControlPressed(CONTROL_FORCE_STACK))
+            else
+                inventory:UseItemFromInvTile(self.tile.item)
+            end
         
         --  the rest are explicit control presses for controllers
         elseif control == CONTROL_SPLITSTACK then

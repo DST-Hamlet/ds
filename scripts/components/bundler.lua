@@ -55,10 +55,12 @@ local function DropItem(inst, item)
 end
 
 function Bundler:StopBundling()
+    local pos = nil
+
     if self.bundlinginst ~= nil then
         if self.bundlinginst.components.container ~= nil then
             if self.inst.components.inventory ~= nil then
-                local pos = self.bundlinginst:GetPosition()
+                local pos = Vector3(TheSim:GetScreenPos(self.bundlinginst.Transform:GetWorldPosition())) 
                 for i = 1, self.bundlinginst.components.container:GetNumSlots() do
                     local item = self.bundlinginst.components.container:RemoveItemBySlot(i)
                     if item ~= nil then
@@ -78,7 +80,7 @@ function Bundler:StopBundling()
         local item = SpawnPrefab(self.itemprefab)
         if item ~= nil then
             if self.inst.components.inventory ~= nil then
-                self.inst.components.inventory:GiveItem(item, nil, self.inst:GetPosition())
+                self.inst.components.inventory:GiveItem(item, nil, pos)
             else
                 DropItem(self.inst, item)
             end
@@ -108,6 +110,7 @@ function Bundler:OnFinishBundling()
         self.wrappedprefab ~= nil then
         local wrapped = SpawnPrefab(self.wrappedprefab)
         if wrapped ~= nil then
+            local give_pos = self.bundlinginst:GetPosition()
             if wrapped.components.unwrappable ~= nil then
                 local items = {}
                 for i = 1, self.bundlinginst.components.container:GetNumSlots() do
@@ -122,7 +125,7 @@ function Bundler:OnFinishBundling()
                 self.itemprefab = nil
                 self.wrappedprefab = nil
                 if self.inst.components.inventory ~= nil then
-                    self.inst.components.inventory:GiveItem(wrapped, nil, self.inst:GetPosition())
+                    self.inst.components.inventory:GiveItem(wrapped, nil, Vector3(TheSim:GetScreenPos(give_pos:Get())))
                 else
                     DropItem(self.inst, wrapped)
                 end

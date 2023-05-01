@@ -15,6 +15,13 @@ local HerdMember = Class(function(self, inst)
     self.task = self.inst:DoTaskInTime(5, OnInit)
 end)
 
+function HerdMember:OnRemoveFromEntity()
+    if self.task ~= nil then
+        self.task:Cancel()
+        self.task = nil
+    end
+end
+
 function HerdMember:SetHerd(herd)
     self.herd = herd
 end
@@ -28,7 +35,7 @@ function HerdMember:GetHerd()
 end
 
 function HerdMember:CreateHerd()
-    if not self.herd then
+    if self.inst:IsValid() and (self.herd == nil or not self.herd:IsValid()) and (self.inst.components.health == nil or not self.inst.components.health:IsDead()) then
         self.herd = SpawnPrefab(self.herdprefab)
 
         if self.herd then

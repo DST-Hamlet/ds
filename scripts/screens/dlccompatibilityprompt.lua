@@ -24,7 +24,6 @@ local DlcCompatibilityPrompt = Class(Screen, function(self, done_fn)
         {text=STRINGS.UI.SAVEINTEGRATION.CANCEL,
             cb=function()
                 TheFrontEnd:PopScreen(self)
-                TheFrontEnd:PopScreen()
             end
         }}
 
@@ -175,6 +174,9 @@ function DlcCompatibilityPrompt:MakeDLCButton( dlc_index, dlc_icon )
             end
 
             return true
+
+        elseif control == CONTROL_CANCEL and not down then
+            TheFrontEnd:PopScreen(self)
         end
     end
 

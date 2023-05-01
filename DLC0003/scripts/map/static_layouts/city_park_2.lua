@@ -178,7 +178,7 @@ return {
           name = "",
           type = "lawnornament_6",
           shape = "rectangle",
-          x = 129,
+          x = 128,
           y = 192,
           width = 0,
           height = 0,

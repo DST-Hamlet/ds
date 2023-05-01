@@ -11,6 +11,21 @@ local prefabs =
 	"collapse_small",
 }
 
+local function OnRemoved(inst)
+    -- Remove from save index
+	SaveGameIndex:DeregisterResurrector(inst)
+
+	-- Remove penalty if not used
+	if inst.components.resurrector then 
+		inst.components.resurrector.penalty = 0 
+		if not inst.components.resurrector.used then
+			local player = GetPlayer()
+			if player and player.components.health then
+				player.components.health:RecalculatePenalty()
+			end
+		end
+	end
+end
 
 local function onhammered(inst, worker)
 	if inst:HasTag("fire") and inst.components.burnable then
@@ -25,19 +40,6 @@ local function onhammered(inst, worker)
 		SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
 	end
 	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
-
-	-- Remove from save index
-	SaveGameIndex:DeregisterResurrector(inst)
-
-	if inst.components.resurrector then 
-		inst.components.resurrector.penalty = 0 
-		if not inst.components.resurrector.used then
-			local player = GetPlayer()
-			if player then
-				player.components.health:RecalculatePenalty()
-			end
-		end
-	end
 	
 	inst:Remove()
 end
@@ -48,19 +50,10 @@ local function onburnt(inst)
     if inst.components.workable then
         inst.components.workable:SetWorkLeft(1)
     end
-    -- Remove from save index
-	SaveGameIndex:DeregisterResurrector(inst)
-	-- Remove penalty if not used
-	if inst.components.resurrector then
-		inst.components.resurrector.penalty = 0
-		if not inst.components.resurrector.used then
-			local player = GetPlayer()
-			if player and player.components.health then
-				player.components.health:RecalculatePenalty()
-			end
-		end
-	end
-	if inst.AnimState and inst.components.resurrector and not inst.components.resurrector.used then
+
+    OnRemoved(inst)
+
+    if inst.AnimState and inst.components.resurrector and not inst.components.resurrector.used then
         inst.AnimState:PlayAnimation("burnt", true)
         inst.components.resurrector.active = false
         inst.components.resurrector.used = true
@@ -114,7 +107,6 @@ local function doresurrect(inst, dude)
 
 	GetClock():MakeNextDay()
 	
-    dude.Transform:SetPosition(inst.Transform:GetWorldPosition())
     dude:Hide()
     dude:ClearBufferedAction()
 
@@ -125,14 +117,26 @@ local function doresurrect(inst, dude)
         dude.components.playercontroller:Enable(false)
     end
 
-	if not inst.interior then
-		TheCamera:SetDistance(12)
-	end
+	dude:DoTaskInTime(0, function()
+		local snapcam = true
 
-	if TheCamera.interior or inst.interior then
-		local interiorSpawner = GetWorld().components.interiorspawner
-		interiorSpawner:PlayTransition(GetPlayer(), nil, inst.interior, inst)	
-	end
+		-- Do not transition to the same room.
+		if (TheCamera.interior and not inst:GetIsInInterior()) or inst.interior  then
+			GetInteriorSpawner():PlayTransition(dude, nil, inst.interior, inst, true)
+			snapcam = false
+		end
+
+		dude.Transform:SetPosition(inst.Transform:GetWorldPosition())
+
+		if snapcam then
+			TheCamera:Snap()
+			TheFrontEnd:DoFadeIn(1)
+		end
+
+		if not TheCamera.interior then
+			TheCamera:SetDistance(12)	
+		end
+	end)
 
 	dude.components.hunger:Pause()
 	
@@ -264,6 +268,8 @@ local function fn(Sim)
 
 	inst.OnSave = onsave 
     inst.OnLoad = onload
+
+	inst:ListenForEvent("onremove", OnRemoved)
    
     return inst
 end

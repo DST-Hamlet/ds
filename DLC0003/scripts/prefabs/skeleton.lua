@@ -33,7 +33,7 @@ end
 local function onhammered(inst, worker)
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
 	inst:Remove()
 end
 
@@ -80,9 +80,11 @@ function SpawnPlayerSkeletonHidden(position)
 		return
 	end
 
-	skel.Transform:SetPosition(position.x, position.y, position.z)
-	skel.HiddenPlayerSkeleton = true
+	skel.Physics:SetActive(false)
 	skel:Hide()
+	skel.HiddenPlayerSkeleton = true
+
+	skel.Transform:SetPosition(position.x, position.y, position.z)
 end
 
 return Prefab("common/objects/skeleton", fn, assets, prefabs),

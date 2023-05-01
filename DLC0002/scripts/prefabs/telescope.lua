@@ -63,6 +63,7 @@ local function onfinished(inst)
 		user:ListenForEvent("animover", function() 
 			inst:Remove()
 		end)
+		inst.persists = false
 	end
 end
 

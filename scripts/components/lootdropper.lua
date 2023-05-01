@@ -9,8 +9,18 @@ local LootDropper = Class(function(self, inst)
     self.droppingchanceloot = false
     self.loot = nil
     self.chanceloottable = nil
-    
 end)
+
+-- Translates prefabs to their cooked prefab for when they are not in default form (cookedXXX or XXX_cooked)
+local special_cooked_prefabs = {
+	["trunk_summer"] = "trunk_cooked",
+	["trunk_winter"] = "trunk_cooked",
+}
+
+-- For modders use:
+function AddSpecialCookedPrefab(prefab, cooked_prefab)
+	special_cooked_prefabs[prefab] = cooked_prefab
+end
 
 LootTables = {}
 function SetSharedLootTable(name, table)
@@ -117,9 +127,6 @@ function LootDropper:GenerateLoot()
 	local recipe = GetRecipe(self.inst.prefab)
 
 	if recipe then
-
-		
-		
 		local percent = 1
 
 		if self.inst.components.finiteuses then
@@ -133,7 +140,11 @@ function LootDropper:GenerateLoot()
 			end
 		end
 	end
-    
+
+    if self.inst:HasTag("burnt") and math.random() < .4 then
+        table.insert(loots, "charcoal") -- Add charcoal to loot for burnt structures and trees.
+    end
+
     return loots
 end
 
@@ -187,12 +198,15 @@ function LootDropper:DropLoot(pt)
         for k,v in pairs(prefabs) do
             local cookedAfter = v.."_cooked"
             local cookedBefore = "cooked"..v
-            if PrefabExists(cookedAfter) then
+            
+            if special_cooked_prefabs[v] then
+                prefabs[k] = special_cooked_prefabs[v]
+            elseif PrefabExists(cookedAfter) then
                 prefabs[k] = cookedAfter
             elseif PrefabExists(cookedBefore) then
                 prefabs[k] = cookedBefore 
             else             
-                prefabs[k] = "ash"               
+                prefabs[k] = "ash"
             end
         end
     end

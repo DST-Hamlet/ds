@@ -2,6 +2,7 @@ local InventoryItem = Class(function(self, inst)
     self.inst = inst
     self.owner = nil
     self.canbepickedup = true
+    self.canbepickedupwhileburning = false
     self.onpickupfn = nil    
     self.isnew = true
     self.nobounce = false
@@ -140,9 +141,11 @@ function InventoryItem:OnPutInInventory(owner)
         self.onputininventoryfn(self.inst, owner)
     end
     self.inst:PushEvent("onputininventory")
-
-    if self.inst.components.floatable then 
+    
+    if self.inst.components.floatable then
         self.inst.components.floatable:PlayLandAnim()
+        self.inst.components.floatable.onwater = false
+        self.inst:RemoveTag("aquatic")
     end 
 end
 
@@ -165,42 +168,37 @@ function InventoryItem:IsSheltered()
 end
 
 function InventoryItem:OnDropped(randomdir, tossdir, skipfall, setspeed)
-    --print("InventoryItem:OnDropped", self.inst, randomdir)
-    --print(debug.traceback())
 	if not self.inst:IsValid() then
 		return
 	end
 	
-    --print("OWNER", self.owner, self.owner and Point(self.owner.Transform:GetWorldPosition()))
-    
     local x,y,z = self.inst.Transform:GetWorldPosition()
-    --print("pos", x,y,z)
+
     local dropper = nil
     if self.owner then
         dropper = self.owner
         -- if we're owned, our own coords are junk at this point
         x,y,z = self.owner.Transform:GetWorldPosition()
     end
-    --print("REMOVED", self.inst)
+
 	self:OnRemoved()
 
     -- now in world space, if we weren't already
-    --print("setpos", x,y,z)
     self.inst.Transform:SetPosition(x,y,z)
     self.inst.Transform:UpdateTransform()
 
     if self.inst.Physics then
         if not self.nobounce then
             y = y + 1
-            --print("setpos", x,y,z)
             self.inst.Physics:Teleport(x,y,z)
 		end
 
 		local vel = Vector3(0, 5, 0)
+
         if tossdir then 
-            vel.x = tossdir.x * 4--speed
-            vel.z = tossdir.z * 4--speed
-            self.inst.Transform:SetPosition(x + tossdir.x ,y,z + tossdir.z) --move the position a bit so it doesn't clip through the player 
+            vel.x = tossdir.x * 4 --speed
+            vel.z = tossdir.z * 4 --speed
+            self.inst.Transform:SetPosition(x + tossdir.x ,y,z + tossdir.z) -- move the position a bit so it doesn't clip through the player 
         elseif randomdir then
             local speed = 2 + math.random()
             if setspeed then
@@ -211,10 +209,11 @@ function InventoryItem:OnDropped(randomdir, tossdir, skipfall, setspeed)
 			vel.y = speed*3
             vel.z = speed*math.sin(angle)
         end
+
         if self.nobounce then
 			vel.y = 0
         end
-        --print("vel", vel.x, vel.y, vel.z)
+    
 		self.inst.Physics:SetVel(vel.x, vel.y, vel.z)
     end
 
@@ -326,7 +325,7 @@ function InventoryItem:CollectInventoryActions(doer, actions)
 end
 
 function InventoryItem:CollectSceneActions(doer, actions)
-    if self.canbepickedup and doer.components.inventory and not (self.inst.components.burnable and self.inst.components.burnable:IsBurning()) and not self.inst:HasTag("sunken") then
+    if self.canbepickedup and doer.components.inventory and (self.canbepickedupwhileburning or not (self.inst.components.burnable and self.inst.components.burnable:IsBurning())) and not self.inst:HasTag("sunken") then
         if self.inst:HasTag("aquatic") and not (doer.components.driver and doer.components.driver:GetIsDriving()) then
             table.insert(actions, ACTIONS.RETRIEVE)
         else
@@ -362,7 +361,11 @@ function InventoryItem:CollectUseActions(doer, target, actions)
 
     if target:HasTag("weighdownable") then
         table.insert(actions, ACTIONS.WEIGHDOWN)
-    end  
+    end
+
+    if target.components.trader and target.components.trader.acceptnontradable then
+        table.insert(actions, ACTIONS.GIVE)
+    end
 end
 
 function InventoryItem:GetGrandOwner()
@@ -491,19 +494,22 @@ function InventoryItem:OnLootDropped()
     self:OnStartFalling()
 end 
 
-
-
 function InventoryItem:OnHitWater()
-    -- print(self.inst.prefab.." hit water")
+    if self.inst.components.blowinwind ~= nil then
+        self.inst.components.blowinwind:Stop()
+    end
+
     self.inst:RemoveTag("falling")
-    local x, y, z = self.inst.Transform:GetWorldPosition()
+
     if self.inst.components.floatable ~= nil then
-        self.inst.components.floatable:OnHitWater()
-        local fx = SpawnPrefab("splash_water_drop")
-        if self.inst.SoundEmitter then 
-            self.inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/item_float")
-        end 
-        fx.Transform:SetPosition(x, y, z)
+        if not self.inst.components.floatable.onwater then
+            self.inst.components.floatable:OnHitWater()
+            local fx = SpawnPrefab("splash_water_drop")
+            if self.inst.SoundEmitter then 
+                self.inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/item_float")
+            end 
+            fx.Transform:SetPosition(self.inst.Transform:GetWorldPosition())
+        end
     else
         if self.inst:HasTag("irreplaceable") then
             self.inst.Transform:SetPosition(GetPlayer().Transform:GetWorldPosition())
@@ -511,10 +517,7 @@ function InventoryItem:OnHitWater()
             self.inst:SinkIfOnWater()
         end
     end
-    if self.inst.components.blowinwind ~= nil then
-        self.inst.components.blowinwind:Stop()
-    end
-end 
+end
 
 function InventoryItem:OnHitLand()
     -- print(self.inst.prefab.." hit land")
@@ -613,12 +616,5 @@ function InventoryItem:OnUpdate(dt)
         self.inst:StopUpdatingComponent(self) 
     end 
 end 
-
-function InventoryItem:InheritMoisture(moisture, iswet)
-    if self.inst.components.inventoryitemmoisture ~= nil then
-        self.inst.components.inventoryitemmoisture:InheritMoisture(moisture, iswet)
-    end
-end
-
 
 return InventoryItem

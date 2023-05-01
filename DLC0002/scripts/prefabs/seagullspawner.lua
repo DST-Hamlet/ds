@@ -90,6 +90,7 @@ local function fn()
 
 	inst:AddTag("seagullspawner")
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst:AddComponent( "childspawner" )
 	inst.components.childspawner.childname = "seagull_water"
@@ -132,6 +133,7 @@ local function circlingseagullfn()
 
 	inst:AddTag("FX")
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst.AnimState:SetMultColour(1,1,1,0)
 	inst:AddComponent("colourtweener")

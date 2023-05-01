@@ -124,7 +124,9 @@ local commonspawnfn = {
 	grass_water = function(x, y, ents)
 		return WorldSim:GetTile(x, y) == GROUND.MANGROVE and IsSurroundedByWater(x, y, 1)
 	end,
-	
+	grass_tall_patch = function(x, y, ents)
+		return not IsCloseToWater(x, y, 3)
+	end,
 }
 
 local function surroundedbywater(x, y, ents)
@@ -135,6 +137,9 @@ local function notclosetowater(x, y, ents)
 	return not IsCloseToWater(x, y, 1)
 end
 
+local function notclosetowater_patch(x, y, ents)
+	return not IsCloseToWater(x, y, 2)
+end
 
 local waterprefabs =
 {
@@ -149,20 +154,34 @@ local landprefabs =
 	"rock_flintless", "rocks", "flint", "goldnugget", "gravestone", "mound", "red_mushroom", "blue_mushroom",
 	"green_mushroom", "carrot_planted", "beehive", "reeds", "marsh_tree", "snakeden", "pond", "primeapebarrel",
 	"mandrake", "mermhouse_fisher", "sweet_potato_planted", "flup", "flupspawner_sparse", "wasphive",
-	"beachresurrector", "flower_evil", "crate", "tallbirdnest"
+	"beachresurrector", "flower_evil", "crate", "tallbirdnest",
+
+	-- Porkland prefabs
+
+	"clawpalmtree", "grass_tall", "flower_rainforest", "dungpile", "randomdust", "rock_flippable",
+	"aloe_planted", "asparagus_planted", "radish_planted", "rainforesttree", "peagawk", "pog",
+	"tubertree", "nitre", "teatree", "nettle", "pig_ruins_torch", "adult_flytrap", "charcoal", 
+	"randomrelic", "randomruin", "pig_ruins_entrance_small", "rainforesttree_rot", "meteor_impact",
+	"anthill", "anthill_exit", "pighead", "tree_pillar", "mandrakehouse", "rainforesttree_burnt",
+	"gnatmound", "iron", "thunderbirdnest", "sedimentpuddle", "vampirebatcave_potential",
+	"ancient_robot_claw", "ancient_robot_leg", "ancient_robot_ribs", "ancient_robot_head",
+	"spoiled_food",
 }
 
+local landprefabs_patch = {
+	"deep_jungle_fern_noise", "teatree_piko_nest_patch", "hanging_vine_patch",
+}
 
-for i = 1, #waterprefabs, 1 do
-	assert(commonspawnfn[waterprefabs[i]] == nil) --don't replace an existing one
-	commonspawnfn[waterprefabs[i]] = surroundedbywater
+local function AddCommonSpawnTestFn(prefab_table, test_fn)
+	for i, prefab in pairs(prefab_table) do
+		assert(commonspawnfn[prefab] == nil, prefab .. " already exists in commonspawnfn table") -- don't replace an existing one
+		commonspawnfn[prefab] = test_fn
+	end
 end
 
-for i = 1, #landprefabs, 1 do
-	assert(commonspawnfn[landprefabs[i]] == nil) --don't replace an existing one
-	commonspawnfn[landprefabs[i]] = notclosetowater
-end
-
+AddCommonSpawnTestFn(waterprefabs, surroundedbywater)
+AddCommonSpawnTestFn(landprefabs, notclosetowater)
+AddCommonSpawnTestFn(landprefabs_patch, notclosetowater_patch)
 
 function GetCommonSpawnFn(prefab, x, y, ents)
 	return prefab ~= nil and (commonspawnfn[prefab] == nil or commonspawnfn[prefab](x, y, ents))

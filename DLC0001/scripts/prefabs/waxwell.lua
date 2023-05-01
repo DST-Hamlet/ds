@@ -28,6 +28,7 @@ local start_inv =
 
 local function custom_init(inst)
 	inst:AddComponent("reader")
+	inst:AddTag("bookreader")
 
 	inst.components.sanity.dapperness = TUNING.DAPPERNESS_HUGE
 	inst.components.health:SetMaxHealth(TUNING.WILSON_HEALTH * .5 )

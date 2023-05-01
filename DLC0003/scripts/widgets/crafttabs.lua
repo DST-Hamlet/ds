@@ -113,7 +113,7 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
 
         	STRINGS.TABS[v.str],
         	resolvefilepath("images/hud.xml"),
-        	v.icon_atlas or resolvefilepath("images/hud.xml"),
+        	v.icon_atlas and resolvefilepath(v.icon_atlas) or resolvefilepath("images/hud.xml"),
         	v.icon,
         	tab_bg.normal,
         	tab_bg.selected,
@@ -147,7 +147,7 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
         was_crafting_station = v.crafting_station
         tab.filter = v
         tab.icon = v.icon
-        tab.icon_atlas = v.icon_atlas or resolvefilepath("images/hud.xml")
+        tab.icon_atlas = v.icon_atlas and resolvefilepath(v.icon_atlas) or resolvefilepath("images/hud.xml")
         tab.tabname = STRINGS.TABS[v.str]       
         self.tabbyfilter[v] = tab
 
@@ -178,6 +178,8 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
     self.inst:ListenForEvent("itemlose", function(inst, data) self:UpdateRecipes() end, self.owner)
     self.inst:ListenForEvent("stacksizechange", function(inst, data) self:UpdateRecipes() end, self.owner)
     self.inst:ListenForEvent("unlockrecipe", function(inst, data) self:UpdateRecipes() end, self.owner)
+	self.inst:ListenForEvent("refreshcrafting", function(inst, data) self:UpdateRecipes() end, self.owner)
+
     self:DoUpdateRecipes()
     self:SetScale(base_scale, base_scale, base_scale)
     self:StartUpdating()
@@ -515,7 +517,7 @@ function CraftTabs:HandleMultiCraftingStationTabs(valid_tabs)
 					end
 					local tooltip = STRINGS.TABS[string.upper(name)]
 					local category = RecipeCategory(tabname, RECIPETABS[name], RECIPETABS.CRAFTINGSTATIONS, TECH.NONE, RECIPE_GAME_TYPE.COMMON, imagename, tooltip)
-					category.atlas = actualTab.atlas
+					category.atlas = actualTab.icon_atlas and resolvefilepath(actualTab.icon_atlas) or actualTab.atlas
 					category.imageScale = 0.5
 					category.imageNudge = -6
 					category.skipCategoryCheck = true -- to prevent some expensive work that is not needed on these guys

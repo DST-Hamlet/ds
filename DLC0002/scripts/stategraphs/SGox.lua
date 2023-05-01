@@ -39,6 +39,9 @@ local states=
         
         onenter = function(inst, pushanim)
             inst.components.locomotor:StopMoving()
+            if inst.growUpPending then
+                inst.sg:GoToState("grow_up")
+            end
             inst.AnimState:PlayAnimation("idle_loop", true)
             inst.sg:SetTimeout(2 + 2*math.random())
         end,
@@ -199,43 +202,25 @@ local states=
         
     },
 
-	State{
-        name = "hair_growth",
-        tags = {"busy"},
-        
-        onenter = function(inst)
-            inst.components.locomotor:StopMoving()
-            inst.AnimState:PlayAnimation("hair_growth_pre")
-            inst.SoundEmitter:PlaySound("dontstarve/beefalo/hairgrow_vocal")
-        end,
-        
-        events=
-        {
-            EventHandler("animover", function(inst) inst.sg:GoToState("hair_growth_pop") end),
-        },
-    },
-    
     State{
-        name = "hair_growth_pop",
-        tags = {"busy"},
+        name = "grow_up_adult_pop",
+        tags = {"busy", "adultpop"},
         
         onenter = function(inst)
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("hair_growth") 
-                inst.SoundEmitter:PlaySound("dontstarve/beefalo/hairgrow_pop")
+                inst.SoundEmitter:PlaySound(inst.sounds.hairgrow_pop)
                 if inst:HasTag("baby") and inst.components.growable then
                     inst.AnimState:SetBuild("ox_baby_build")
                     inst.components.growable:SetStage(inst.components.growable:GetNextStage() )
-                elseif inst.components.beard then
+                else
                     local herd = inst.components.herdmember and inst.components.herdmember:GetHerd()
                     if herd and herd.components.mood and herd.components.mood:IsInMood() then
                         inst.AnimState:SetBuild("ox_heat_build") 
                     else
                         inst.AnimState:SetBuild("ox_build") 
                     end
-                    inst.components.beard.bits = 3
                 end
-                inst.hairGrowthPending = false
         end,
         
         events=
@@ -243,25 +228,40 @@ local states=
             EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
         },
     },
-    
+
     State{
-        name = "shaved",
-        tags = {"busy", "sleeping"},
-        
+        name = "grow_up",
+        tags = {"busy"},
+
         onenter = function(inst)
-            inst.AnimState:SetBuild("ox_shaved_build")
-            inst.AnimState:PlayAnimation("shave")
+            inst.components.locomotor:StopMoving()
+            inst.AnimState:PlayAnimation("hair_growth_pre")
+            inst.SoundEmitter:PlaySound(inst.sounds.hairgrow_vocal)
         end,
-        
+
         events=
         {
             EventHandler("animover", function(inst)
-                if inst.components.sleeper and inst.components.sleeper:IsAsleep() then
-                    inst.sg:GoToState("sleeping")
-                else
-                    inst.sg:GoToState("wake")
-                end
+                inst.components.growable:SetStage(inst.components.growable:GetNextStage())
+                inst.growUpPending = false
+                inst.sg:GoToState("grow_up_pop")
             end),
+        },
+    },
+
+    State{
+        name = "grow_up_pop",
+        tags = {"busy"},
+
+        onenter = function(inst)
+            inst.components.locomotor:StopMoving()
+            inst.AnimState:PlayAnimation("hair_growth")
+            inst.SoundEmitter:PlaySound(inst.sounds.hairgrow_pop)
+        end,
+
+        events=
+        {
+            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
         },
     },
 
@@ -269,9 +269,13 @@ local states=
         name = "emerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
-            -- local is_moving = inst.sg:HasStateTag("moving")
-            -- local is_running = inst.sg:HasStateTag("running")
+        onenter = function(inst, noanim)
+            if noanim then
+                inst.AnimState:SetBank("ox")
+                inst.sg:GoToState("idle")
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then
@@ -307,7 +311,13 @@ local states=
         name = "submerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
+        onenter = function(inst, noanim)
+            if noanim then
+                inst.AnimState:SetBank("ox_water")
+                inst.sg:GoToState("idle")
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then

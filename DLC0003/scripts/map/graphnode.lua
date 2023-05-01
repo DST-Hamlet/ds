@@ -274,7 +274,7 @@ local function resolveswappableprefabs(table)
 	return tbl
 end
 
-function Node:PopulateVoronoi(spawnFn, entitiesOut, width, height, world_gen_choices, prefab)
+function Node:PopulateVoronoi(spawnFn, entitiesOut, width, height, world_gen_choices, prefab, is_adventuremode)
 
 	if self.populated == true then
 		--table.insert(entitiesOut[prefab], save_data)
@@ -399,14 +399,14 @@ function Node:PopulateVoronoi(spawnFn, entitiesOut, width, height, world_gen_cho
 
 		end
 
-		self:PopulateExtra(world_gen_choices, spawnFn, {points_type=points_type, points_x=points_x, points_y=points_y, idx_left=idx_left, entitiesOut=entitiesOut, width=width, height=height, prefab_list=prefab_list}, prefab)
+		self:PopulateExtra(world_gen_choices, spawnFn, {points_type=points_type, points_x=points_x, points_y=points_y, idx_left=idx_left, entitiesOut=entitiesOut, width=width, height=height, prefab_list=prefab_list}, prefab, is_adventuremode)
 
 	end
 
 end
 
 
-function Node:PopulateChildren(spawnFn, entitiesOut, width, height, backgroundRoom, perTerrain, world_gen_choices, prefab)
+function Node:PopulateChildren(spawnFn, entitiesOut, width, height, backgroundRoom, perTerrain, world_gen_choices, prefab, is_adventuremode)
 	-- Fill in any background sites that we have generated
 
 	if self.children_populated == true then
@@ -462,25 +462,22 @@ function Node:PopulateChildren(spawnFn, entitiesOut, width, height, backgroundRo
 				end
 			end
 			
-			self:PopulateExtra(world_gen_choices, spawnFn, {points_type=points_type, points_x=points_x, points_y=points_y, idx_left=idx_left, entitiesOut=entitiesOut, width=width, height=height, prefab_list=prefab_list})
+			self:PopulateExtra(world_gen_choices, spawnFn, {points_type=points_type, points_x=points_x, points_y=points_y, idx_left=idx_left, entitiesOut=entitiesOut, width=width, height=height, prefab_list=prefab_list}, prefab, is_adventuremode)
 		end
 	end
 
 end
 
-function Node:PopulateExtra(world_gen_choices, spawnFn, data, worldprefab)
+function Node:PopulateExtra(world_gen_choices, spawnFn, data, worldprefab, is_adventuremode)
 	-- We have a bunch of unused positions that we can use.
 	-- loop through anything > 'default' (ie 1)
 	-- add in % more
 	--print("world_gen_choices...", world_gen_choices, #idx_left)
 
 	if world_gen_choices ~= nil and #data.idx_left >0 then
-			
 		local amount_to_generate = {}
 		for prefab,amt in pairs(world_gen_choices) do
-
-			if data.prefab_list[prefab] == nil and worldprefab ~= "porkland" then
-				-- TODO: Need a better way to increse items in areas where they dont usually generate				
+			if is_adventuremode and data.prefab_list[prefab] == nil then
 				data.prefab_list[prefab] = math.random(1,2)
 			end
 			
@@ -510,7 +507,6 @@ function Node:PopulateExtra(world_gen_choices, spawnFn, data, worldprefab)
 				self:AddEntity(prefab, data.points_x, data.points_y, data.idx_left[idx], data.entitiesOut, data.width, data.height, data.prefab_list, prefab_data)				
 					
 				amount_to_generate[prefab] = amount_to_generate[prefab] - 1
-				
 				-- Remove any complete items from the list
 				if amount_to_generate[prefab] <= 0 then
 					--print("Generated enough",prefab)

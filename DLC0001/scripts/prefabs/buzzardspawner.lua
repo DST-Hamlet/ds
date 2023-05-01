@@ -126,6 +126,7 @@ local function fn()
 	minimap:SetIcon( "buzzard.png" )
 
 	inst:AddTag("buzzardspawner")
+	inst:AddTag("NOBLOCK")
 
 	inst:AddComponent( "childspawner" )
 	inst.components.childspawner.childname = "buzzard"
@@ -164,6 +165,8 @@ local function circlingbuzzardfn()
 	anim:SetOrientation( ANIM_ORIENTATION.OnGround )
 	anim:SetLayer( LAYER_BACKGROUND )
 	anim:SetSortOrder( 3 )
+
+	inst:AddTag("NOBLOCK")
 
 	inst:AddComponent("circler")
 

@@ -95,7 +95,7 @@ local function fn()
     trans:SetScale(0.9, 0.9, 0.9)
 
     MakeObstaclePhysics(inst, 2)
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "crick_torso")
      
     anim:SetBank ("crick_crickantqueen")
     anim:SetBuild("crickant_queen_basics")
@@ -140,6 +140,8 @@ local function fn()
 
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetLoot(loot)
+    inst.components.lootdropper.alwaysinfront = true
+    inst.components.lootdropper.speed = 3
     
     inst:AddComponent("inspectable")
 
@@ -157,7 +159,7 @@ local function fn()
     inst.min_combat_cooldown = 5
     inst.max_combat_cooldown = 7
 
-    MakeLargeFreezableCharacter(inst, "pig_torso")
+    MakeLargeFreezableCharacter(inst, "crick_ab")
 
     inst.warrior_count = 0
     inst.SpawnWarrior = SpawnWarrior

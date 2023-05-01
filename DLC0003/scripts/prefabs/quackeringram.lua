@@ -170,7 +170,7 @@ local function onPotentialRamHit(inst, target)
 			end
         elseif target.components.workable and not target:HasTag("busy") then --Haaaaaaack!
             hitTarget = true
-            target.components.workable:Destroy(inst)
+            target.components.workable:WorkedBy(inst, target.components.workable.workleft) -- workable:Destroy doesn't work well with coral reefs.
         end
     end
 

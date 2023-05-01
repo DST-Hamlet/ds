@@ -16,6 +16,11 @@ local function growtree(inst)
 	end
 end
 
+local function digup(inst, digger)
+    inst.components.lootdropper:DropLoot()
+    inst:Remove()
+end
+
 local function plant(inst, growtime)
     inst:RemoveComponent("inventoryitem")
     inst.AnimState:PlayAnimation("idle_planted")
@@ -23,10 +28,23 @@ local function plant(inst, growtime)
     inst.growtime = GetTime() + growtime
     print ("PLANT", growtime)
     inst.growtask = inst:DoTaskInTime(growtime, growtree)
+
+    inst:AddComponent("lootdropper")
+    inst.components.lootdropper:SetLoot({"twigs"})
+
+    inst:AddComponent("workable")
+    inst.components.workable:SetWorkAction(ACTIONS.DIG)
+    inst.components.workable:SetOnFinishCallback(digup)
+    inst.components.workable:SetWorkLeft(1)
 end
 
 local function ondeploy (inst, pt) 
     inst = inst.components.stackable:Get()
+
+    if inst.components.inventoryitem then
+        inst.components.inventoryitem:OnRemoved()
+    end
+
     inst.Transform:SetPosition(pt:Get() )
     local timeToGrow = GetRandomWithVariance(TUNING.PINECONE_GROWTIME.base, TUNING.PINECONE_GROWTIME.random)
     plant(inst, timeToGrow)

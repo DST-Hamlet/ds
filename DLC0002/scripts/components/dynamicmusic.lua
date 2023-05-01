@@ -104,6 +104,7 @@ local DynamicMusic = Class(function(self, inst)
     inst:ListenForEvent( "builditem", function(it, data) self:OnStartBusy() end)  
     inst:ListenForEvent( "buildstructure", function(it, data) self:OnStartBusy() end)  
     inst:ListenForEvent( "working", function(it, data) self:OnStartBusy() end)
+    inst:ListenForEvent( "hacking", function(it, data) self:OnStartBusy() end)
 
     inst:ListenForEvent("mountboat", function(it, data)
         if data and data.boat and data.boat.prefab == "surfboard" then

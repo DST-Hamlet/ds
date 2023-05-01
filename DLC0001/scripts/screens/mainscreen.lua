@@ -153,9 +153,10 @@ function MainScreen:DoInit( )
 
 	local submenuitems = 
 	{
-		{text = STRINGS.UI.MAINSCREEN.NOTIFY, cb = function() self:EmailSignup() end},
+		--{text = STRINGS.UI.MAINSCREEN.NOTIFY, cb = function() self:EmailSignup() end},
 		{text=STRINGS.UI.MAINSCREEN.FORUM, cb= function() self:Forums() end}
 	}
+
 	self.submenu = self.right_col:AddChild(Menu(submenuitems, 70))
 	self.submenu:SetPosition(0, -300, 0)
 	self.submenu:SetScale(.6)	

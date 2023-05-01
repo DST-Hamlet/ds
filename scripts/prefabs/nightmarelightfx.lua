@@ -43,6 +43,8 @@ local function upper_crackfn()
     local anim = inst.entity:AddAnimState()
 
     inst:AddTag("NOCLICK")
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 
     inst:AddComponent("colourtweener")
     anim:SetBank("nightmare_crack_upper_fx")

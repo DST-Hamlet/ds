@@ -63,6 +63,7 @@ local Burnable = Class(function(self, inst)
     self.canlight = true
 
     self.lightningimmune = false
+    self.burntonwater = false
     
     self.smoldering = false
     self.inst:AddTag("wildfirestarter")

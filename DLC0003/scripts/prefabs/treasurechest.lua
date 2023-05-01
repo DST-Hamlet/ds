@@ -106,6 +106,10 @@ local function testitem_honeychest(inst, item, slot)
 	return item.prefab == "honey" or item.prefab == "nectar_pod"
 end
 
+local function testitem_roottrunk(inst, item, slot)
+	return not item:HasTag("irreplaceable") and not item.components.leader
+end
+
 local function onopen(inst) 
 	if not inst:HasTag("burnt") then
 		inst.AnimState:PlayAnimation("open")
@@ -117,6 +121,7 @@ local function onopen(inst)
 		if inst.prefab == "luggagechest" then
 			inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/steamer_trunk/steamer_trunk_open")
 		elseif inst.prefab == "corkchest" then
+			inst.AnimState:PushAnimation("open_loop", true)
 			inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/crafted/cork_chest/open")
 		elseif inst.prefab == "antchest" then
 			inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/honey_chest/open")
@@ -161,7 +166,9 @@ local function oncloseocto(inst)
 			inst.AnimState:PushAnimation("closed", true)
 			return
 		else
-		
+			inst.persists = false
+			inst.components.container.canbeopened = false
+
 			inst.AnimState:PushAnimation("sink", false)
 			
 			inst:DoTaskInTime(96*FRAMES, function (inst)
@@ -223,7 +230,12 @@ end
 local joecounter = 1
 local function onload(inst, data)
 	if data and data.burnt then
-		inst.components.burnable.onburnt(inst)
+		if inst.components.burnable then
+			inst.components.burnable.onburnt(inst)
+		else
+			-- This chest is no longer burnable.
+			inst:Remove()
+		end
 	end
 
 	if (inst.prefab == "antchest") and data and data.honeyWasLoaded then
@@ -317,8 +329,6 @@ local function chest(style, aquatic)
 		inst.AnimState:SetBuild(chests[style].build)
 		inst.AnimState:PlayAnimation("closed", true)
 
-		inst:AddComponent("floatable")
-
 		inst:AddComponent("inspectable")
 		inst:AddComponent("container")
 		inst.components.container:SetNumSlots(#slotpos)
@@ -339,12 +349,13 @@ local function chest(style, aquatic)
 			inst:DoTaskInTime(0.01, function() LoadHoneyFirstTime(inst) end)
 		end
 		if style == "root_chest" then
+			inst:AddTag("NOBLOCK")
 			inst:ListenForEvent("onremove", function() assert(false,"MAIN ROOT CHEST WAS REMOVED SOMEHOW") end)
 		end
-		if style == "root_chest" or style == "root_chest_child" then
+		if style == "root_chest" or style == "root_chest_child" or style == "minotaur_chest" then
 			inst.components.container:SetNumSlots(#root_slotpos, true)
 			inst.components.container.widgetslotpos = root_slotpos
-			inst.components.container.widgetpos = Vector3(75, 200, 0)
+			inst.components.container.widgetpos = Vector3(0, 200, 0)
 		    inst.components.container.widgetanimbank = "ui_chester_shadow_3x4"
 		    inst.components.container.widgetanimbuild = "ui_chester_shadow_3x4"			
 		end
@@ -352,6 +363,7 @@ local function chest(style, aquatic)
 		if style == "root_chest_child" then
 			inst:ListenForEvent("onopen", function() if GetWorld().components.roottrunkinventory then GetWorld().components.roottrunkinventory:empty(inst) end end)
 			inst:ListenForEvent("onclose", function() if GetWorld().components.roottrunkinventory then GetWorld().components.roottrunkinventory:fill(inst) end end)
+			inst.components.container.itemtestfn = testitem_roottrunk
 		end
 
 		if style == "cork_chest" then
@@ -364,14 +376,7 @@ local function chest(style, aquatic)
 			inst:AddTag("pogproof")
 		end
 
-		if style ~= "octopus_chest" then
-			inst:AddComponent("lootdropper")
-			inst:AddComponent("workable")
-			inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
-			inst.components.workable:SetWorkLeft(2)
-			inst.components.workable:SetOnFinishCallback(onhammered)
-			inst.components.workable:SetOnWorkCallback(onhit)
-		else
+		if style == "octopus_chest" then
 			MakeInventoryPhysics(inst)
 			inst:AddComponent("inventoryitem")
 			inst.components.inventoryitem.canbepickedup = false
@@ -380,16 +385,26 @@ local function chest(style, aquatic)
 			inst.components.container.onclosefn = oncloseocto
 			inst.components.container:SetNumSlots(#octo_slotpos, true)
 
+			inst:AddComponent("floatable")
+
 			inst.components.container.widgetslotpos = octo_slotpos
 			inst.components.container.widgetpos = Vector3(75, 200, 0)
 		    inst.components.container.widgetanimbank = "ui_thatchpack_1x4"
 		    inst.components.container.widgetanimbuild = "ui_thatchpack_1x4"
+
+		elseif style ~= "root_chest" then
+			inst:AddComponent("lootdropper")
+			inst:AddComponent("workable")
+			inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
+			inst.components.workable:SetWorkLeft(2)
+			inst.components.workable:SetOnFinishCallback(onhammered)
+			inst.components.workable:SetOnWorkCallback(onhit)			
 		end
 
 		inst:ListenForEvent( "onbuilt", onbuilt)
 		MakeSnowCovered(inst, 0.01)	
 
-		if style ~= "water_chest" then
+		if not aquatic and style ~= "root_chest" then
 			MakeSmallBurnable(inst, nil, nil, true)
 			MakeSmallPropagator(inst)
 		end

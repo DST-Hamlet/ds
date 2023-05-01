@@ -170,8 +170,8 @@ function MakeBook(name, usefn, bookuses )
         inst:AddComponent("book")
         inst.components.book.onread = usefn
 
-        inst:AddComponent("characterspecific")
-        inst.components.characterspecific:SetOwner("wickerbottom")
+        --inst:AddComponent("characterspecific")
+        --inst.components.characterspecific:SetOwner("wickerbottom")
         
         inst:AddComponent("inventoryitem")
 

@@ -181,6 +181,8 @@ local function MakeVeggie(name, has_seeds, iswater)
 		inst:AddComponent("inventoryitem")
 
 		inst.AnimState:PlayAnimation("idle")
+		MakeInventoryFloatable(inst, "idle_water", "idle")
+
 		inst.components.edible.healthvalue = TUNING.HEALING_TINY/2
 		inst.components.edible.hungervalue = TUNING.CALORIES_TINY
 
@@ -269,11 +271,12 @@ local function MakeVeggie(name, has_seeds, iswater)
 		inst:AddComponent("cookable")
 		inst.components.cookable.product = name.."_cooked"
 
-		local is_banana = name == "cave_banana"
-		if is_banana then
-			--inst.components.inventoryitem:ChangeImageName("bananas")
+		local is_banana_in_sw = name == "cave_banana" and SaveGameIndex:IsModeShipwrecked()
+		if is_banana_in_sw then
 			inst:AddComponent("named")
 			inst.components.named:SetName(STRINGS.NAMES["BANANA"])
+
+			inst.AnimState:SetBuild("bananas")
 		end
 
 		return inst
@@ -288,7 +291,7 @@ local function MakeVeggie(name, has_seeds, iswater)
 		inst.AnimState:SetBank(assetname)
 		inst.AnimState:SetBuild(assetname)
 		inst.AnimState:PlayAnimation("cooked")
-
+		MakeInventoryFloatable(inst, "cooked_water", "cooked")
 
 		inst:AddComponent("perishable")
 		inst:AddComponent("edible")
@@ -315,11 +318,12 @@ local function MakeVeggie(name, has_seeds, iswater)
 
 		inst:AddComponent("inspectable")
 
-		local is_banana = name == "cave_banana"
-		if is_banana then
+		local is_banana_in_sw = name == "cave_banana" and SaveGameIndex:IsModeShipwrecked()
+		if is_banana_in_sw then
 			inst:AddComponent("named")
-			--inst.components.inventoryitem:ChangeImageName("bananas_cooked")
 			inst.components.named:SetName(STRINGS.NAMES["BANANA_COOKED"])
+
+			inst.AnimState:SetBuild("bananas")
 		end
 
 		local is_blown_in_hurricane = name == "carrot" or name == "berries"
@@ -332,7 +336,6 @@ local function MakeVeggie(name, has_seeds, iswater)
 	    MakeSmallBurnable(inst)
 		MakeSmallPropagator(inst)
 
-		MakeInventoryFloatable(inst, "cooked_water", "cooked")
 		---------------------
 
 		inst:AddComponent("bait")

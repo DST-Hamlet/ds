@@ -40,11 +40,21 @@ end
 function RootTrunkInventory:empty( target )
 	local t_cont = target.components.container
 	local cont = self.trunk.components.container
-	if t_cont and cont then		
+	if t_cont and cont then
 		for i,slot in pairs(cont.slots) do
 			local item = cont:RemoveItemBySlot(i)
-			print(item.prefab)
-			t_cont:GiveItem(item, i, nil, nil, true)
+			local success = t_cont:GiveItem(item, i, nil, nil, true)
+
+			-- Notes(DiogoW): The root trunk no longer accepts irreplaceable items,
+			-- but irreplaceable items already inside are dropped at (0,0,0) because of it.
+			-- This solves the issue.
+
+			if not success and item and item:IsValid() then
+				item.Transform:SetPosition(t_cont.inst.Transform:GetWorldPosition())
+				if item.components.inventoryitem then
+					item.components.inventoryitem:OnDropped(true)
+				end
+			end
 		end
 	end	
 end
@@ -52,10 +62,9 @@ end
 function RootTrunkInventory:fill( source )
 	local s_cont = source.components.container
 	local cont = self.trunk.components.container
-	if s_cont and cont then		
+	if s_cont and cont then
 		for i,slot in pairs(s_cont.slots) do
 			local item = s_cont:RemoveItemBySlot(i)
-			print(item.prefab)
 			cont:GiveItem(item, i, nil, nil, true)
 		end
 	end	

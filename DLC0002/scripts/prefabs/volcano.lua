@@ -31,6 +31,9 @@ local function OnActivate(inst)
         end
 
         local function onenter()
+            if GetPlayer().components.driver:GetIsDriving() then 
+                GetPlayer().components.driver:OnDismount()
+            end
             SaveGameIndex:SaveCurrent(function() SaveGameIndex:EnterWorld("volcano", onsaved) end, "ascend_volcano")
         end
 

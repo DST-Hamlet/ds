@@ -17,9 +17,12 @@ local function fn()
     anim:SetLayer( LAYER_BACKGROUND )
     anim:SetSortOrder( 3 )
 
-    inst.persists = false
-    inst:AddTag("fx")
-    inst:ListenForEvent("animover", function() inst:Remove() end)
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
+    
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
 
     return inst
 end

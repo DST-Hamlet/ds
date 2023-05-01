@@ -6,6 +6,8 @@ local assets =
 	Asset("ANIM", "anim/teleport_pad.zip"),
 	Asset("ANIM", "anim/teleport_pad_beacon.zip"),
 	Asset("MINIMAP_IMAGE", "telipad"),
+
+	Asset("SOUND", "sound/dontstarve_wagstaff.fsb"),
 }
 
 local prefabs = 
@@ -24,7 +26,7 @@ local function onhammered(inst, worker)
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
 	inst:Remove()
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
 end
 
 local function onhit(inst, worker)
@@ -139,6 +141,8 @@ local function base()
 				end
 			end
 		end
+
+		inst.highlightchildren = inst.decor
         
 		if not GetWorld().telipads then
 			GetWorld().telipads = {}

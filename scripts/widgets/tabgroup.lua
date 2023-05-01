@@ -160,6 +160,7 @@ end
 function TabGroup:DeselectAll()
     for k,v in ipairs(self.tabs) do
         v:Deselect()
+        v:MoveToFront()
     end
 end
 

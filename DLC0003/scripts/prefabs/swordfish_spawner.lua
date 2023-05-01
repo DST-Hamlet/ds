@@ -9,6 +9,8 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
 
+	inst:AddTag("NOBLOCK")
+
 	inst:AddComponent( "childspawner" )
 	inst.components.childspawner:SetRegenPeriod(60)
 	inst.components.childspawner:SetSpawnPeriod(55)

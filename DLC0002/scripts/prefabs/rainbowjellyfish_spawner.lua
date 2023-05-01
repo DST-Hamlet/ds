@@ -39,6 +39,7 @@ local function fn(Sim)
 	local trans = inst.entity:AddTransform()
 
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 	inst:AddTag("rainbowjellyfish_spawner")
 
 	inst:AddComponent( "childspawner" )

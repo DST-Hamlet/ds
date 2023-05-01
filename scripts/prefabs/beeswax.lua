@@ -49,6 +49,8 @@ local function fn()
 
     inst:AddComponent("inspectable")
 
+    inst:AddTag("meltable")
+
     inst:AddComponent("inventoryitem")
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM

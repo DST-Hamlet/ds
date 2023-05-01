@@ -197,7 +197,6 @@ local function fn()
     inst.AnimState:SetBank("tigershark")
     inst.AnimState:SetBuild("tigershark_water_build")
     inst.AnimState:PlayAnimation("water_run", true)
-    inst.AnimState:SetRayTestOnBB(true)
     inst.AnimState:AddOverrideBuild("tigershark_water_ripples_build")
 
     inst:AddComponent("inspectable")
@@ -220,7 +219,7 @@ local function fn()
     inst.components.groundpounder.damageRings = 3
     inst.components.groundpounder.destructionRings = 1
     inst.components.groundpounder.numRings = 3
-    inst.components.groundpounder.noTags = {"sharkitten"}
+    inst.components.groundpounder.noTags = {"FX", "NOCLICK", "DECOR", "INLIMBO", "groundpoundimmune", "sharkitten"}
 
     inst:AddComponent("combat")
     inst.components.combat:SetDefaultDamage(TUNING.TIGERSHARK_DAMAGE)

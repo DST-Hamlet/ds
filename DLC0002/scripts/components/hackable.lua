@@ -538,6 +538,8 @@ function Hackable:Hack(hacker, numworks)
             self.onhackedfn(self.inst, hacker, self.hacksleft)
         end
 
+		hacker:PushEvent("hacking", {target = self.inst})
+
         if(self.hacksleft <= 0) then         
 			if self.transplanted then
 				if self.cycles_left ~= nil then

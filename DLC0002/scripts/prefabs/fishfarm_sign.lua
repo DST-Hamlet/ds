@@ -39,37 +39,23 @@ local function resetArt(inst)
     end
 end
 
-local function onsave(inst, data)
-
-end
-
-local function onload(inst, data)
-    inst:Remove()
-end
-
-local function onbuilt(inst, sound)
-
-end
-
 local function fn(Sim)
-	
     local inst = CreateEntity()
     local trans = inst.entity:AddTransform()
     local anim = inst.entity:AddAnimState()
     
     anim:SetBank("fish_farm_sign")
     anim:SetBuild("fish_farm_sign")
-    anim:PlayAnimation( "idle",true)
+    anim:PlayAnimation("idle", true)
 
-    inst.OnSave = onsave 
-    inst.OnLoad = onload        
+    inst.AnimState:SetLayer(LAYER_BACKGROUND)
+    inst.AnimState:SetSortOrder(3)
+
+    inst.persists = false      
     
     inst.resetArt = resetArt
-	--inst:ListenForEvent("onfishchange", function () resetArt(inst) end)
 
     return inst
-
 end    
 
 return Prefab( "common/objects/fish_farm_sign", fn, assets, prefabs )
-	  

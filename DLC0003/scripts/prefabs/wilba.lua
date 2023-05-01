@@ -147,7 +147,10 @@ local function NecklaceComment(inst)
     end
 
     inst.components.talker:Say(GetString(inst.prefab, "ANNOUNCE_NECKLACE_ACTIVE"))
-    inst.comment_task = inst:DoTaskInTime(math.random(TUNING.TOTAL_DAY_TIME/15, TUNING.TOTAL_DAY_TIME/10), function() NecklaceComment(inst) end)
+
+    if inst.ready_to_transform and not inst.were then
+        inst.comment_task = inst:DoTaskInTime(math.random(TUNING.TOTAL_DAY_TIME/15, TUNING.TOTAL_DAY_TIME/10), function() NecklaceComment(inst) end)
+    end
 end
 
 local function SetHUDState(inst, force)
@@ -562,7 +565,6 @@ local fn = function(inst)
     inst:ListenForEvent("resurrect", function()
         inst.ready_to_transform = false
         inst.from_food = false
-        inst.were = false
         inst.monster_count = 0
         inst.monster_cooldown = 0
         inst.cooldown_schedule = 0
@@ -573,7 +575,11 @@ local fn = function(inst)
             inst.trans_task_info = nil
         end
 
-        inst.TransformToWilba(inst)
+        if inst.were then
+            inst.TransformToWilba(inst)
+        end
+
+        inst.were = false
     end)
     inst:ListenForEvent("death", function()
         if inst.breath_task then
@@ -599,6 +605,8 @@ local fn = function(inst)
     end)
 
     inst.components.talker.allcaps = true
+
+    inst.components.inventory:GuaranteeItems(start_inv)
 
     inst.SetWere = SetWere
     inst.TransformToWere = TransformToWere

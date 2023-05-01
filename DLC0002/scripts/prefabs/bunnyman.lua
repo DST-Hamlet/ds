@@ -48,7 +48,7 @@ local function ShouldAcceptItem(inst, item)
     if item.components.equippable and item.components.equippable.equipslot == EQUIPSLOTS.HEAD then
         return true
     end
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         
         if (item.prefab == "carrot" or item.prefab == "carrot_cooked")
            and inst.components.follower.leader
@@ -63,7 +63,7 @@ end
 local function OnGetItemFromPlayer(inst, giver, item)
     
     --I eat food
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         if (item.prefab == "carrot" or item.prefab == "carrot_cooked") then
             if inst.components.combat.target and inst.components.combat.target == giver then
                 inst.components.combat:SetTarget(nil)
@@ -220,14 +220,13 @@ local function fn()
     inst.entity:AddLightWatcher()
 
     MakeCharacterPhysics(inst, 50, .5)
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "manrabbit_torso")
 
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.runspeed = TUNING.PIG_RUN_SPEED --5
     inst.components.locomotor.walkspeed = TUNING.PIG_WALK_SPEED --3
 
     inst:AddTag("character")
-    inst:AddTag("pig")
     inst:AddTag("manrabbit")
     inst:AddTag("scarytoprey")
     anim:SetBank("manrabbit")

@@ -16,9 +16,9 @@ local function FindItem(inventory, list)
 end 
 
 function Shopper:PayMoney(inventory,cost)
-	local hasoincs,oincamount = inventory:Has("oinc", 0)
-	local hasoinc10s,oinc10amount = inventory:Has("oinc10", 0)
-	local hasoinc100s,oinc100amount = inventory:Has("oinc100", 0)
+	local hasoincs,oincamount = inventory:Has("oinc", 0, true)
+	local hasoinc10s,oinc10amount = inventory:Has("oinc10", 0, true)
+	local hasoinc100s,oinc100amount = inventory:Has("oinc100", 0, true)
 	local debt = cost
 
 	local oincused = 0
@@ -65,7 +65,7 @@ function Shopper:PayMoney(inventory,cost)
 		end
 		if oincresult < 0 then
 			for i=1,math.abs(oincresult)do
-				inventory:ConsumeByName("oinc", 1 )
+				inventory:ConsumeByName("oinc", 1, true )
 			end
 		end
 
@@ -78,14 +78,14 @@ function Shopper:PayMoney(inventory,cost)
 		end
 		if oinc10result < 0 then
 			for i=1,math.abs(oinc10result)do
-				inventory:ConsumeByName("oinc10", 1 )
+				inventory:ConsumeByName("oinc10", 1, true )
 			end
 		end
 
 		local oinc100result = 0 -oinc100used 
 		if oinc100result < 0 then
 			for i=1,math.abs(oinc100result)do
-				inventory:ConsumeByName("oinc100", 1 )
+				inventory:ConsumeByName("oinc100", 1, true )
 			end
 		end
 	end
@@ -94,9 +94,9 @@ end
 function Shopper:GetMoney(inventory)
 	local money = 0
 
-	local hasoincs,oincamount = inventory:Has("oinc", 0)
-	local hasoinc10s,oinc10amount = inventory:Has("oinc10", 0)
-	local hasoinc100s,oinc100amount = inventory:Has("oinc100", 0)
+	local hasoincs,oincamount = inventory:Has("oinc", 0, true)
+	local hasoinc10s,oinc10amount = inventory:Has("oinc10", 0, true)
+	local hasoinc100s,oinc100amount = inventory:Has("oinc100", 0, true)
 		
 	money = oincamount + (oinc10amount *10)+ (oinc100amount *100)
 	return money

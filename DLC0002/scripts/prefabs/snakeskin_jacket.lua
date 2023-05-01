@@ -41,8 +41,8 @@ local function fn(Sim)
     inst.components.equippable.insulated = true
 
     inst:AddComponent("waterproofer")
-    inst.components.waterproofer.effectiveness = TUNING.WATERPROOFNESS_LARGE
-    
+    inst.components.waterproofer.effectiveness = TUNING.WATERPROOFNESS_HUGE
+
     inst.components.equippable:SetOnEquip( onequip )
     inst.components.equippable:SetOnUnequip( onunequip )
     

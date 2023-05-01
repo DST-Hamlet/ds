@@ -19,8 +19,6 @@ local MACHINESTATES =
 }
 
 local function spawnice(inst)
-	inst:RemoveEventCallback("animover", spawnice)
-
     local ice = SpawnPrefab("ice")
     local pt = Vector3(inst.Transform:GetWorldPosition()) + Vector3(0,2,0)
     ice.Transform:SetPosition(pt:Get())
@@ -46,8 +44,8 @@ end
 local function fueltaskfn(inst)
 	inst.AnimState:PlayAnimation("use")
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/icemachine_start")
-	inst.components.fueled:StopConsuming() --temp pause fuel so we don't run out in the animation.
-	inst:ListenForEvent("animover", spawnice)
+	inst.components.fueled:StopConsuming() -- temp pause fuel so we don't run out in the animation.
+	inst:DoTaskInTime(inst.AnimState:GetCurrentAnimationLength(), spawnice)
 end
 
 local function ontakefuelfn(inst)
@@ -63,10 +61,6 @@ end
 local function onhit(inst, worker)
 	inst.AnimState:PlayAnimation("hit"..inst.machinestate)
 	inst.AnimState:PushAnimation("idle"..inst.machinestate, true)
-	inst:RemoveEventCallback("animover", spawnice)
-	if inst.machinestate == MACHINESTATES.ON then
-		inst.components.fueled:StartConsuming() --resume fuel consumption incase you were interrupted from fueltaskfn
-	end
 end
 
 local function fuelsectioncallback(new, old, inst)

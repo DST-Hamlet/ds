@@ -1,9 +1,11 @@
 local function PercentChanged(inst, data)
-    if inst.components.armor
-       and data.percent and data.percent <= 0
-       and inst.components.inventoryitem and inst.components.inventoryitem.owner then
+    if
+        inst.components.armor
+        and not inst.components.armor.dontremove
+        and data.percent and data.percent <= 0
+        and inst.components.inventoryitem and inst.components.inventoryitem.owner
+    then
         inst.components.inventoryitem.owner:PushEvent("armorbroke", {armor = inst})
-        --ProfileStatsSet("armor_broke_" .. inst.prefab, true)
     end
 end
 
@@ -107,9 +109,10 @@ function Armor:TakeDamage(damage_amount, attacker, weapon)
 
     if self:CanResist(attacker, weapon) then
         local leftover = damage_amount
-        
-        local max_absorbed = damage_amount * self.absorb_percent;
-        local absorbed = math.floor(math.min(max_absorbed, self.condition))
+
+        local absorbed = damage_amount * self.absorb_percent;
+        --absorbed = math.floor(math.min(absorbed, self.condition)) -- NOTE(DiogoW): the player should not be punished for using armor with low durability.
+
         -- we said we were going to absorb something so we will
         if absorbed < 1 then
             absorbed = 1
@@ -129,7 +132,7 @@ function Armor:TakeDamage(damage_amount, attacker, weapon)
             end                
         end
 
-        self:SetCondition(self.condition - absorbed)
+        self:SetCondition(self.condition - math.min(absorbed, self.condition))
 		if self.ontakedamage then
 			self.ontakedamage(self.inst, damage_amount, absorbed, leftover)
 		end

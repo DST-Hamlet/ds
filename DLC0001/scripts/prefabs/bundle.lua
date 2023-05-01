@@ -13,11 +13,6 @@ local function MakeWrap(name, containerprefab, tag, cheapfuel)
     {
         name,
         containerprefab,
-        "bundle",
-        "bundle_blueprint",
-        "bundle_large",
-        "bundle_medium",
-        "bundle_small",
     }
 
     local function fn()
@@ -72,6 +67,17 @@ local function CollectContainerItems(container)
     return items
 end
 
+local function ItemTestFn(inst, item, slot)
+    return not (item:HasTag("irreplaceable") or item:HasTag("bundle") or item:HasTag("nobundling"))
+end
+
+local slotpos = {
+    Vector3(-37.5, 32 + 4, 0), 
+    Vector3(37.5, 32 + 4, 0),
+    Vector3(-37.5, -(32 + 4), 0), 
+    Vector3(37.5, -(32 + 4), 0),
+}
+
 local function MakeContainer(name, build)
     local assets =
     {
@@ -87,31 +93,15 @@ local function MakeContainer(name, build)
 
         --V2C: blank string for controller action prompt
         inst.name = " "
-
-        -- local slotpos = {}
-
-        -- for y = 0, 1 do
-        --     table.insert(slotpos, Vector3(-35, -y*75 + 40 ,0))
-        --     table.insert(slotpos, Vector3(-35 + 75, -y*75 + 40 ,0))
-        -- end
-
-
-        local slotpos =
-        {
-            Vector3(-37.5, 32 + 4, 0), 
-            Vector3(37.5, 32 + 4, 0),
-            Vector3(-37.5, -(32 + 4), 0), 
-            Vector3(37.5, -(32 + 4), 0),
-        }
-
-        local widgetbuttoninfo =
-        {
+        
+        local widgetbuttoninfo = {
             text = STRINGS.ACTIONS.WRAPBUNDLE,
             position = Vector3(0, -100, 0),
+        
             fn = function(container, doer)
-				BufferedAction(inst.components.container.opener, inst, ACTIONS.WRAPBUNDLE):Do()
+                BufferedAction(inst.components.container.opener, inst, ACTIONS.WRAPBUNDLE):Do()
             end,
-
+        
             validfn = function(inst)
                 local items = CollectContainerItems(inst.components.container)
                 return #items > 0
@@ -127,9 +117,7 @@ local function MakeContainer(name, build)
         inst.components.container.side_align_tip = 200
         inst.components.container.type = "cooker"
         inst.components.container.widgetbuttoninfo = widgetbuttoninfo
-        inst.components.container.itemtestfn = function(inst, item, slot)
-            return item.prefab ~= "bundle"
-        end
+        inst.components.container.itemtestfn = ItemTestFn
 
         inst.persists = false
 
@@ -206,8 +194,7 @@ local function MakeBundle(name, onesize, variations, loot, tossloot, setupdata)
         inst.AnimState:PlayAnimation("idle"..suffix)
 
         if doer ~= nil and doer.SoundEmitter ~= nil then
-            --doer.SoundEmitter:PlaySound("dontstarve/common/together/packaged")
-            --DANY ADD STUFF HERE
+            doer.SoundEmitter:PlaySound("dontstarve/common/craftable/bundles/packaged")
         end
     end
 
@@ -217,32 +204,24 @@ local function MakeBundle(name, onesize, variations, loot, tossloot, setupdata)
         else
             local loottable = (setupdata ~= nil and setupdata.lootfn ~= nil) and setupdata.lootfn(inst, doer) or loot
             if loottable ~= nil then
-                local moisture = inst.components.moisturelistener:GetMoisture()
-                local iswet = inst.components.moisturelistener:IsWet()
                 for i, v in ipairs(loottable) do
                     local item = SpawnPrefab(v)
                     if item ~= nil then
-                        if item.Physics ~= nil then
-                            item.Physics:Teleport(pos:Get())
-                        else
-                            item.Transform:SetPosition(pos:Get())
-                        end
-                        --[[ TO DO, MAKE DS COMPATIBLE
-                        if item.components.inventoryitem ~= nil then
-                            item.components.inventoryitem:InheritMoisture(moisture, iswet)
-                            if tossloot then
-                                item.components.inventoryitem:OnDropped(true, .5)
-                            end
-                        end
-                        ]]
+                        item.Transform:SetPosition(pos:Get())
+                        item.components.inventoryitem:OnDropped(true, nil, nil, .5)
+                                    
+                        inst:ApplyInheritedMoisture(item)
                     end
                 end
             end
-            --SpawnPrefab(name.."_unwrap").Transform:SetPosition(pos:Get())
+
+            SpawnPrefab(name.."_unwrap").Transform:SetPosition(pos:Get())
         end
+
         if doer ~= nil and doer.SoundEmitter ~= nil then
-            doer.SoundEmitter:PlaySound("dontstarve/common/together/packaged")
+            doer.SoundEmitter:PlaySound("dontstarve/common/craftable/bundles/packaged")
         end
+
         inst:Remove()
     end
 

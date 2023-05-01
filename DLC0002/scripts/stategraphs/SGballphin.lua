@@ -231,6 +231,8 @@ local states=
 		onenter = function(inst)
 			inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/balphin/death")
 			inst.AnimState:PlayAnimation("death")
+			inst.components.locomotor:Stop()
+			RemovePhysicsColliders(inst)
 			inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
 		end,
 

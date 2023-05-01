@@ -5,10 +5,14 @@ local Bloomable = Class(function(self, inst)
     self.time = 0
     self.timevarriance = TUNING.TOTAL_DAY_TIME/2
 
-     self.inst:ListenForEvent("seasonChange", function(it, data) 
-            self:SeasonChange(data)
-        end, GetWorld())
+    self._OnSeasonChange = function(world, data) self:SeasonChange(data) end
+    self.inst:ListenForEvent("seasonChange", self._OnSeasonChange, GetWorld())
 end)
+
+function Bloomable:OnRemoveFromEntity()
+    self:StopBloom()
+    self.inst:RemoveEventCallback("seasonChange", self._OnSeasonChange, GetWorld())
+end
 
 function Bloomable:SetCanBloom(fn)
     self.canbloom = fn
@@ -23,9 +27,11 @@ function Bloomable:SetStopBloomFn(fn)
 end
 
 function Bloomable:StartBloom(instant)
-
-    if self.unbloomtask then self.unbloomtask:Cancel() self.unbloomtask = nil end
-    self.unbloomtaskinfo = nil
+    -- Instant is used on load.
+    if not instant then
+        if self.unbloomtask then self.unbloomtask:Cancel() self.unbloomtask = nil end
+        self.unbloomtaskinfo = nil
+    end
 
     self.blooming = true
     self.inst:AddTag("blooming")

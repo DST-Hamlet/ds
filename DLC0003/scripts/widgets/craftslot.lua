@@ -60,31 +60,64 @@ function CraftSlot:OnGainFocus()
 	end
 end
 
+function CraftSlot:OnClick()
+    self.last_recipe_click = GetTime()
+    if not self.recipe_held then
+        if not DoRecipeClick(self.owner, self.recipe) then
+            self:Close()
+        end
+    end
+    self.recipe_held = false
+end
+
+function CraftSlot:OnDown()
+    if self.last_recipe_click and (GetTime() - self.last_recipe_click) < 1 then
+        self.recipe_held = true
+        self.last_recipe_click = nil
+    end
+end
+
+function CraftSlot:OnUpdate(dt)
+    if self.down and self.recipe_held then
+        DoRecipeClick(self.owner, self.recipe)
+	end
+end
 
 function CraftSlot:OnControl(control, down)
     if CraftSlot._base.OnControl(self, control, down) then return true end
 
-    if not down and control == CONTROL_ACCEPT then
-		if self.recipe then
-			if self.recipe.subcategory then
-		    	self:Open()
-			else
-	        	if self.owner then
-    	        	if self.recipepopup and not self.recipepopup.focus then 
-	                	TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-	                	print("JAMES_DEBUG: Craft Slot On Control Recipe = "..self.recipename.." Test Index = "..self.test_index)
-    	        	    if not DoRecipeClick(self.owner, self.recipe) then self:Close() end
-        		        return true
-	    	        end
-		        end
-			end
-		end
+    if control == CONTROL_ACCEPT and self.recipe then
+        if not down then
+            self.down = false
+
+            if self.recipe.subcategory then
+                self:Open()
+            else
+                if self.owner then
+                    if self.recipepopup and not self.recipepopup.focus then 
+                        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+                        print("JAMES_DEBUG: Craft Slot On Control Recipe = "..self.recipename.." Test Index = "..self.test_index)
+
+                        self:OnClick()
+                        self:StopUpdating()
+
+                        return true
+                    end
+                end
+            end
+        elseif not self.recipe.subcategory then
+            self.down = true
+
+            self:StartUpdating()
+            self:OnDown()
+        end
     end
 end
 
 
 function CraftSlot:OnLoseFocus()
     CraftSlot._base.OnLoseFocus(self)
+    self.down = false
 	if self.recipe and not self.recipe.subcategory then
 	    self:Close()
 	else

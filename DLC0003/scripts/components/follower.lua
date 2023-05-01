@@ -17,6 +17,10 @@ local Follower = Class(function(self, inst)
     self.exit_destinations = { EXIT_DESTINATION.LAND }
 
     self.inst:ListenForEvent("attacked", onattacked)
+
+	self.OnLeaderRemoved = function()
+        self:SetLeader(nil)
+    end
 end)
 
 --[[
@@ -109,11 +113,16 @@ function Follower:SetLeader(inst)
 	self.previousleader = self.leader
     if self.leader and self.leader.components.leader then
         self.leader.components.leader:RemoveFollower(self.inst)
+		self.inst:RemoveEventCallback("onremove", self.OnLeaderRemoved, self.previousleader)
     end
     if inst and inst.components.leader then
         inst.components.leader:AddFollower(self.inst)
     end
     self.leader = inst
+
+	if self.leader then
+		self.inst:ListenForEvent("onremove", self.OnLeaderRemoved, self.leader)
+	end
     
     if self.leader and (self.leader:HasTag("player") or self.leader:HasTag("follower_leash")) then 
 		self:StartLeashing()
@@ -141,6 +150,10 @@ function Follower:CanFollowLeaderThroughExit(exit_destination)
 		end
 	end
 	return canFollow
+end
+
+function Follower:CanFollowLeaderToInterior(exit_destination)
+	return self:CanFollowLeaderThroughExit(EXIT_DESTINATION.LAND)
 end
 
 function Follower:GetLoyaltyPercent()

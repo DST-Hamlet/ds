@@ -9,17 +9,11 @@ local AGRO_DIST = 5
 local AGRO_STOP_DIST = 7
 
 local function findinfesttarget(inst,brain)    
-   
     local target = GetPlayer()
-
     if inst:GetDistanceSqToInst(target) < AGRO_DIST*AGRO_DIST and not inst.infesting then
         inst.chasingtargettask = inst:DoPeriodicTask(0.2,function()
                 print(inst:GetDistanceSqToInst(target) , AGRO_STOP_DIST*AGRO_STOP_DIST, inst.components.infester.infesting)
                 if inst:GetDistanceSqToInst(target) > AGRO_STOP_DIST*AGRO_STOP_DIST then          
-
-                    dumptable(brain.pendingtasks,1,1,1)
-
-
                     inst:ClearBufferedAction()  
                     inst.components.locomotor:Stop()
                     inst.sg:GoToState("idle")
@@ -57,7 +51,7 @@ local function makenest(inst)
     if inst.makehome and not inst.components.homeseeker then       
         local x,y,z = inst.Transform:GetWorldPosition()
         local ents = TheSim:FindEntities(x,y,z, 4, nil, {"FX", "NOCLICK", "DECOR","INLIMBO"} )
-        if #ents <= 1 then
+        if #ents <= 1 and not IsPointCloseToWaterOrImpassable(x, y, z, 2) then
             inst.makehome = nil
             if inst.makehometime then
                 inst.makehometime:Cancel()

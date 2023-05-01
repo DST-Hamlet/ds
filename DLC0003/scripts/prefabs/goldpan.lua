@@ -32,6 +32,7 @@ local function fn(Sim)
 	anim:PlayAnimation("idle")	
 
 	inst:AddTag("worksOnFloor")
+	inst:AddTag("smeltable") -- Smelter
 
 	inst:AddComponent("weapon")
 	inst.components.weapon:SetDamage(TUNING.AXE_DAMAGE)

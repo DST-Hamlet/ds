@@ -65,8 +65,9 @@ AddIngredientValues(mushrooms, {veggie=.5}, true)
 
 AddIngredientValues({"meat"}, {meat=1}, true, true)
 AddIngredientValues({"monstermeat"}, {meat=1, monster=1}, true, true)
-AddIngredientValues({"froglegs", "drumstick"}, {meat=.5}, true)
+AddIngredientValues({"froglegs", "drumstick", "batwing"}, {meat=.5}, true)
 AddIngredientValues({"smallmeat"}, {meat=.5}, true, true)
+AddIngredientValues({"plantmeat"}, {meat=1}, true)
 
 AddIngredientValues({"fish", "eel"}, {meat=.5,fish=1}, true)
 

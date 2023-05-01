@@ -39,6 +39,8 @@ local randomchestloot =
 	"coral",
 	"shark_fin",
 	"blubber",
+	"bioluminescence",
+	"bioluminescence",
 }
 
 local chestloot =
@@ -51,6 +53,7 @@ local chestloot =
 	surfnturf = "boat_lantern",
 	lobsterbisque = "piratehat",
 	lobsterdinner = "boatcannon",
+	caviar = "bottlelantern",
 }
 
 -- only accept 1 trinket per day and pull up a chest that has multiple  dubloons + items (that we set per trinket)
@@ -233,6 +236,9 @@ local function fn(Sim)
 	inst:ListenForEvent( "daytime", function(global, data)
 		StartTrading(inst)
 	end, GetWorld())
+
+	inst.chestloot = chestloot
+	inst.randomchestloot = randomchestloot
 	
 	return inst
 end

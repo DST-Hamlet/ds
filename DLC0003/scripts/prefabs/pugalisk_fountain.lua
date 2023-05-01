@@ -57,7 +57,7 @@ end
 
 local function deactivate(inst)    
     if not inst.resettask then
-        inst.resettask, inst.resettaskinfo = inst:ResumeTask(TUNING.TOTAL_DAY_TIME,function() reset(inst) end)
+        inst.resettask, inst.resettaskinfo = inst:ResumeTask(TUNING.TOTAL_DAY_TIME, reset)
     end
 end
 
@@ -75,13 +75,26 @@ local function onload(inst, data)
         if data.resettask then
             if inst.resettask then inst.resettask:Cancel() inst.resettask = nil end
             inst.resettaskinfo = nil
-            inst.resettask, inst.resettaskinfo = inst:ResumeTask(data.resettask, function() reset(inst) end)
+            inst.resettask, inst.resettaskinfo = inst:ResumeTask(data.resettask, reset)
         end  
         if data.dry then        
             inst.AnimState:PlayAnimation("off", true)
+            inst.SoundEmitter:KillSound("burble")
             inst.dry = true
             inst.components.activatable.inactive = false
         end         
+    end
+end
+
+function OnLongUpdate(inst, dt)
+    if inst.resettask then
+        local new_time = math.max(inst:TimeRemainingInTask(inst.resettaskinfo) - dt, 0)
+
+        inst.resettask:Cancel()
+        inst.resettask = nil 
+        inst.resettaskinfo = nil
+
+        inst.resettask, inst.resettaskinfo = inst:ResumeTask(new_time, reset)
     end
 end
 
@@ -114,6 +127,8 @@ local function fn(Sim)
 
     inst.OnSave = onsave 
     inst.OnLoad = onload
+
+    inst.OnLongUpdate = OnLongUpdate
 
     inst:DoTaskInTime(0,function()
             local drop = nil

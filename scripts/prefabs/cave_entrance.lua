@@ -1,4 +1,3 @@
-local PopupDialogScreen = require "screens/popupdialog"
 
 local assets=
 {
@@ -13,7 +12,8 @@ local assets=
 local prefabs = 
 {
 	"bat",
-	"exitcavelight"
+	"exitcavelight",
+	"cave_regenerator",
 }
 
 local function GetVerb(inst)
@@ -196,7 +196,7 @@ local function GetStatus(inst)
     if inst.open then
         return "OPEN"
     end
-end  
+end
 
 local function fn(Sim)
 	local inst = CreateEntity()
@@ -227,7 +227,7 @@ local function fn(Sim)
 	if SaveGameIndex:GetCurrentMode() == "adventure" then
 		inst:DoTaskInTime(0, function() inst:Remove() end)
 	end
-	
+
     return inst
 end
 

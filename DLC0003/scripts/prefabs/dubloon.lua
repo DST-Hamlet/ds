@@ -54,6 +54,7 @@ local function fn(Sim)
     inst.components.edible.hungervalue = 1
     
     inst:AddComponent("currency")
+    inst:AddComponent("tradable")
     
     inst:AddComponent("inspectable")
     

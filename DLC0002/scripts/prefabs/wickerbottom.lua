@@ -10,16 +10,13 @@ local assets =
 }
 
 local fn = function(inst)
-	
-	inst:AddComponent("reader")
+	inst:AddTag("bookreader")
 	
 	inst:AddTag("insomniac")
     inst.components.eater.stale_hunger = TUNING.WICKERBOTTOM_STALE_FOOD_HUNGER
     inst.components.eater.stale_health = TUNING.WICKERBOTTOM_STALE_FOOD_HEALTH
     inst.components.eater.spoiled_hunger = TUNING.WICKERBOTTOM_SPOILED_FOOD_HUNGER
     inst.components.eater.spoiled_health = TUNING.WICKERBOTTOM_SPOILED_FOOD_HEALTH
-
-
 
 	inst.components.sanity:SetMax(TUNING.WICKERBOTTOM_SANITY)
 	inst.components.builder.science_bonus = 1
@@ -36,8 +33,6 @@ local fn = function(inst)
     else
       	Recipe("book_tentacles", {Ingredient("papyrus", 2), Ingredient("tentaclespots", 1)}, booktab, {SCIENCE = 3})
     end
-	
-
 end
 
 

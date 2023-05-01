@@ -146,8 +146,6 @@ function Pickable:Fertilize(fertilizer)
 	self:MakeEmpty()
 end
 
-
-
 function Pickable:OnSave()
 	
 	local data = { 
@@ -235,13 +233,14 @@ function OnRegen(inst)
 end
 
 function Pickable:Regen()
-    
     self.canbepicked = true
+
+	self.targettime = nil
+    self.task = nil
+
     if self.onregenfn then
         self.onregenfn(self.inst)
     end
-    self.targettime = nil
-    self.task = nil
 end
 
 function Pickable:MakeBarren()

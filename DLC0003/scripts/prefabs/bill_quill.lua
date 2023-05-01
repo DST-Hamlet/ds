@@ -20,7 +20,8 @@ local function fn(Sim)
 
     MakeInventoryFloatable(inst, "idle_water", "idle")
     
-    inst:AddComponent("inspectable")    
+    inst:AddComponent("inspectable")
+    inst:AddComponent("tradable")
     
     inst:AddComponent("inventoryitem")
     

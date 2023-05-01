@@ -3,20 +3,21 @@ require "recipes"
 
 local assets =
 {
-
     Asset("ANIM", "anim/pig_shop.zip"),
-    
+
     Asset("ANIM", "anim/flag_post_duster_build.zip"),
     Asset("ANIM", "anim/flag_post_perdy_build.zip"),
     Asset("ANIM", "anim/flag_post_royal_build.zip"),
-    Asset("ANIM", "anim/flag_post_wilson_build.zip"), 
+    Asset("ANIM", "anim/flag_post_wilson_build.zip"),
     Asset("ANIM", "anim/pig_tower_build.zip"),
-    Asset("SOUND", "sound/pig.fsb"),
-    Asset("MINIMAP_IMAGE", "pig_guard_tower"),    
-    Asset("MINIMAP_IMAGE", "pig_palace"),        
     Asset("ANIM", "anim/pig_tower_royal_build.zip"),
-    Asset("INV_IMAGE", "pighouse_city"),       
 
+    Asset("SOUND", "sound/pig.fsb"),
+
+    Asset("MINIMAP_IMAGE", "pig_guard_tower"),
+    Asset("MINIMAP_IMAGE", "pig_tower_royal"),
+
+    Asset("INV_IMAGE", "pighouse_city"),
 }
 
 local prefabs = 
@@ -147,7 +148,7 @@ local function onhammered(inst, worker)
 	if inst.components.spawner then inst.components.spawner:ReleaseChild() end
 
 	SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
 	inst:Remove()
 end
 
@@ -194,7 +195,7 @@ local function citypossessionfn(inst)
     else
         inst.AnimState:AddOverrideBuild("flag_post_wilson_build")
         local spawned = {"pigman_royalguard"}
-        inst.components.spawner:Configure( spawned[math.random(1,#spawned)], TUNING.GUARDTOWER_CITY_RESPAWNTIME,1)         
+        inst.components.spawner:Configure( spawned[math.random(1,#spawned)], TUNING.GUARDTOWER_CITY_RESPAWNTIME,1)
     end
 end
 
@@ -310,14 +311,15 @@ local function fn(Sim)
     inst.components.workable:SetWorkLeft(4)
 	inst.components.workable:SetOnFinishCallback(onhammered)
 	inst.components.workable:SetOnWorkCallback(onhit)
-	
 
     inst.onvacate = onvacate
 
 	inst:AddComponent( "spawner" )
+    inst.components.spawner.childname = "pigman_royalguard" -- Prevents a crash caused by destroying console spawned towers.
     inst.components.spawner.onoccupied = onoccupied
     inst.components.spawner.onvacate = onvacate
-    inst:ListenForEvent( "daytime", function() OnDay(inst) end, GetWorld()) 
+    inst:ListenForEvent( "daytime", function() OnDay(inst) end, GetWorld())
+
 
     inst.citypossessionfn = citypossessionfn 
     inst.OnLoadPostPass = citypossessionfn
@@ -367,7 +369,7 @@ local function palacefn(Sim)
     inst:AddTag("palacetower")
     inst.AnimState:SetBuild("pig_tower_royal_build")
     inst:SetPrefabNameOverride("pig_guard_tower")
-    inst.MiniMapEntity:SetIcon( "pig_palace.png" )
+    inst.MiniMapEntity:SetIcon( "pig_tower_royal.png" )
     return inst
 end
 

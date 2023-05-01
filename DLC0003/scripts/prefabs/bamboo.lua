@@ -49,6 +49,11 @@ local function makeemptyfn(inst)
 end
 
 local function makebarrenfn(inst)
+	if inst.AnimState:IsCurrentAnimation("idle_dead") then
+		inst.Physics:SetCollides(true)
+		return
+	end
+
 	if inst.components.hackable and inst.components.hackable.withered then
 		if not inst.components.hackable.hasbeenhacked then
 			inst.AnimState:PlayAnimation("full_to_dead")
@@ -153,6 +158,9 @@ local function makefn(stage)
 		inst.components.hackable.ontransplantfn = ontransplantfn
 		inst.components.hackable.hacksleft = TUNING.BAMBOO_HACKS
 		inst.components.hackable.maxhacks = TUNING.BAMBOO_HACKS
+
+		inst:AddComponent("shearable")
+		inst.components.shearable:SetProduct(nil, 2)
 
 		local variance = math.random() * 4 - 2
 		inst.makewitherabletask = inst:DoTaskInTime(TUNING.WITHER_BUFFER_TIME + variance, function(inst) inst.components.hackable:MakeWitherable() end)

@@ -31,7 +31,8 @@ function TwisterBrain:OnStart()
                 (self.inst.CanCharge and self.inst.components.combat.target and self.inst.components.combat.target:GetPosition():Dist(self.inst:GetPosition()) >= TUNING.TWISTER_ATTACK_RANGE) end, 
                 "Charge Behaviours", ChaseAndRam(self.inst, MAX_CHASE_TIME, GIVE_UP_DIST, MAX_CHARGE_DIST)),
 
-            WhileNode(function() return not self.inst.CanCharge end, "Attack Behaviours", ChaseAndAttack(self.inst, nil, nil, nil, nil, true)),
+            WhileNode(function() return self.inst.components.combat.target ~= nil end,
+            "Attack Behaviours", ChaseAndAttack(self.inst, nil, nil, nil, nil, true)),
 
             Wander(self.inst, function() return GetPlayer():GetPosition() end, 20, wandertimes),
         }, .25)

@@ -15,20 +15,44 @@ local prefabs=
 local RESOURSE_TIME = TUNING.SEG_TIME*4
 local POOP_ANIMATION_LENGTH = 70
 
-local function spawnTarProp(inst)
-	inst.task_spawn = nil
+local function SpawnTar(x, y, z)
 	local tar = SpawnPrefab("tar")
-
- 	local pt = Vector3(inst.Transform:GetWorldPosition()) + Vector3(0,4.5,0)
 
 	local right = TheCamera:GetRightVec()
 	local offset = 1.3
 	local variation = 0.2
-	tar.Transform:SetPosition(pt.x + (right.x*offset) +(math.random()*variation),0, pt.z + (right.z*offset)+(math.random()*variation) )
+
+	tar.Transform:SetPosition(
+		x + (right.x*offset) + (math.random()*variation),
+		0 ,
+		z + (right.z*offset)+(math.random()*variation)
+	)
 
 	tar.AnimState:PlayAnimation("drop") 
-	tar.AnimState:PushAnimation("idle_water",true)	
-	--inst:RemoveEventCallback("animover", spawnTarProp )
+	tar.AnimState:PushAnimation("idle_water", true)
+
+	return tar
+end
+
+local FIND_TAR_TAGS = {"tar"}
+
+local function spawnTarProp(inst)
+	inst.task_spawn = nil
+	
+	local x, y, z = inst.Transform:GetWorldPosition()
+
+	if POPULATING or not inst.entity:IsAwake() then
+		local tar = TheSim:FindEntities(x, y, z, 2, FIND_TAR_TAGS)[1]
+
+		if tar ~= nil and not tar.components.stackable:IsFull() then
+			tar.components.stackable:SetStackSize(tar.components.stackable:StackSize() + 1)
+		else
+			SpawnTar(x, y, z)
+		end
+	else
+		SpawnTar(x, y, z)
+	end
+
 	if inst.components.machine:IsOn() and not inst.components.fueled:IsEmpty() then
 		inst.startTar(inst)
 		inst.AnimState:PlayAnimation("active",true)
@@ -93,7 +117,7 @@ local function onhammered(inst, worker)
 	end
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
 
 	inst:Remove()
 end
@@ -174,8 +198,8 @@ local function TurnOff(inst)
 		inst.task_tar = nil
 	end
 	inst.components.fueled:StopConsuming()
-	inst.AnimState:PlayAnimation("idle")
-	inst.SoundEmitter:KillSound("suck")  
+	inst.AnimState:PlayAnimation("idle", true)
+	inst.SoundEmitter:KillSound("suck")
 end
 
 local function TurnOn(inst, instant)
@@ -226,7 +250,7 @@ local function fn(Sim)
     
 	anim:SetBank("tar_extractor")
 	anim:SetBuild("tar_extractor")
-	anim:PlayAnimation("idle",true)
+	anim:PlayAnimation("idle", true)
    
 	inst:AddComponent("inspectable")
     inst.components.inspectable.getstatus = getstatus

@@ -25,7 +25,9 @@ local firelevels =
 
 local function Extinguish(self)
     self.components.firefx:Extinguish()
-    self:ListenForEvent("animover", function(inst) inst:Remove() end)  --remove once the pst animation has finished
+    self.persists = false
+	self:ListenForEvent("animover", self.Remove)
+	self:ListenForEvent("entitysleep", self.Remove)
 end
 
 local function fn(Sim)
@@ -43,6 +45,7 @@ local function fn(Sim)
     
     --inst:AddTag("fx")
     inst:AddTag("NOCLICK")
+    inst:AddTag("NOBLOCK")
     inst.Transform:SetScale(1.0,4,1)
     
     inst:AddComponent("firefx")

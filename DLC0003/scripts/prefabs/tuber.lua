@@ -6,7 +6,7 @@ local assets =
 
 local function oneaten(inst, eater)
     if eater.components.poisonable and eater:HasTag("poisonable") then
-        eater.components.poisonable:Poison()
+        eater.components.poisonable:Poison(nil, nil, nil, true)
     end 
 end
 
@@ -43,6 +43,7 @@ local function fn(Sim)
     inst.components.cookable.product = "tuber_crop_cooked"
 
     inst:AddComponent("inspectable")
+    inst:AddComponent("tradable")
 
     inst:AddComponent("fuel")
     inst.components.fuel.fuelvalue = TUNING.SMALL_FUEL
@@ -86,6 +87,7 @@ local function cookedfn(Sim)
     inst.components.perishable.onperishreplacement = "spoiled_food"
 
     inst:AddComponent("inspectable")
+    inst:AddComponent("tradable")
 
     inst:AddComponent("fuel")
     inst.components.fuel.fuelvalue = TUNING.SMALL_FUEL
@@ -126,6 +128,7 @@ local function bloomfn(Sim)
     inst.components.cookable.product = "tuber_bloom_crop_cooked"
 
     inst:AddComponent("inspectable")
+    inst:AddComponent("tradable")
 
     inst:AddComponent("fuel")
     inst.components.fuel.fuelvalue = TUNING.SMALL_FUEL
@@ -170,6 +173,7 @@ local function cookedbloomfn(Sim)
     inst.components.perishable.onperishreplacement = "spoiled_food"
 
     inst:AddComponent("inspectable")
+    inst:AddComponent("tradable")
 
     inst:AddComponent("fuel")
     inst.components.fuel.fuelvalue = TUNING.SMALL_FUEL

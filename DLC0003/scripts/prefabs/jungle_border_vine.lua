@@ -27,6 +27,7 @@ local function plantfn(Sim)
     inst.entity:AddAnimState()
     inst.AnimState:SetBank("vine_rainforest_border")
     inst:AddTag("NOCLICK")
+    inst:AddTag("NOBLOCK")
     inst.AnimState:SetBuild("vines_rainforest_border")
 
     inst:AddComponent("distancefade")

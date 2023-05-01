@@ -528,7 +528,14 @@ CommonStates.AddFrozenStates = function(states, timelines, anims)
         
         events=
         {   
-            EventHandler("onthaw", function(inst) inst.sg:GoToState("thaw") end ),        
+            EventHandler("onthaw", function(inst) inst.sg:GoToState("thaw") end ),
+            EventHandler("unfreeze", function(inst)
+                if inst.sg.sg.states.hit then
+                    inst.sg:GoToState("hit")
+                else
+                    inst.sg:GoToState("idle")
+                end
+            end)      
         },
     }
 
@@ -626,9 +633,9 @@ CommonStates.AddCombatStates = function(states, timelines, anims)
         onenter = function(inst)
             inst.AnimState:PlayAnimation(anims and anims.death or "death")
             if inst.components.locomotor then
-                inst.components.locomotor:StopMoving()
+                inst.components.locomotor:Stop()
             end
-			inst.Physics:ClearCollisionMask()
+			RemovePhysicsColliders(inst)
             inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))            
         end,
     }

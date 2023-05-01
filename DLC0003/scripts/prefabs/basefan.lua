@@ -65,7 +65,7 @@ local function onhammered(inst, worker)
 	inst.SoundEmitter:KillSound("idleloop")
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
 
 	inst:Remove()
 end

@@ -10,15 +10,17 @@ local prefabs =
     "mussel_farm",
 }
 
-local function ondeploy (inst, pt)    
+local function ondeploy(inst, pt)
+    inst = inst.components.stackable:Get()
     inst:Remove()
-    --local timeToGrow = GetRandomWithVariance(TUNING.PINECONE_GROWTIME.base, TUNING.PINECONE_GROWTIME.random)
-    local stalk = SpawnPrefab("mussel_farm")
-    stalk.Transform:SetPosition(pt:Get() ) 
-  --  stalk.components.pickable:MakeEmpty()
-    stalk.components.growable:SetStage(2)
+
+    local farm = SpawnPrefab("mussel_farm")
+    farm.Transform:SetPosition(pt:Get())
+
+    farm.components.growable:SetStage(2)
     inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/muscle_plant")
-    
+
+    return farm
 end
 
 local function stopgrowing(inst)
@@ -97,6 +99,9 @@ local function fn(Sim)
     inst.components.inspectable.getstatus = describe
         
     inst:AddComponent("inventoryitem")
+
+    inst:AddComponent("stackable")
+    inst.components.stackable.maxsize = TUNING.STACK_SIZE_LARGEITEM
     
     inst:AddComponent("deployable")
     inst.components.deployable.test = test_ground

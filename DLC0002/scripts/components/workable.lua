@@ -38,6 +38,10 @@ function Workable:SetWorkable(b)
     self.workable = b
 end
 
+function Workable:CanBeWorked()
+    return self.workleft > 0 and self.workable
+end
+
 function Workable:SetWorkLeft(work)
     if not self.workable then self.workable = true end
     work = work or 10
@@ -85,6 +89,14 @@ function Workable:OnLoad(data)
 end
 
 function Workable:WorkedBy(worker, numworks)
+
+    if -- Net and Fish Actions need an inventory!
+        table.contains({ACTIONS.NET, ACTIONS.FISH}, self:GetWorkAction())
+        and worker.components.inventory == nil
+    then
+        return
+    end
+
     numworks = numworks or 1
     self.workleft = self.workleft - numworks
     self.lastworktime = GetTime()

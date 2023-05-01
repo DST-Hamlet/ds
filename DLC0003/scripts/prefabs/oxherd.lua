@@ -6,6 +6,7 @@ local assets =
 local prefabs = 
 {
     "ox",
+    "babyox",
 }
 
 local function InMood(inst)
@@ -69,6 +70,7 @@ local function fn(Sim)
     --anim:PlayAnimation("arrow_loop", true)
 
     inst:AddTag("herd")
+    inst:AddTag("NOBLOCK")
     
     inst:AddComponent("herd")
     inst.components.herd:SetMemberTag("ox")
@@ -87,7 +89,7 @@ local function fn(Sim)
     
     inst:AddComponent("periodicspawner")
     inst.components.periodicspawner:SetRandomTimes(TUNING.OX_MATING_SEASON_BABYDELAY, TUNING.OX_MATING_SEASON_BABYDELAY_VARIANCE)
-    inst.components.periodicspawner:SetPrefab("ox")
+    inst.components.periodicspawner:SetPrefab("babyox")
     inst.components.periodicspawner:SetOnSpawnFn(OnSpawned)
     inst.components.periodicspawner:SetSpawnTestFn(CanSpawn)
     inst.components.periodicspawner:SetDensityInRange(20, 6)

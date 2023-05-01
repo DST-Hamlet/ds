@@ -122,7 +122,6 @@ local function fn()
 	inst.Transform:SetFourFaced()
 
 	MakeCharacterPhysics(inst, 200, 1)
-    MakePoisonableCharacter(inst)
 
     inst:AddTag("rocky")
     inst:AddTag("character")

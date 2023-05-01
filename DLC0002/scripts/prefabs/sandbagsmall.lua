@@ -39,16 +39,30 @@ local function resolveanimtoplay(inst, percent)
 	end
 end
 
+local function ToFloodGrid(num)
+	-- The flood grid is is the center of a 2x2 tile pattern. So 1,3,5,7..
+	num = math.floor(num)
+
+    if math.mod(num, 2) == 0 then
+        num = num + 1
+    end
+
+    return num
+end
+
 local function quantizepos(pt)
-	local x, y, z = pt:Get()
-	y = 0
-	
+	pt.y = 0
+
 	if GetWorld().Flooding then
-		local px,py,pz = GetWorld().Flooding:GetTileCenterPoint(x,y,z)
-		return Vector3(px,py,pz)
-	else
-		return Vector3(x,y,z)
+		local px,py,pz = GetWorld().Flooding:GetTileCenterPoint(pt.x, pt.y, pt.z)
+
+		if px and py and pz then
+			return Vector3(px, py, pz)
+		end
 	end
+
+	-- Placement outside of Shipwrecked.
+	return Vector3(ToFloodGrid(pt.x), 0, ToFloodGrid(pt.z))
 end
 
 
@@ -195,7 +209,6 @@ local function onload(inst, data)
 		clearobstacle(inst)
 	end
 end
-
 
 local function fn(Sim)
 	local inst = CreateEntity()

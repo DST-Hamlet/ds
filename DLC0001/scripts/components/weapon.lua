@@ -9,6 +9,7 @@ local Weapon = Class(function(self, inst)
     self.canattack = nil
     self.projectile = nil
     self.stimuli = nil
+    self.projectilelaunchsymbol = nil 
 
     --Monkey uses these
     self.modes = 
@@ -83,7 +84,19 @@ function Weapon:LaunchProjectile(attacker, target)
 
 	    local proj = SpawnPrefab(self.projectile)
 	    if proj and proj.components.projectile then
-	        proj.Transform:SetPosition(attacker.Transform:GetWorldPosition() )
+            local owner = nil 
+            if self.inst.components.inventoryitem then 
+                  owner = self.inst.components.inventoryitem.owner
+                  if owner and owner.components.inventoryitem and owner.components.inventoryitem.owner then 
+                      owner = owner.components.inventoryitem.owner
+                  end
+            end
+
+            if self.projectilelaunchsymbol and owner and owner.AnimState then 
+                proj.Transform:SetPosition(owner.AnimState:GetSymbolPosition(self.projectilelaunchsymbol, 0, 0, 0))
+            else
+                proj.Transform:SetPosition(attacker.Transform:GetWorldPosition() )
+            end
 	        proj.components.projectile:Throw(self.inst, target, attacker)
 	    end
       if proj and proj.components.complexprojectile then 

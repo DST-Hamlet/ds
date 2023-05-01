@@ -10,7 +10,6 @@ local prefabs =
     "tallbirdegg",
 }    
 
-local NEST_TIME = 35*TUNING.SEG_TIME
 local TALLBIRD_LAY_DIST = 16
 
 local function StopNesting(inst)
@@ -44,7 +43,7 @@ end
 
 local function StartNesting(inst, time)
     StopNesting(inst)
-    time = time or (NEST_TIME+math.random() )
+    time = time or (TUNING.TALLBIRD_LAY_EGG_TIME_MIN + math.random() * TUNING.TALLBIRD_LAY_EGG_TIME_VAR )
     inst.nesttime = GetTime() + time
     inst.nesttask = inst:DoTaskInTime(time, DoNesting)
 end
@@ -116,6 +115,7 @@ local function fn(Sim)
     anim:SetBuild("tallbird_egg")
     anim:SetBank("egg")
     anim:PlayAnimation("eggnest", false)
+    inst.AnimState:SetFinalOffset(-1)
     
     inst:AddComponent("pickable")
     --inst.components.pickable.picksound = "dontstarve/wilson/harvest_berries"
@@ -143,6 +143,8 @@ local function fn(Sim)
 	inst:ListenForEvent("entitysleep", onsleep)
 	inst.OnSave = OnSave
 	inst.OnLoad = OnLoad
+
+    inst.StartNesting = StartNesting
    
     return inst
 end

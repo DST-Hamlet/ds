@@ -78,12 +78,12 @@ function Moisture:CheckForShelter()
     if soundShouldPlay ~= self.inst.SoundEmitter:PlayingSound("treerainsound") then
         if soundShouldPlay then
 		    self.inst.SoundEmitter:PlaySound("dontstarve_DLC001/common/rain_on_tree", "treerainsound") 
-			self.inst.SoundEmitter:SetParameter("treerainsound", "intensity", GetSeasonManager().precip_rate)
+			self.inst.SoundEmitter:SetVolume("treerainsound", GetSeasonManager().precip_rate)
         else
 		    self.inst.SoundEmitter:KillSound("treerainsound")
 		end
     elseif soundShouldPlay and self.inst.SoundEmitter:PlayingSound("treerainsound") then
-		self.inst.SoundEmitter:SetParameter("treerainsound", "intensity", GetSeasonManager().precip_rate)
+		self.inst.SoundEmitter:SetVolume("treerainsound", GetSeasonManager().precip_rate)
     end
 end
 

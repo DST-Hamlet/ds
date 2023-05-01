@@ -60,8 +60,38 @@ local function OnWorked(inst, worker)
 	end
 end
 
+local notags = {'NOBLOCK', 'player', 'FX'}
+local function test_ground(inst, pt)
+	local tiletype = GetGroundTypeAtPosition(pt)
+	local ground_OK = tiletype ~= GROUND.ROCKY and tiletype ~= GROUND.ROAD and tiletype ~= GROUND.IMPASSABLE and
+						tiletype ~= GROUND.UNDERROCK and tiletype ~= GROUND.WOODFLOOR and tiletype ~= GROUND.MAGMAFIELD and 
+						tiletype ~= GROUND.CARPET and tiletype ~= GROUND.CHECKER and 
+						tiletype ~= GROUND.ASH and tiletype ~= GROUND.VOLCANO and tiletype ~= GROUND.VOLCANO_ROCK and tiletype ~= GROUND.BRICK_GLOW and
+						tiletype < GROUND.UNDERGROUND
+    
+    
+    local ground = GetWorld()
+    if ground.Map:IsWater(tiletype) then 
+    	ground_OK = false 
+    end 
+	
+	if ground_OK then
+	    local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, 4, nil, notags)
+		local min_spacing = inst.components.deployable.min_spacing or 2
 
-local function CanDeploy(inst) return true end
+	    for k, v in pairs(ents) do
+			if v ~= inst and v:IsValid() and v.entity:IsVisible() and not v.components.placer and v.parent == nil then
+				if distsq( Vector3(v.Transform:GetWorldPosition()), pt) < min_spacing*min_spacing then
+					return false
+				end
+			end
+		end
+		
+		return true
+
+	end
+	return false
+end
 
 local function OnDeploy (inst, pt) 
 	local flower = SpawnPrefab("flower")
@@ -93,12 +123,13 @@ local function fn(Sim)
 	inst:AddComponent("tradable")
 
 	MakePoisonableCharacter(inst)
-	MakeCharacterPhysics(inst, 1, .25)
+	MakeAmphibiousCharacterPhysics(inst, 1, .25)
 	inst.Physics:SetCollisionGroup(COLLISION.FLYERS)
 	inst.Physics:ClearCollisionMask()
-	inst.Physics:CollidesWith(COLLISION.WORLD)
+	inst.Physics:CollidesWith(COLLISION.GROUND)
 	
 	inst:AddComponent("inventoryitem")
+	inst.components.inventoryitem.nosink = true
 
 	if SaveGameIndex:IsModeShipwrecked() then
 		inst.AnimState:SetBuild("butterfly_tropical_basic")
@@ -155,6 +186,8 @@ local function fn(Sim)
 	------------------
 	inst:AddComponent("deployable")
 	inst.components.deployable.ondeploy = OnDeploy
+	inst.components.deployable.test = test_ground
+	inst.components.deployable.min_spacing = .5
 
 	inst:AddComponent("appeasement")
 	inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_SMALL

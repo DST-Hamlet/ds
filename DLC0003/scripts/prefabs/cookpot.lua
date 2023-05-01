@@ -21,6 +21,11 @@ local function onhammered(inst, worker)
 	if not inst:HasTag("burnt") and inst.components.stewer and inst.components.stewer.product and inst.components.stewer.done then
 		inst.components.lootdropper:AddChanceLoot(inst.components.stewer.product, 1)
 	end
+
+	if inst.components.container ~= nil then
+		inst.components.container:DropEverything()
+	end
+
 	inst.components.lootdropper:DropLoot()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
 	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
@@ -211,7 +216,7 @@ local function onFloodedEnd(inst)
 end 
 
 local function returntointeriorscene(inst)
-	if inst.components.stewer.cooking then
+	if inst.components.stewer and inst.components.stewer.cooking then
 		inst.Light:Enable(true)
 	else
 		inst.Light:Enable(false)

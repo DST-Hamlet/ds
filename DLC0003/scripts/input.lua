@@ -1,6 +1,18 @@
 require "events"
 local Text = require "widgets/text"
 
+local function IgnoreMinisign(ent)
+    return ent:HasTag("sign")
+end
+
+local function PrioritizeMiniSign(ent)
+    if ent.prefab == "minisign" and not ent._imagename then
+        local activeitem = GetPlayer().components.inventory:GetActiveItem()
+
+        return activeitem and activeitem.prefab == "featherpencil" or false
+    end
+end
+
 Input = Class(function(self)
     self.onkey = EventProcessor()     -- all keys, down and up, with key param
     self.onkeyup = EventProcessor()   -- specific key up, no parameters
@@ -22,11 +34,15 @@ Input = Class(function(self)
         self.mouse_enabled = true
     end
 
+    self:DisableAllControllers()
+
 	self.pickConditions = {}
 	self:AddPickCondition("fishinhole", function(ent) return ent.prefab == "fishinhole" end, 2)
 	self:AddPickCondition("notOnFloor", function(ent) return not ent:HasTag("OnFloor") end, 1)
 
-    self:DisableAllControllers()
+    -- The mouse now tries to ignore mini signs. Solving the issue with mini signs and chests in the same place.
+    self:AddPickCondition("IgnoreMinisign",     IgnoreMinisign,    -1)
+    self:AddPickCondition("PrioritizeMiniSign", PrioritizeMiniSign, 2)
 end)
 
 function Input:DisableAllControllers()
@@ -279,26 +295,26 @@ function Input:RemovePickCondition(name, condition, weight)
 end
 
 local function GetSortedEntitiesAtScreenPoint(self)
-	local function PickWeight(ent)
-		local weight = 0
-		for i,v in pairs(self.pickConditions) do
-			local condition = v[1]
-			weight = weight + (condition(ent) and v[2] or 0)
-		end
-		return weight
-	end
+    local function PickWeight(ent)
+        local weight = 0
 
-    local function cmp(a, b)
-		return PickWeight(a) > PickWeight(b)
+        for i,v in pairs(self.pickConditions) do
+            local condition = v[1]
+            weight = weight + (condition(ent) and v[2] or 0)
+        end
+
+        return weight
     end
 
-    --print("GetSortedEntitiesAtScreenPoint before")
+    local function cmp(a, b)
+        return PickWeight(a) > PickWeight(b)
+    end
+
     local ents = TheSim:GetEntitiesAtScreenPoint(TheSim:GetPosition())
-    --dumptable(ents, 1, 1)
+
     table.insert(ents, nil)
     table.sort(ents, cmp)
-    --print("after")
-    --dumptable(ents, 1, 1)
+
     return ents
 end
 
@@ -315,7 +331,7 @@ function Input:OnUpdate()
 	end
 
 	if self.mouse_enabled then
-		self.entitiesundermouse = GetSortedEntitiesAtScreenPoint(self) --TheSim:GetEntitiesAtScreenPoint(TheSim:GetPosition())
+		self.entitiesundermouse = GetSortedEntitiesAtScreenPoint(self)
 	    
 		local inst = self.entitiesundermouse[1]
 		if inst ~= self.hoverinst then

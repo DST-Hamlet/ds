@@ -12,13 +12,13 @@ function Book:OnRead(reader)
 end
 
 function Book:CollectSceneActions(doer, actions)
-    if doer.components.reader then
+	if doer.components.reader and not (self.action == ACTIONS.READ and not doer:HasTag("bookreader")) then
         table.insert(actions, ACTIONS.READ)
     end
 end
 
 function Book:CollectInventoryActions(doer, actions)
-    if doer.components.reader then
+	if doer.components.reader and not (self.action == ACTIONS.READ and not doer:HasTag("bookreader")) then
         table.insert(actions, ACTIONS.READ)
     end
 end

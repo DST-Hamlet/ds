@@ -1,13 +1,14 @@
 local Screen = require "widgets/screen"
 local Button = require "widgets/button"
 local AnimButton = require "widgets/animbutton"
+local TextButton = require "widgets/textbutton"
 local Menu = require "widgets/menu"
 local Text = require "widgets/text"
 local Image = require "widgets/image"
 local UIAnim = require "widgets/uianim"
 local Widget = require "widgets/widget"
 
-local ScriptErrorScreen = Class(Screen, function(self, title, text, buttons, texthalign, additionaltext, textsize, timeout)
+local ScriptErrorScreen = Class(Screen, function(self, title, text, buttons, texthalign, additionaltext, textsize, timeout, showdisablemodwarning)
 	Screen._ctor(self, "ScriptErrorScreen")
 
     TheInputProxy:SetCursorVisible(true)
@@ -89,6 +90,34 @@ local ScriptErrorScreen = Class(Screen, function(self, title, text, buttons, tex
 	    self.default_focus = self.menu
 	end
 	self:AddChild(TheFrontEnd.helptext)
+
+	if showdisablemodwarning then
+		self.disablemodwarning = self.root:AddChild(TextButton())
+		self.disablemodwarning:SetText(STRINGS.UI.MAINSCREEN.ACKNOWLEDGEWARNING)
+		self.disablemodwarning:SetFont(BODYTEXTFONT)
+		self.disablemodwarning:SetTextSize(25)
+		self.disablemodwarning:SetPosition(20, -160, 0)
+
+		self.disablemodwarning:SetOnClick(function()
+			self.disablemodwarning.checked = not self.disablemodwarning.checked
+			Profile:SetModsWarning(not self.disablemodwarning.checked)
+			Profile:Save()
+			local texture = string.format("button_checkbox%d.tex", self.disablemodwarning.checked and 2 or 1)
+			self.disablemodwarningimage:SetTexture("images/ui.xml", texture)
+		end)
+		
+		self.disablemodwarning.checked = not Profile:GetModsWarning()
+		
+		local texture = string.format("button_checkbox%d.tex", self.disablemodwarning.checked and 2 or 1)
+		self.disablemodwarningimage = self.root:AddChild(Image("images/ui.xml", texture))
+		
+		local text_width = self.disablemodwarning.text:GetRegionSize()
+		self.disablemodwarningimage:SetPosition(-0.5 * text_width -10, -160)
+
+		self.disablemodwarningimage:SetScale(0.4, 0.4, 0.4)
+		self.disablemodwarning:SetFocusChangeDir(MOVE_DOWN, self.menu)
+		self.menu:SetFocusChangeDir(MOVE_UP, self.disablemodwarning)
+	end
 end)
 
 function ScriptErrorScreen:OnBecomeActive()

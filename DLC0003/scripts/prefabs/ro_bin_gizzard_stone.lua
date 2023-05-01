@@ -179,6 +179,7 @@ local function fn(Sim)
     inst:AddTag("ro_bin_gizzard_stone")
     
     inst:AddTag("irreplaceable")
+    inst:AddTag("dropontravel")
 	inst:AddTag("nonpotatable")
     inst:AddTag("follower_leash")
 

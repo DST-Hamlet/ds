@@ -231,7 +231,7 @@ local states=
     
     State{
         name = "fall",
-        tags = {"busy"},
+        tags = {"busy", "falling"},
         onenter = function(inst)
 			inst.Physics:SetDamping(0)
             inst.Physics:SetMotorVel(0,-20+math.random()*10,0)
@@ -261,7 +261,13 @@ local states=
         onexit = function(inst)
             local pt = inst:GetPosition()
             pt.y = 0
+            inst.Physics:SetMotorVel(0,0,0)
             inst.Transform:SetPosition(pt:Get())
+
+            -- The Y position prevents them from targeting the player on spawn by the herald.
+            if inst:HasTag("aporkalypse_cleanup") and inst.components.combat then
+                inst.components.combat:SuggestTarget(GetPlayer())
+            end
         end,
     },    
     
@@ -284,7 +290,13 @@ local states=
         name = "emerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
+        onenter = function(inst, noanim)
+            if noanim then
+                inst.AnimState:SetBank("frog")
+                inst.sg:GoToState("idle")
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then
@@ -316,7 +328,6 @@ local states=
             elseif should_run then
                 inst.components.locomotor:RunForward()
             end
-            print("now play jumpout",inst)
             inst.AnimState:PlayAnimation("jumpout")
         end,
 
@@ -334,7 +345,13 @@ local states=
         name = "submerge",
         tags = {"canrotate", "busy"},
         
-        onenter = function(inst)
+        onenter = function(inst, noanim)
+            if noanim then
+                inst.AnimState:SetBank("frog_water")
+                inst.sg:GoToState("idle")
+                return
+            end
+
             local should_move = inst.components.locomotor:WantsToMoveForward()
             local should_run = inst.components.locomotor:WantsToRun()
             if should_move then

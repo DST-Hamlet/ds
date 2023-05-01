@@ -1,5 +1,6 @@
 chestfunctions = require("scenarios/chestfunctions")
 
+-- !!!!!!!!!!     DEPRECATED    !!!!!!!!!!
 
 local function OnCreate(inst, scenariorunner)
 

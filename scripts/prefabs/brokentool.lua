@@ -4,7 +4,6 @@ local assets=
 }
 
 local function fn(Sim)
-    
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
 	inst.entity:AddAnimState()
@@ -16,9 +15,10 @@ local function fn(Sim)
     inst.AnimState:SetBuild("broken_tool")
     inst.AnimState:PlayAnimation("used")
     
-    inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
     
-return inst
+	return inst
 end
 
 return Prefab( "common/inventory/brokentool", fn, assets) 

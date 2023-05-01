@@ -79,7 +79,7 @@ local function fn(Sim)
     inst.Transform:SetFourFaced()
     inst.foodItemsEatenCount = 0
     
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "beefalo_body")
     MakeCharacterPhysics(inst, 100, .5)
     local scale = 1.22
     inst.Transform:SetScale(scale, scale, scale)

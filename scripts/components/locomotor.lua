@@ -138,6 +138,16 @@ function LocoMotor:GetRunSpeed()
     end
 end
 
+function LocoMotor:GetFasterOnRoad()
+    if self.inst.components.rider ~= nil then
+        local mount = self.inst.components.rider:IsRiding() and self.inst.components.rider:GetMount() or nil
+        if mount ~= nil then
+            return mount.components.locomotor.fasteronroad
+        end
+    end
+    return self.fasteronroad
+end
+
 function LocoMotor:GetBonusSpeed()
     return self.bonusspeed
 end
@@ -181,7 +191,7 @@ function LocoMotor:UpdateGroundSpeedMultiplier()
 		self.groundspeedmultiplier = self.slowmultiplier
 	else
         self.wasoncreep = false
-		if self.fasteronroad then
+		if self:GetFasterOnRoad() then
             --print(self.inst, "UpdateGroundSpeedMultiplier check road" )
 			if RoadManager and RoadManager:IsOnRoad( x,0,z ) then
 				self.groundspeedmultiplier = self.fastmultiplier
@@ -275,7 +285,11 @@ function LocoMotor:GoToEntity(inst, bufferedaction, run)
     self.wantstomoveforward = true
     
     if bufferedaction and bufferedaction.distance then
-		self.arrive_dist = bufferedaction.distance
+        --NOTE: use actual physics (ignoring physicsradiusoverride)
+        --      as fallback if bufferedaction.distance is too small
+        self.arrive_dist = ARRIVE_STEP + (inst.Physics ~= nil and inst.Physics:GetRadius() or 0) + (self.inst.Physics ~= nil and self.inst.Physics:GetRadius() or 0)
+        self.arrive_dist = math.max(self.arrive_dist, bufferedaction.distance)
+
 	else
         self.arrive_dist = ARRIVE_STEP
 

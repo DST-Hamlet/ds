@@ -129,10 +129,14 @@ function PlayerActionPicker:GetInventoryActions(useitem, right)
     if useitem then
         local actions = {}
 
-        for k,v in pairs(useitem.components) do
-            if v.CollectInventoryActions then
-                v:CollectInventoryActions(self.inst, actions, right)
+        if not TheInput:IsControlPressed(CONTROL_FORCE_TRADE) then
+            for k,v in pairs(useitem.components) do
+                if v.CollectInventoryActions then
+                    v:CollectInventoryActions(self.inst, actions, right)
+                end
             end
+        else
+            actions = {ACTIONS.DROP}
         end
         
         local acts = self:SortActionList(actions, nil, useitem)

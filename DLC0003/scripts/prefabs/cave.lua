@@ -2,25 +2,25 @@ require("periodicthreats")
 
 local cave_prefabs =
 {
-	"world",
-	"cave_exit",
-	"slurtle",
-	"snurtle",
-	"slurtlehole",
-	"warningshadow",
-	"cavelight",
-	"flower_cave",
+    "world",
+    "cave_exit",
+    "slurtle",
+    "snurtle",
+    "slurtlehole",
+    "warningshadow",
+    "cavelight",
+    "flower_cave",
     "ancient_altar",
     "ancient_altar_broken",
-	"stalagmite",
-	"stalagmite_tall",
-	"bat",
-	"mushtree_tall",
-	"mushtree_medium",
-	"mushtree_small",
-	"cave_banana_tree",
-	"spiderhole",
-	"ground_chunks_breaking",
+    "stalagmite",
+    "stalagmite_tall",
+    "bat",
+    "mushtree_tall",
+    "mushtree_medium",
+    "mushtree_small",
+    "cave_banana_tree",
+    "spiderhole",
+    "ground_chunks_breaking",
     "tentacle_pillar",
     "tentacle_pillar_arm",
     "batcave",
@@ -72,29 +72,69 @@ local assets =
     Asset("IMAGE", "images/colour_cubes/ruins_dim_cc.tex"),
     Asset("IMAGE", "images/colour_cubes/ruins_dark_cc.tex"),
 
-	Asset("IMAGE", "images/colour_cubes/fungus_cc.tex"),
-	Asset("IMAGE", "images/colour_cubes/sinkhole_cc.tex"),
+    Asset("IMAGE", "images/colour_cubes/fungus_cc.tex"),
+    Asset("IMAGE", "images/colour_cubes/sinkhole_cc.tex"),
 }
 
-local function fn(Sim)
-	local inst = SpawnPrefab("world")
-	inst:AddTag("cave")
+local function RetrofitCaveRegenerator(inst)
+    if 
+        not inst:HasTag("ruin") or
+        inst.cave_regenerator_retrofitted
+    then
+        return
+    end
 
-	inst.prefab = "cave"
-	--cave specifics
+    if not (
+        TheSim:FindFirstEntityWithTag("minotaur")
+    ) then
+        local nightmarelight = TheSim:FindFirstEntityWithTag("nightmarelight")
+
+        if nightmarelight then
+            local pt = nightmarelight:GetPosition()
+            local theta = math.random() * 2 * PI
+            local radius = 2 * TILE_SCALE
+
+            local offset = FindWalkableOffset(pt, theta, radius, 12, true)
+
+            if offset then
+                pt = pt + offset
+            end
+
+            print(">> Retrofitting cave_regenerator")
+
+            local regenerator = SpawnPrefab("cave_regenerator")
+            if regenerator then
+                regenerator.Transform:SetPosition(pt:Get())
+
+                inst.cave_regenerator_retrofitted = true
+            end
+        end
+    else
+        inst.cave_regenerator_retrofitted = true
+    end
+end
+
+local function fn(Sim)
+    local inst = SpawnPrefab("world")
+    inst:AddTag("cave")
+
+    inst.prefab = "cave"
+    --cave specifics
     inst:AddComponent("clock")
     inst:AddComponent("quaker")
-	inst:AddComponent("seasonmanager")
+    inst:AddComponent("seasonmanager")
     inst:DoTaskInTime(0, function(inst) inst.components.seasonmanager:SetCaves() end)
-	inst:AddComponent("colourcubemanager")
+    inst:AddComponent("colourcubemanager")
 
-	inst:AddComponent("periodicthreat")
-	local threats = require("periodicthreats")
-	inst.components.periodicthreat:AddThreat("WORM", threats["WORM"])
+    inst:AddComponent("periodicthreat")
+    local threats = require("periodicthreats")
+    inst.components.periodicthreat:AddThreat("WORM", threats["WORM"])
 
     inst:AddComponent("bigfooter")
-	
-	inst.components.ambientsoundmixer:SetReverbPreset("cave")
+
+    inst.components.ambientsoundmixer:SetReverbPreset("cave")
+
+    inst:DoTaskInTime(1, RetrofitCaveRegenerator)
 
     return inst
 end

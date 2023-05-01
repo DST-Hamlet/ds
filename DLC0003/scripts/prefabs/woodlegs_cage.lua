@@ -81,6 +81,8 @@ local function Unlock(inst)
 			inst:Remove()
 		end)
 	end)
+
+	inst.persists = false
 end
 
 local keySymbols = { woodlegs_key1 = "KEY1", woodlegs_key2 = "KEY2", woodlegs_key3 = "KEY3" }

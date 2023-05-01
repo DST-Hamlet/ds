@@ -61,9 +61,9 @@ local function setfertilityfn(inst, fert_percent)
 		local anim = "full"
 		if fert_percent <= 0 then
 			anim = "empty"
-		elseif fert_percent <= 0.33 then
+		elseif fert_percent <= .33 then
 			anim = "med2"
-		elseif fert_percent <= 0.66 then
+		elseif fert_percent <= .66 then
 			anim = "med1"
 		end
 		
@@ -90,127 +90,127 @@ local decor_defs =
 {
 	[1] = { { signright = { { -1.1, 0, 0.5 } } } },
 
-	[2] = {	{ stick = {
-						{ left - 0.9, 0, back },
-						{ right, 0, front },
-					  }
-			},
-			{ stickleft = {
-						{ 0.0, 0, back },
-						{ left, 0, front },
-					  }
-			},
-			{ stickright = {
-						{ right + 0.9, 0, back },
-						{ left - 0.3, 0, back + 0.5 },
-						{ right + 0.3, 0, back + 0.5 },
-					  }
-			},
-			{ signleft = { { -1.0, 0, 0.5 } } }
-		  },
+	[2] = { { stick = {
+		{ left - 0.9, 0, back },
+		{ right, 0, front },
+	}
+	},
+		{ stickleft = {
+			{ 0.0, 0, back },
+			{ left, 0, front },
+		}
+		},
+		{ stickright = {
+			{ right + 0.9, 0, back },
+			{ left - 0.3, 0, back + 0.5 },
+			{ right + 0.3, 0, back + 0.5 },
+		}
+		},
+		{ signleft = { { -1.0, 0, 0.5 } } }
+	},
 
-	[3] = {	{ signleft = { { -1.0, 0, 0.5 } } },
+	[3] = { { signleft = { { -1.0, 0, 0.5 } } },
 
-			-- left side
-			{ farmrock = {
-					{ right + 3.0, 0, rock_front + 0.2 },
-					{ right + 3.05, 0, rock_front - 1.5 },
-				}
-			},
+		-- left side
+		{ farmrock = {
+			{ right + 3.0, 0, rock_front + 0.2 },
+			{ right + 3.05, 0, rock_front - 1.5 },
+		}
+		},
 
-			{ farmrocktall = { { right + 3.07, 0, rock_front - 1.0 }, }	},
-			{ farmrockflat = { { right + 3.06, 0, rock_front - 0.4 }, }	},
+		{ farmrocktall = { { right + 3.07, 0, rock_front - 1.0 }, } },
+		{ farmrockflat = { { right + 3.06, 0, rock_front - 0.4 }, } },
 
-			-- right side
-			{ farmrock = { { left - 3.05, 0, rock_front - 1.0 }, } },
-			{ farmrocktall = { { left - 3.07, 0, rock_front - 1.5 }, } },
-			{ farmrockflat = { { left - 3.06, 0, rock_front - 0.4 }, } },
+		-- right side
+		{ farmrock = { { left - 3.05, 0, rock_front - 1.0 }, } },
+		{ farmrocktall = { { left - 3.07, 0, rock_front - 1.5 }, } },
+		{ farmrockflat = { { left - 3.06, 0, rock_front - 0.4 }, } },
 
-			-- front row
-			{ farmrock = {
-					{ right + 1.1, 0, rock_front + 0.21 },
-					{ right + 2.4, 0, rock_front + 0.25 },
-				}
-			},
+		-- front row
+		{ farmrock = {
+			{ right + 1.1, 0, rock_front + 0.21 },
+			{ right + 2.4, 0, rock_front + 0.25 },
+		}
+		},
 
-			{ farmrocktall = { { right + 0.5, 0, rock_front + 0.195 }, } },
-			
-			{ farmrockflat = {
-					{ right + 0.0, 0, rock_front - 0.0 },
-					{ right + 1.8, 0, rock_front + 0.22 },
-				}
-			},
+		{ farmrocktall = { { right + 0.5, 0, rock_front + 0.195 }, } },
 
-			-- back row
-			{ farmrockflat = {
-					
-					{ left - 1.3, 0, back - 0.19 },
-				}
-			},
+		{ farmrockflat = {
+			{ right + 0.0, 0, rock_front - 0.0 },
+			{ right + 1.8, 0, rock_front + 0.22 },
+		}
+		},
 
-			{ farmrock = {
-					{ left - 0.5, 0, back - 0.21 },
-					{ left - 2.5, 0, back - 0.22 },
-				}
-			},
+		-- back row
+		{ farmrockflat = {
 
-			{ farmrocktall = {
-					{ left + 0.0, 0, back - 0.15 },
-					{ left - 3.0, 0, back - 0.20 },
-					{ left - 1.9, 0, back - 0.205 },
-				}
-			},
+			{ left - 1.3, 0, back - 0.19 },
+		}
+		},
 
-			{ fencepost = {
-					{ left - 1.0,  0, back + 0.15 },
-					{ right + 0.8, 0, back + 0.15 },
-					{ right + 0.3, 0, back + 0.15 },
-				},
-			},
+		{ farmrock = {
+			{ left - 0.5, 0, back - 0.21 },
+			{ left - 2.5, 0, back - 0.22 },
+		}
+		},
 
-			{ fencepostright = {
-					{ left - 0.5,  0, back + 0.15 },
-					{ 0,		   0, back + 0.15 },
-				},
-			},
-	  }
+		{ farmrocktall = {
+			{ left + 0.0, 0, back - 0.15 },
+			{ left - 3.0, 0, back - 0.20 },
+			{ left - 1.9, 0, back - 0.205 },
+		}
+		},
+
+		{ fencepost = {
+			{ left - 1.0, 0, back + 0.15 },
+			{ right + 0.8, 0, back + 0.15 },
+			{ right + 0.3, 0, back + 0.15 },
+		},
+		},
+
+		{ fencepostright = {
+			{ left - 0.5, 0, back + 0.15 },
+			{ 0, 0, back + 0.15 },
+		},
+		},
+	}
 }
 
 local burntdecor_defs =
 {
-	[2] = {	
-			{ burntstick = {
-						{ left - 0.9, 0, back },
-						{ right, 0, front },
-					  }
-			},
-			{ burntstickleft = {
-						{ 0.0, 0, back },
-						{ left, 0, front },
-					  }
-			},
-			{ burntstickright = {
-						{ right + 0.9, 0, back },
-						--{ left - 0.3, 0, back + 0.5 },
-						--{ right + 0.3, 0, back + 0.5 },
-					  }
-			},
-		  },
+	[2] = {
+		{ burntstick = {
+			{ left - 0.9, 0, back },
+			{ right, 0, front },
+		}
+		},
+		{ burntstickleft = {
+			{ 0.0, 0, back },
+			{ left, 0, front },
+		}
+		},
+		{ burntstickright = {
+			{ right + 0.9, 0, back },
+			--{ left - 0.3, 0, back + 0.5 },
+			--{ right + 0.3, 0, back + 0.5 },
+		}
+		},
+	},
 
-	[3] = {	-- back row
-			{ burntfencepost = {
-					--{ left - 1.0,  0, back + 0.15 },
-					{ right + 0.8, 0, back + 0.15 },
-					--{ right + 0.3, 0, back + 0.15 },
-				},
-			},
+	[3] = { -- back row
+		{ burntfencepost = {
+			--{ left - 1.0,  0, back + 0.15 },
+			{ right + 0.8, 0, back + 0.15 },
+			--{ right + 0.3, 0, back + 0.15 },
+		},
+		},
 
-			{ burntfencepostright = {
-					{ left - 0.5,  0, back + 0.15 },
-					{ 0,		   0, back + 0.15 },
-				},
-			},
-	  }
+		{ burntfencepostright = {
+			{ left - 0.5, 0, back + 0.15 },
+			{ 0, 0, back + 0.15 },
+		},
+		},
+	}
 }
 
 local function makeburnt(inst)
@@ -235,20 +235,19 @@ local function onsave(inst, data)
 	if inst:HasTag("burnt") or inst:HasTag("fire") then
         data.burnt = true
     end
-    data.rotation = inst.Transform:GetRotation()
 end
 
 local function onload(inst, data)
-	if data then
-		if data.burnt then
-        	inst.components.burnable.onburnt(inst)
-       	end
-
-       	if data.rotation then
-       		inst.Transform:SetRotation(data.rotation)
-       	end
+	if data and data.burnt then
+        inst.components.burnable.onburnt(inst)
     end
-    inst:DoTaskInTime(0,function() setfertilityfn(inst, inst.components.grower and inst.components.grower:GetFertilePercent() or 0) end)
+
+	-- For old saves (before adding the savedrotation component)
+	if data and data.rotation then
+		inst.Transform:SetRotation(data.rotation)
+	end
+
+	inst:DoTaskInTime(0,function() setfertilityfn(inst, inst.components.grower and inst.components.grower:GetFertilePercent() or 0) end)
 end
 
 local function plantcrop(inst)
@@ -257,22 +256,15 @@ local function plantcrop(inst)
 		inst.components.grower:PlantItem(seed)
 
 		inst:DoTaskInTime(0,function()
-				local pos = Vector3(inst.Transform:GetWorldPosition())
-				local ents = TheSim:FindEntities(pos.x,pos.y,pos.z, 1)
-				for i,ent in ipairs(ents) do
-					if ent.components.crop then
-						for i=1,10 do
-
-							ent.components.crop:DoGrow(9999)
-
-							--local poop = SpawnPrefab("poop")
-							--ent.components.crop:Fertilize(poop)
-						end
+			for ent, _ in ipairs(inst.components.grower.crops) do
+				if ent.components.crop then
+					for i=1,10 do
+						ent.components.crop:DoGrow(9999)
 					end
 				end
-
 			end
-			)
+		end
+		)
 	end
 end
 
@@ -285,7 +277,6 @@ local function PlaceTestFn(inst, pt)
 end
 
 local function plot(level, planted)
-	
     return function(Sim)
         local inst = CreateEntity()
         local trans = inst.entity:AddTransform()
@@ -317,6 +308,8 @@ local function plot(level, planted)
             end
         end
 
+		inst:AddComponent("savedrotation")
+
         MakeLargeBurnable(inst, nil, nil, true)
         MakeLargePropagator(inst)
         inst.OnSave = onsave 
@@ -329,24 +322,23 @@ local function plot(level, planted)
         inst.components.grower.croppoints = croppoints[level]
         inst.components.grower.growrate = rates[level]
 
+		if planted then
+			local replacements = {
+					 fast_farmplot_planted = "fast_farmplot",
+					 slow_farmplot_planted = "slow_farmplot",
+				  }
 
-        if planted then
-	         local replacements = {
-                      fast_farmplot_planted = "fast_farmplot",
-                      slow_farmplot_planted = "slow_farmplot",
-                   }
-
-             inst:DoTaskInTime(0,function() 
-                plantcrop(inst)
-                local replacement = replacements[inst.prefab]
-                if replacement then
-                    -- Spawn this instead next load
-                    inst:SetPrefabName(replacement)	
-                    -- But before reload it will still show the wrong name, so let's change that
-                    inst:SetPrefabNameOverride(replacement)
-                 end
-            end)
-        end
+			inst:DoTaskInTime(0,function() 
+			   plantcrop(inst)
+			   local replacement = replacements[inst.prefab]
+			   if replacement then
+				   -- Spawn this instead next load
+				   inst:SetPrefabName(replacement)	
+				   -- But before reload it will still show the wrong name, so let's change that
+				   inst:SetPrefabNameOverride(replacement)
+				end
+		   end)
+	   end
         
         local cycles_per_level = {10,20,30}
         
@@ -355,10 +347,8 @@ local function plot(level, planted)
 		inst.components.grower.setfertility = setfertilityfn
 		inst.decor = {}
 
-		trans:SetRotation( 45 )
-
-
 		inst:AddComponent("lootdropper")
+
 		inst:AddComponent("workable")
 		inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
 		inst.components.workable:SetWorkLeft(4)
@@ -366,7 +356,6 @@ local function plot(level, planted)
 		inst.components.workable:SetOnWorkCallback(onhit)
 
 		local sound_name = "dontstarve/common/craftable/farm_basic"
-
 		if level > 2 then
 			sound_name = "dontstarve/common/craftable/farm_improved"
 		end
@@ -385,14 +374,40 @@ local function plot(level, planted)
 				end
 			end
 		end
+
+		inst.highlightchildren = inst.decor
         
         return inst
     end
 end    
 
-return --Prefab( "common/objects/farmplot",  plot(1), assets, prefabs ),
-       Prefab( "common/objects/slow_farmplot", plot(2), assets, prefabs ),
-       Prefab( "common/objects/fast_farmplot", plot(3), assets, prefabs ),
-       Prefab( "common/objects/fast_farmplot_planted", plot(3, true), assets, prefabs ),
-	   MakePlacer( "common/slow_farmplot_placer", "farmplot", "farmplot", "full", true, nil, nil, nil, nil, 90, nil, nil, nil, PlaceTestFn ),
-	   MakePlacer( "common/fast_farmplot_placer", "farmplot", "farmplot", "full", true, nil, nil, nil, nil, 90, nil, nil, nil, PlaceTestFn ) 
+local function placerdecor(level)
+    return function(inst)
+        inst.AnimState:SetLayer(LAYER_BACKGROUND)
+        inst.AnimState:SetSortOrder(3)
+
+        --Show decor on top of the ground placer
+        for i, item_info in ipairs(decor_defs[level]) do
+            for item_name, item_offsets in pairs(item_info) do
+                for j, offset in ipairs(item_offsets) do
+                    local item_inst = SpawnPrefab(item_name)
+                    item_inst:AddTag("NOCLICK") --not all decor pieces come with NOCLICK by default
+                    item_inst:AddTag("placer")
+					item_inst:AddTag("NOBLOCK")
+                    item_inst.entity:SetCanSleep(false)
+                    item_inst.entity:SetParent(inst.entity)
+                    item_inst.Transform:SetPosition(unpack(offset))
+                    item_inst.AnimState:SetLightOverride(1)
+                    inst.components.placer:LinkEntity(item_inst)
+                end
+            end
+        end
+    end
+end
+
+return
+       Prefab( "common/objects/slow_farmplot",          plot(2      ), assets, prefabs ),
+       Prefab( "common/objects/fast_farmplot",          plot(3      ), assets, prefabs ),
+       Prefab( "common/objects/fast_farmplot_planted",  plot(3, true), assets, prefabs ),
+       MakePlacer( "common/slow_farmplot_placer", "farmplot", "farmplot", "full", true, nil, nil, nil, nil, 90, nil, nil, nil, PlaceTestFn, nil, placerdecor(2)),
+       MakePlacer( "common/fast_farmplot_placer", "farmplot", "farmplot", "full", true, nil, nil, nil, nil, 90, nil, nil, nil, PlaceTestFn, nil, placerdecor(3)) 

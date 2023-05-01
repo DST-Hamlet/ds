@@ -367,6 +367,8 @@ local function fn()
 	SetAsRabid(inst, false)
 	transformtest(inst)
 
+	inst:ListenForEvent("exitlimbo", updatelight)
+
 	return inst
 end
 

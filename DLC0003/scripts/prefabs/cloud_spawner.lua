@@ -18,6 +18,8 @@ local function fn(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
 
+    inst:AddTag("NOBLOCK")
+
     inst.spawnCloud = spawnCloud
 	inst:DoTaskInTime(math.random()*MAXTIME, function() spawnCloud(inst) end)
     

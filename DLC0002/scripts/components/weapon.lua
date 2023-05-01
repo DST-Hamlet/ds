@@ -9,7 +9,7 @@ local Weapon = Class(function(self, inst)
     self.canattack = nil
     self.projectile = nil
     self.stimuli = nil
-    self.projectilelaunchsymbol = nil 
+    self.projectilelaunchsymbol = nil
     self.heightoffset = nil
     self.getdamagefn = nil 
     --Monkey uses these

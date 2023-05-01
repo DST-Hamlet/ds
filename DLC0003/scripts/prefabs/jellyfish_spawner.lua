@@ -34,6 +34,7 @@ local function fn(Sim)
 	local trans = inst.entity:AddTransform()
 
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	inst:AddComponent( "childspawner" )
 	inst.components.childspawner.childname = "jellyfish_planted"

@@ -1,68 +1,145 @@
 require("stategraphs/commonstates")
 
-local actionhandlers = 
-{
-}
+local DESTROYSTUFF_IGNORE_TAGS = { "INLIMBO", "mushroomsprout" }
+local BOUNCESTUFF_MUST_TAGS = { "isinventoryitem" }
+local BOUNCESTUFF_CANT_TAGS = { "locomotor", "INLIMBO" }
+
+local function DestroyStuff(inst)
+    local x, y, z = inst.Transform:GetWorldPosition()
+    local ents = TheSim:FindEntities(x, y, z, 3, nil, DESTROYSTUFF_IGNORE_TAGS)
+    for i, v in ipairs(ents) do
+        if v:IsValid() and
+            v.components.workable ~= nil and
+            v.components.workable:CanBeWorked() and
+            v.components.workable.action ~= ACTIONS.NET then
+            SpawnPrefab("collapse_small").Transform:SetPosition(v.Transform:GetWorldPosition())
+            v.components.workable:Destroy(inst)
+        end
+    end
+end
+
+local function ClearRecentlyBounced(inst, other)
+    inst.sg.mem.recentlybounced[other] = nil
+end
+
+local function SmallLaunch(inst, launcher, basespeed)
+    local hp = inst:GetPosition()
+    local pt = launcher:GetPosition()
+    local vel = (hp - pt):GetNormalized()
+    local speed = basespeed * 2 + math.random() * 2
+    local angle = math.atan2(vel.z, vel.x) + (math.random() * 20 - 10) * DEGREES
+    inst.Physics:Teleport(hp.x, .1, hp.z)
+    inst.Physics:SetVel(math.cos(angle) * speed, 1.5 * speed + math.random(), math.sin(angle) * speed)
+
+    launcher.sg.mem.recentlybounced[inst] = true
+    launcher:DoTaskInTime(.6, ClearRecentlyBounced, inst)
+end
+
+local function BounceStuff(inst)
+    if inst.sg.mem.recentlybounced == nil then
+        inst.sg.mem.recentlybounced = {}
+    end
+    local x, y, z = inst.Transform:GetWorldPosition()
+    local ents = TheSim:FindEntities(x, y, z, 6, BOUNCESTUFF_MUST_TAGS, BOUNCESTUFF_CANT_TAGS)
+    for i, v in ipairs(ents) do
+        if v:IsValid() and v.components.inventoryitem and not (v.components.inventoryitem.nobounce or inst.sg.mem.recentlybounced[v]) and v.Physics ~= nil and v.Physics:IsActive() then
+            local distsq = v:GetDistanceSqToPoint(Point(x,y,z))
+            local intensity = math.clamp((36 - distsq) / 27, 0, 1)
+            SmallLaunch(v, inst, intensity)
+        end
+    end
+end
+
+local function hit_recovery_delay(inst, delay, max_hitreacts, skip_cooldown_fn)
+    local on_cooldown = false
+    if (inst._last_hitreact_time ~= nil and inst._last_hitreact_time + (delay or inst.hit_recovery or 2) >= GetTime()) then   -- is hit react is on cooldown?
+        max_hitreacts = max_hitreacts or inst._max_hitreacts
+        if max_hitreacts then
+            if inst._hitreact_count == nil then
+                inst._hitreact_count = 2
+                return false
+            elseif inst._hitreact_count < max_hitreacts then
+                inst._hitreact_count = inst._hitreact_count + 1
+                return false
+            end
+        end
+
+        skip_cooldown_fn = skip_cooldown_fn or inst._hitreact_skip_cooldown_fn
+        if skip_cooldown_fn ~= nil then
+            on_cooldown = not skip_cooldown_fn(inst, inst._last_hitreact_time, delay)
+        elseif inst.components.combat ~= nil then
+            on_cooldown = not (inst.components.combat:InCooldown() and inst.sg:HasStateTag("idle"))     -- skip the hit react cooldown if the creature is ready to attack
+        else
+            on_cooldown = true
+        end
+    end
+
+    if inst._hitreact_count ~= nil and not on_cooldown then
+        inst._hitreact_count = 1
+    end
+    return on_cooldown
+end
 
 
-local events=
+local events =
 {
     CommonHandlers.OnLocomote(true, true),
     CommonHandlers.OnSleep(),
     CommonHandlers.OnFreeze(),
     CommonHandlers.OnAttack(),
-    CommonHandlers.OnAttacked(),
     CommonHandlers.OnDeath(),
 
-    EventHandler("doattack", function(inst)
-        local nstate = "attack"
-        if inst.sg:HasStateTag("running") then
-            nstate = "runningattack"
-        end
-        if inst.components.health and not inst.components.health:IsDead()
-           and not inst.sg:HasStateTag("busy") then
-            inst.sg:GoToState(nstate)
-        end
-    end),
 
-    EventHandler("locomote", function(inst)
-        local is_attacking = inst.sg:HasStateTag("attack") or inst.sg:HasStateTag("runningattack")
-        local is_busy = inst.sg:HasStateTag("busy")
-        local is_idling = inst.sg:HasStateTag("idle")
-        local is_moving = inst.sg:HasStateTag("moving")
-        local is_running = inst.sg:HasStateTag("running") or inst.sg:HasStateTag("runningattack")
-
-        if is_attacking or is_busy then return end
-
-        local should_move = inst.components.locomotor:WantsToMoveForward()
-        local should_run = inst.components.locomotor:WantsToRun()
+    EventHandler("collision_stun", function(inst,data)
         
-        if is_moving and not should_move then
-            inst.SoundEmitter:KillSound("charge")
-            if is_running then
-                inst.sg:GoToState("run_stop")
-            else
-                inst.sg:GoToState("walk_stop")
-            end
-        elseif (not is_moving and should_move) or (is_moving and should_move and is_running ~= should_run) then
-            if should_run then
-                inst.sg:GoToState("run_start")
-            else
-                inst.sg:GoToState("walk_start")
-            end
-        end 
+        if data.light_stun == true then
+            inst.sg:GoToState("hit")
+        elseif data.land_stun == true then
+            inst.sg:GoToState("stun",{land_stun=true})
+        else
+            inst.sg:GoToState("stun")
+        end
     end),
+
+    EventHandler("land_stun", function(inst,data)
+        inst.sg:GoToState("land_stun")
+    end),
+
+    EventHandler("attacked", function(inst,data)    
+        if inst.components.health ~= nil and not inst.components.health:IsDead()
+            and not hit_recovery_delay(inst)
+            and (not inst.sg:HasStateTag("busy")
+            or inst.sg:HasStateTag("caninterrupt")
+            or inst.sg:HasStateTag("frozen")) then    
+                inst.sg:GoToState("hit")
+        elseif inst.sg:HasStateTag("stunned") then
+            inst:PushEvent("stunned_hit")
+        end
+    end),
+    
+    EventHandler("doattack", function(inst)
+
+        if not (inst.sg:HasStateTag("busy") or inst.components.health:IsDead()) then
+            inst.sg:GoToState(inst.sg:HasStateTag("running") and "runningattack" or "attack")
+        end
+    end), 
+
+    EventHandler("doleapattack", function(inst,data)
+        if inst.components.health and not inst.components.health:IsDead()  then
+            inst.sg:GoToState("leap_attack_pre", data.target)
+        end
+    end), 
+
 }
 
-local states=
+local states =
 {
      State{
-        
         name = "idle",
-        tags = {"idle", "canrotate"},
+        tags = { "idle", "canrotate" },
+
         onenter = function(inst, playanim)
             inst.Physics:Stop()
-            inst.SoundEmitter:KillSound("charge")
             if playanim then
                 inst.AnimState:PlayAnimation(playanim)
                 inst.AnimState:PushAnimation("idle", true)
@@ -70,254 +147,528 @@ local states=
                 inst.AnimState:PlayAnimation("idle", true)
             end
 
-            inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/voice")
-
+            --inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/voice")
         end,
-        
-       
-        events=
+
+        events =
         {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
         },
     },
 
+    State{
+        name = "run_start",
+        tags = { "moving", "running", "busy", "atk_pre", "canrotate" },
 
-    State{  name = "run_start",
-            tags = {"moving", "running", "busy", "atk_pre", "canrotate"},
-            
-            onenter = function(inst)
-                inst.Physics:Stop()
-                -- inst.components.locomotor:RunForward()
-                inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/pawground")
-                inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/voice")
-                inst.AnimState:PlayAnimation("atk_pre")
-                inst.AnimState:PlayAnimation("paw_loop", true)
-                inst.sg:SetTimeout(1.5)
-            end,
-            
-            ontimeout= function(inst)
-                inst.sg:GoToState("run")
-                inst:PushEvent("attackstart" )
-            end,
+        onenter = function(inst)
+            inst.Physics:Stop()
+            inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff")
+            inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/voice")
+            inst.AnimState:PlayAnimation("atk_pre")
+            inst.AnimState:PlayAnimation("paw_loop", true)
+            inst.sg:SetTimeout(1.5)
+            inst.chargecount = 0
+        end,
 
-            timeline=
-            {
-		    TimeEvent(12*FRAMES, function(inst)
-                                    inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/pawground")
-                                end ),
-
-            --TimeEvent(30*FRAMES,  function(inst) inst.sg:RemoveStateTag("canrotate") end ),
-
-		    TimeEvent(30*FRAMES, function(inst)
-                                    inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/pawground")
-                                end ),
-            },        
-
-            onexit = function(inst)
-                --inst.SoundEmitter:PlaySound(inst.soundpath .. "charge_LP","charge")
-            end,
+        timeline =
+        {
+            TimeEvent(12 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff") end),
+            TimeEvent(30 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff") end),
         },
 
-    State{  name = "run",
-            tags = {"moving", "running"},
-            
-            onenter = function(inst) 
-                inst.components.locomotor:RunForward()
-                inst.AnimState:PlayAnimation("atk")
-                inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/step")
+        ontimeout = function(inst)
+            inst.sg:GoToState("run")
+            inst:PushEvent("attackstart")
+        end,
+    },
 
-            end,
-            
-            timeline=
-            {
-                TimeEvent(5*FRAMES, function(inst)
-                        inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/step")                                        
-                                    end ),
-            },
-            
-            events=
-            {   
-                EventHandler("animover", function(inst) inst.sg:GoToState("run") end ),        
-            },
+    State{
+        name = "run",
+        tags = { "moving", "running" },
+
+        onenter = function(inst)
+            if not inst.components.timer:TimerExists("rammed") then
+                inst.components.timer:StartTimer("rammed", 3)
+            end
+            inst.components.locomotor:RunForward()
+            if not inst.AnimState:IsCurrentAnimation("atk") then
+                inst.AnimState:PlayAnimation("atk", true)
+            end
+            inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength())
+            inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/step")
+        end,
+
+        onupdate = function(inst, dt)
+            inst.chargecount = inst.chargecount + dt
+        end,
+
+        timeline =
+        {
+            TimeEvent(5 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/step") end),
         },
-    
-    State{  name = "run_stop",
-            tags = {"canrotate", "idle"},
-            
-            onenter = function(inst) 
-                inst.SoundEmitter:KillSound("charge")
-                inst.components.locomotor:Stop()
-                inst.AnimState:PlayAnimation("gore")
-            end,
-            
-            timeline =
-            {
-                TimeEvent(5*FRAMES, function(inst) inst.components.combat:DoAttack() end),
-            },
-            
-            events =
-            {
-                EventHandler("animqueueover", function(inst) inst.sg:GoToState("idle") end),
-            },
-        },    
+
+        ontimeout = function(inst)
+            inst.sg:GoToState("run")
+        end,
+    },
+
+    State{
+        name = "run_stop",
+        tags = { "canrotate", "idle" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("gore")
+        end,
+
+        timeline =
+        {
+            TimeEvent(5 * FRAMES, function(inst)
+                inst.components.combat:DoAttack()
+            end),
+        },
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
+        },
+    },
 
    State{
         name = "taunt",
-        tags = {"busy"},
-        
+        tags = { "busy" },
+
         onenter = function(inst)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("taunt")
-            inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/voice")
+            inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/taunt")
         end,
-        
-        timeline = 
+
+        timeline =
         {
-		    TimeEvent(10*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/voice") end ),
-		    TimeEvent(27*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/voice") end ),
+            --TimeEvent(10 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/taunt") end),
+            TimeEvent(27 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/taunt") end),
         },
-        
-        events=
+
+        events =
         {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
         },
     },
 
-    State{  
+    State{
         name = "runningattack",
-        tags = {"runningattack"},
-        
+        tags = { "runningattack" },
+
         onenter = function(inst)
-            inst.SoundEmitter:KillSound("charge")
             inst.components.combat:StartAttack()
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("gore")
         end,
-        
+
         timeline =
         {
-            TimeEvent(1*FRAMES, function(inst) inst.components.combat:DoAttack() end),
+            TimeEvent(FRAMES, function(inst)
+                inst.components.combat:DoAttack()
+            end),
         },
-        
+
         events =
         {
-            EventHandler("animqueueover", function(inst) inst.sg:GoToState("attack") end),
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
         },
     },
+
     State{
         name = "attack",
-        tags = {"attack", "busy"},
-        
+        tags = { "attack", "busy" },
+
         onenter = function(inst)
             inst.components.combat:StartAttack()
             inst.components.locomotor:StopMoving()
-            inst.AnimState:PlayAnimation("gore")
+            inst.AnimState:PlayAnimation("bite")
         end,
-        
+
         timeline =
-        {
-            TimeEvent(5*FRAMES, function(inst) inst.components.combat:DoAttack() end),
+
+        { 
+            TimeEvent(13*FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff") end),
+            TimeEvent(10*FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/bite") end),
+            TimeEvent(16 * FRAMES, function(inst) inst.components.combat:DoAttack()
+            end),
         },
-        
+
         events =
         {
-            EventHandler("animqueueover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
         },
     },
 
     State{
         name = "hit",
-        tags = {"hit", "busy"},
-        
+        tags = { "hit", "busy" },
+
         onenter = function(inst)
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("hit")
+            inst._last_hitreact_time = GetTime()
         end,
-        
-        hittimeline = 
+
+        timeline =
         {
-            TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/hurt") end),
+            TimeEvent(0, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/hurt") end),
         },
-        
+
         events =
         {
-            EventHandler("animqueueover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
         },
     },
 
     State{
         name = "death",
-        tags = {"death", "busy"},
-        
+        tags = { "death", "busy" },
+
         onenter = function(inst)
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("death")
+            inst.persists = false
             inst.components.lootdropper:DropLoot()
+
+            local chest = SpawnPrefab("minotaurchestspawner")
+
+            local pt = inst:GetPosition()
+
+            if not IsPassableAtPoint(pt:Get()) then
+                local theta = math.random() * 2 * PI
+                local radius = TILE_SCALE * 2
+                
+                local offset = FindWalkableOffset(pt, theta, radius, 8, true)
+                if offset then
+                    pt = pt+offset
+                end
+            end
+
+            chest.Transform:SetPosition(pt:Get())
+            chest.minotaur = inst
+
+            inst:AddTag("NOCLICK")
+        end,
+
+        timeline =
+        {
+            TimeEvent(0, function(inst)
+                inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/death")
+                --inst.SoundEmitter:PlaySound("")
+            end),
+            TimeEvent(2, ErodeAway),
+        },
+
+        onexit = function(inst)
+            --Should NOT happen!
+            inst:RemoveTag("NOCLICK")
+        end,
+    },
+
+    State{
+        name = "bite",
+        tags = {"attack", "busy"},
+
+        onenter = function(inst, target)
+            inst.Physics:Stop()
+            inst.components.combat:StartAttack()
+            inst.AnimState:PlayAnimation("bite")
+           .target = target
+        end,
+
+        timeline=
+
+        { 
+            TimeEvent(8*FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/step") end),
+            TimeEvent(13*FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/step") end),
+            TimeEvent(16*FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/bite") end),
+
+
+            TimeEvent(16*FRAMES, function(inst)
+                inst.components.combat:DoAttack(inst.sg.statemem.target) 
+                inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/bite")
+            end),  
+        },
+
+        events=
+        {
+            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+        },
+    },
+
+    State{
+        name = "leap_attack_pre",
+        tags = {"attack", "busy","leapattack"},
+        
+        onenter = function(inst)
+            inst.hasrammed = true
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("jump_atk_pre")
+            inst.sg.statemem.startpos = Vector3(inst.Transform:GetWorldPosition())
+            inst:DoTaskInTime(1,function()
+                if inst:IsValid() and not inst.components.health:IsDead() and inst.sg and inst.sg:HasStateTag("leapattack") then
+                    local target = inst.components.combat.target or nil
+                    if target then
+                        inst.sg.statemem.targetpos = Vector3(inst.components.combat.target.Transform:GetWorldPosition())
+                        inst:ForceFacePoint(inst.sg.statemem.targetpos)
+                    else
+                        local range = 6 -- overshoot range
+                        local theta = inst.Transform:GetRotation()*DEGREES
+                        local offset = Vector3(range * math.cos( theta ), 0, -range * math.sin( theta ))            
+                        inst.sg.statemem.targetpos = Vector3(inst.sg.statemem.startpos.x + offset.x, 0, inst.sg.statemem.startpos.z + offset.z)
+                    end
+                end
+            end)
+            inst.sg:SetTimeout(1.5)
+        end,
+
+        onexit = function(inst)
+            
+        end,
+
+        ontimeout = function(inst, target)
+            inst.sg:GoToState("leap_attack",{targetpos = inst.sg.statemem.targetpos}) 
+        end,
+    },
+
+    State{
+        name = "leap_attack",
+        tags = {"attack", "busy", "leapattack"},
+        
+        onenter = function(inst,data)
+            if inst.components.timer:TimerExists("leapattack_cooldown") then
+                inst.components.timer:SetTimeLeft("leapattack_cooldown", TUNING.MINOTAUR_LEAP_CD)
+            else
+                inst.components.timer:StartTimer("leapattack_cooldown", TUNING.MINOTAUR_LEAP_CD)
+            end
+
+            inst.sg.statemem.targetpos = data.targetpos
+            
+            inst.AnimState:PlayAnimation("jump_atk_loop")
+            inst.components.locomotor:Stop()
+
+            inst.sg.statemem.startpos = Vector3(inst.Transform:GetWorldPosition())
+
+            inst.components.combat:StartAttack()
+
+            inst:ForceFacePoint(inst.sg.statemem.targetpos)
+            
+            local range = 2
+            local theta = inst.Transform:GetRotation()*DEGREES
+            local offset = Vector3(range * math.cos( theta ), 0, -range * math.sin( theta ))
+            local newloc = Vector3(inst.sg.statemem.targetpos.x + offset.x, 0, inst.sg.statemem.targetpos.z + offset.z)
+
+            local time = inst.AnimState:GetCurrentAnimationLength()
+            local dist = math.sqrt(distsq(inst.sg.statemem.startpos.x, inst.sg.statemem.startpos.z, newloc.x, newloc.z))
+            local vel = dist/time
+
+            inst.sg.statemem.vel = vel
+
+            inst.components.locomotor:EnableGroundSpeedMultiplier(false)
+            inst.Physics:SetMotorVelOverride(vel,0,0)
+
+            inst.Physics:ClearCollisionMask()
+            inst.Physics:CollidesWith(GetWorldCollision())
+        end,
+
+        onexit = function(inst)
+            inst.Physics:ClearMotorVelOverride()
+
+            inst.components.locomotor:Stop()
+            inst.components.locomotor:EnableGroundSpeedMultiplier(true)
+            inst.sg.statemem.startpos = nil
+            inst.sg.statemem.targetpos = nil
+
+            inst.OnChangeToObstacle(inst)
         end,
         
-        TimeEvent(0*FRAMES, function(inst) 
-            inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/death")
-            inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/death_voice")
-        end),
+        events=
+        {
+            EventHandler("animover", function(inst)
+                inst.components.groundpounder:GroundPound()
+                BounceStuff(inst)
+
+                if inst.jumpland(inst) then
+                    inst.sg:GoToState("leap_attack_pst")
+                    inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/groundpound")
+                else
+                    inst.sg:GoToState("stun",{land_stun=true})
+                end
+            end),
+        },
+    },
+
+    State{
+
+        name = "leap_attack_pst",
+        tags = {"busy"},
         
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("jump_atk_pst")
+            inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/groundpound")
+        end,
+
+        onexit = function(inst)
+            inst.components.groundpounder.numRings = 3
+        end,
+
+        events =
+        {
+            EventHandler("animover", function(inst) inst.sg:GoToState("taunt") end),
+        },
+    },
+
+    State{
+        name = "stun",
+        tags = {"busy","stunned"},
+        
+        onenter = function(inst, data)
+            inst.components.locomotor:Stop()
+            if data and data.land_stun then
+                inst.AnimState:PlayAnimation("stun_jump_pre")
+            else
+                inst.sg.statemem.playlandsound = true
+                inst.AnimState:PlayAnimation("stun_pre")
+            end
+            local stuntime = math.max(1.5,Remap(inst.chargecount,0, 1, 0, 6 ) )
+            if not inst.components.timer:TimerExists("endstun") then
+                inst.components.timer:StartTimer("endstun", stuntime)
+            end
+            inst:StopBrain()
+        end,
+
+        timeline=
+        { 
+            TimeEvent(11*FRAMES, function(inst) 
+                if inst.sg.statemem.playlandsound then
+                    inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/step")
+                end
+             end), 
+        },
+
+        events=
+        {
+            EventHandler("stunned_hit", function(inst) inst.sg:GoToState("stun_hit") end),
+            EventHandler("animover", function(inst) inst.sg:GoToState("stun_loop") end),
+        },    
+    },
+
+    State{
+        name = "stun_loop",
+        tags = {"busy","stunned"},
+        
+        onenter = function(inst)
+            inst.AnimState:PlayAnimation("stun_loop")
+        end,
+        
+        timeline=
+        { 
+            TimeEvent(8*FRAMES, function(inst)
+                inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/recover")
+             end), 
+        },
+
+        events=
+        {
+            EventHandler("stunned_hit", function(inst) inst.sg:GoToState("stun_hit") end),
+            EventHandler("animover", function(inst) inst.sg:GoToState("stun_loop") end),
+        },
+    },
+
+    State{
+        name = "stun_hit",
+        tags = {"busy","stunned"},
+        
+        onenter = function(inst)
+            inst.AnimState:PlayAnimation("stun_hit")
+        end,
+
+        events=
+        {
+            EventHandler("animover", function(inst) inst.sg:GoToState("stun_loop") end),
+        },
+    },
+
+    State{
+        name = "stun_pst",
+        tags = {"busy"},
+        
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("stun_pst")
+        end,
+
+        events=
+        {
+            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+        },
+
+        timeline =
+        {
+            TimeEvent(8 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff") end),
+            TimeEvent(27 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff") end),
+            TimeEvent(30 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/step") end),
+            TimeEvent(38 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/scuff") end),
+        },
     },
 }
 
 CommonStates.AddWalkStates(states,
 {
-    starttimeline = 
+    starttimeline =
     {
-	    TimeEvent(0*FRAMES, function(inst) inst.Physics:Stop() end ),
+        TimeEvent(0, function(inst)
+            inst.Physics:Stop()
+        end),
     },
-	walktimeline = {
-		    TimeEvent(0*FRAMES, function(inst) inst.Physics:Stop() end ),
-            TimeEvent(7*FRAMES, function(inst) 
-                inst.components.locomotor:WalkForward()
-            end ),
-            TimeEvent(20*FRAMES, function(inst)
-                inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/step")
-                --       :Shake(shakeType, duration, speed, scale)
-                TheCamera:Shake("VERTICAL", 0.5, 0.05, 0.1)
-                inst.Physics:Stop()
-            end ),
-	},
-}, nil,true)
+    walktimeline =
+    {
+        TimeEvent(0, function(inst)
+            inst.Physics:Stop()
+        end),
+        TimeEvent(7 * FRAMES, function(inst)
+            inst.components.locomotor:WalkForward()
+        end),
+        TimeEvent(18 * FRAMES, function(inst)
+            inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/walk")
+        end),
+        TimeEvent(20 * FRAMES, function(inst)
+            GetPlayer().components.playercontroller:ShakeCamera(inst, "VERTICAL", .5, .05, .1, 40)
+            inst.Physics:Stop()
+        end),
+    },
+}, nil, true)
 
 CommonStates.AddSleepStates(states,
 {
-    starttimeline = 
+    starttimeline =
     {
-		TimeEvent(11*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/liedown") end ),
+        TimeEvent(11 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/liedown") end),
     },
-    
-	sleeptimeline = {
-        TimeEvent(18*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/sleep") end),
-	},
+    sleeptimeline =
+    {
+        TimeEvent(18 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("ancientguardian_rework/minotaur2/sleep") end),
+    },
 })
-
--- CommonStates.AddCombatStates(states,
--- {
---     attacktimeline = 
---     {
---         TimeEvent(17*FRAMES, function(inst)
---                                 inst.components.combat:DoAttack()
---                              end),
---     },
---     hittimeline = 
---     {
---         TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/hurt") end),
---     },
---     deathtimeline = 
---     {
---         TimeEvent(0*FRAMES, function(inst) 
---             inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/death")
---             inst.SoundEmitter:PlaySound("dontstarve/creatures/rook_minotaur/death_voice")
---         end),
---     },
--- })
 
 CommonStates.AddFrozenStates(states)
 
-    
-return StateGraph("rook", states, events, "idle", actionhandlers)
-
+return StateGraph("minotaur", states, events, "idle")

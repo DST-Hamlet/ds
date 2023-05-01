@@ -38,7 +38,12 @@ function BoatEquipSlot:OnControl(control, down)
 
             return true
         elseif control == CONTROL_SECONDARY and self.tile and self.tile.item then
-            GetPlayer().components.inventory:UseItemFromInvTile(self.tile.item)
+            local inventory = GetPlayer().components.inventory
+            if TheInput:IsControlPressed(CONTROL_FORCE_TRADE) then
+                inventory:DropItemFromInvTile(self.tile.item, TheInput:IsControlPressed(CONTROL_FORCE_STACK))
+            else
+                inventory:UseItemFromInvTile(self.tile.item)
+            end
             return true
         end
     end

@@ -76,6 +76,7 @@ local function fn()
 	inst.components.equippable:SetOnUnequip(onunequip)
 
 	inst:AddComponent("weapon")
+	inst.components.weapon.projectilelaunchsymbol = "swap_object"
 	inst.components.weapon:SetDamage(TUNING.HARPOON_DAMAGE)
 	inst.components.weapon:SetRange(TUNING.HARPOON_RANGE, TUNING.HARPOON_RANGE+2)
 	

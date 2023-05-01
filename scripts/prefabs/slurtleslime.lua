@@ -54,6 +54,7 @@ local function fn(Sim)
     inst.components.explosive.explosivedamage = TUNING.SLURTLESLIME_EXPLODE_DAMAGE
     inst.components.explosive.buildingdamage = 1
     inst.components.explosive.lightonexplode = false
+    inst:ListenForEvent("onextinguish", function(inst) inst.SoundEmitter:KillSound("hiss") end)
 
 
     --[[local light = inst.entity:AddLight()

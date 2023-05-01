@@ -33,7 +33,7 @@ function BlinkStaff:CanBlinkToPoint(pt)
     local ground = GetWorld()
     if ground then
 		local tile = ground.Map:GetTileAtPoint(pt.x, pt.y, pt.z)
-		return tile ~= GROUND.IMPASSIBLE and tile < GROUND.UNDERGROUND
+		return tile ~= GROUND.IMPASSABLE and tile < GROUND.UNDERGROUND and IsPointInInteriorBounds(pt)
 	end
 	return false
 end
@@ -53,9 +53,9 @@ function BlinkStaff:CollectPointActions(doer, pos, actions, right)
 end
 
 function BlinkStaff:SpawnEffect(inst)
-	local pt = inst:GetPosition()
-	local fx = SpawnPrefab("small_puff")
-	fx.Transform:SetPosition(pt.x, pt.y, pt.z)
+	local x, y, z = inst.Transform:GetWorldPosition()
+    SpawnPrefab("sand_puff_large_back").Transform:SetPosition(x, y - .1, z)
+    SpawnPrefab("sand_puff_large_front").Transform:SetPosition(x, y, z)
 end
 
 function BlinkStaff:Blink(pt, caster)

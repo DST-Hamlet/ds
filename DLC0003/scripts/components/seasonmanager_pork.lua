@@ -110,10 +110,10 @@ local SeasonManager = Class(function(self, inst)
 	self.greenlength = TUNING.SEASON_LENGTH_FRIENDLY_DEFAULT
 	self.drylength = TUNING.SEASON_LENGTH_HARSH_DEFAULT
 
-	self.temperatelength = TUNING.SEASON_LENGTH_FRIENDLY_DEFAULT/2
-	self.humidlength = TUNING.SEASON_LENGTH_FRIENDLY_DEFAULT/2
-	self.lushlength = TUNING.SEASON_LENGTH_FRIENDLY_DEFAULT/2
-	self.aporkalypse_length = TUNING.SEASON_LENGTH_FRIENDLY_DEFAULT/2
+	self.temperatelength = TUNING.PLATEAU_SEASON_LENGTH_DEFAULT
+	self.humidlength = TUNING.PLATEAU_SEASON_LENGTH_DEFAULT
+	self.lushlength = TUNING.PLATEAU_SEASON_LENGTH_DEFAULT
+	self.aporkalypse_length = TUNING.PLATEAU_SEASON_LENGTH_DEFAULT
 
 
 	self.incaves = false
@@ -217,7 +217,7 @@ function SeasonManager:onEnterInterior(data)
 
     self.hurricaneoutside = self:IsHurricaneStorm()
     if self.hurricaneoutside then
-    	self:StopHurricaneStorm()
+    	self:StopHurricaneStorm(true)
     end
 end
 
@@ -228,7 +228,7 @@ function SeasonManager:onExitInterior(data)
     end
 
     if self.hurricaneoutside then
-    	self:StartHurricaneStorm()
+    	self:StartHurricaneStorm(nil, nil, true)
     end
 end
 
@@ -731,19 +731,18 @@ function SeasonManager:UpdateSegs()
 	local clock = GetClock()
 
 	if self.aporkalypse_transition then
-
 		local aporkalypse = GetAporkalypse()
 
 		if aporkalypse and aporkalypse:IsActive() then
-
 			clock:SetSegsMidEra(segs.day, segs.dusk, segs.night, "night")			
 			clock.inst:PushEvent("nighttime", {day=clock.numcycles})
-			clock.previous_phase = clock.phase
 		else
 			local phase = clock:GetPhaseByNormEraTime(clock:GetNormEraTime(), segs.day, segs.dusk, segs.night)
 			clock:SetSegsMidEra(segs.day, segs.dusk, segs.night, phase, true)
 			clock.inst:PushEvent(phase .. "time", {day=clock.numcycles})
 		end
+		
+		self.inst:DoTaskInTime(0, function() clock:updateAmibentColor() end)
 
 		self.aporkalypse_transition = false
 	else
@@ -1174,6 +1173,9 @@ function SeasonManager:OnSave()
 		humidenabled = self.humidenabled,
 		aporkalypse_enabled = self.aporkalypse_enabled,
 
+		pre_aporkalypse_percent = self.pre_aporkalypse_percent,
+		pre_aporkalypse_season  = self.pre_aporkalypse_season,
+
 		event = self.initialevent,
 		segmod = self.segmod,
 		windmode = self.windmode,
@@ -1275,6 +1277,9 @@ function SeasonManager:OnLoad(data)
 	self.lushenabled = data.lushenabled or self.lushenabled
 	self.humidenabled = data.humidenabled or self.humidenabled
 	self.aporkalypse_enabled = data.aporkalypse_enabled or self.aporkalypse_enabled
+
+	self.pre_aporkalypse_season = data.pre_aporkalypse_season or self.pre_aporkalypse_season
+	self.pre_aporkalypse_percent = data.pre_aporkalypse_percent or self.pre_aporkalypse_percent
 
 	self.segmod = data.segmod or self.segmod
 	self.initialevent = data.event or true
@@ -2110,16 +2115,20 @@ function SeasonManager:UpdateHurricaneTease(dt)
 	end
 end
 
-function SeasonManager:StartHurricaneStorm(duration_override, disablehail)
+function SeasonManager:StartHurricaneStorm(duration_override, disablehail, continuation)
 	if not self:IsHurricaneStorm() then
+		if continuation then
+			self.hurricane = true
+			self:StartPrecip(true)
+			self.inst:PushEvent("hurricanestart")
+			
+			return
+		end
+
 		self.hurricane = true
 		
 		self.atmo_moisture = self.moisture_limit
-		--self.precipmode = "hurricane"
-		--self.lightningmode = "hurricane"
 		self:StartPrecip()
-		--local season_floor_scale = 0.25
-		--self.moisture_floor = (.25 + math.random()*.5) * (self.atmo_moisture*season_floor_scale)
 		self.hurricane_disablehail = disablehail
 		self.hurricane_peak_intensity = 100
 		self.hurricane_rate = 0
@@ -2142,33 +2151,31 @@ function SeasonManager:StartHurricaneStorm(duration_override, disablehail)
 			self.hurricane_gust_peak = 0.0 --GetRandomWithVariance(0.5, 0.25)
 			self.hurricane_gust_state = HURRICANE_GUST_WAIT
 		end
-		--print("Hurricane: " .. self.hurricane_duration)
 
 		self.inst:PushEvent("hurricanestart")
 	end
 end
 
-function SeasonManager:StopHurricaneStorm()
+function SeasonManager:StopHurricaneStorm(will_continue)
 	if self:IsHurricaneStorm() then
 		--stop hurricane weather things
 		self:StopPrecip()
 		self.hurricane = false
 
-		if not self:IsWindy() then
-			self.hurricane_wind = 0.0
-			self.hurricane_gust_speed = 0.0
-			self.hurricane_gust_timer = 0.0
-			self.hurricane_gust_period = 0.0
-			self.hurricane_gust_peak = 0.0
-			self.hurricane_gust_state = HURRICANE_GUST_WAIT
+		if not will_continue then
+			if not self:IsWindy() then
+				self.hurricane_wind = 0.0
+				self.hurricane_gust_speed = 0.0
+				self.hurricane_gust_timer = 0.0
+				self.hurricane_gust_period = 0.0
+				self.hurricane_gust_peak = 0.0
+				self.hurricane_gust_state = HURRICANE_GUST_WAIT
+			end
+
+			self.hurricane_disablehail = nil		
+			self.atmo_moisture = 0.0
 		end
 
-		self.hurricane_disablehail = nil		
-		self.atmo_moisture = 0.0
-		--self.atmo_moisture = self.moisture_limit --let rain linger off
-		--self.precipmode = "dynamic"
-		--self.lightningmode = "precip"
-		--self:DefaultLightningDelays()
 		self.inst:PushEvent("hurricanestop")
 	end
 end
@@ -2315,7 +2322,7 @@ function SeasonManager:OnUpdate( dt )
 			night_cold = TUNING.PLATEAU_NIGHT_TEMP
 		end
 
-		if self.current_season ~= SEASONS.LUSH and self:GetPercentSeason() > 0.02 then
+		if self.current_season ~= SEASONS.LUSH and (self:GetPercentSeason() > 0.02 or self:IsAporkalypse()) then
 			if GetPlayer().components.hayfever and GetPlayer().components.hayfever.enabled then
 				 GetPlayer().components.hayfever:Disable()
 			end

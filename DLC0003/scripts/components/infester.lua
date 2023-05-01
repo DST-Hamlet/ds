@@ -6,6 +6,8 @@ local Infester = Class(function(self, inst)
     self.basetime = 8
     self.randtime = 8
     self.inst:AddTag("infester")
+
+	self.onuninfestfn = nil
 end)
 
 function Infester:Uninfest()
@@ -13,7 +15,7 @@ function Infester:Uninfest()
 	if self.target then
 		self.target:RemoveChild(self.inst)
 		local pos =Vector3(self.target.Transform:GetWorldPosition())
-		self.inst.Transform:SetPosition(pos.x,pos.y,pos.z) 
+		self.inst.Transform:SetPosition(pos.x,pos.y,pos.z)
 				
 		self.target.components.infestable:uninfest(self.inst)
 
@@ -23,6 +25,11 @@ function Infester:Uninfest()
 		self.inst.bitetask:Cancel()
 		self.inst.bitetask = nil
 	end
+
+	if self.onuninfestfn then
+		self.onuninfestfn(self.inst)
+	end
+
 	self.inst:ClearBufferedAction()
 	self.inst:StopUpdatingComponent(self)
 end

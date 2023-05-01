@@ -83,8 +83,13 @@ end
 
 local function ondepleted(inst)
     if inst.components.inventoryitem and inst.components.inventoryitem.owner then
-        --dropthing.
-        inst.components.inventoryitem.owner.components.inventory:DropItem(inst, true)
+        local owner = inst.components.inventoryitem.owner
+        local container = owner.components.inventory or owner.components.container
+
+        if container then
+            -- Drop it!
+            container:DropItem(inst, true)
+        end
     end
     inst:DoTaskInTime(0,function() OnIgniteFn(inst) end)
 end

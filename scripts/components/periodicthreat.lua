@@ -311,6 +311,10 @@ function PeriodicThreat:OnUpdate(dt)
 end
 
 function PeriodicThreat:LongUpdate(dt)
+	if POPULATING then
+		return
+	end
+	
 	self:OnUpdate(dt)
 end
 

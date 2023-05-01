@@ -20,9 +20,11 @@ local function onequip(inst, owner)
 
     owner:ListenForEvent("wind_rampup", owner.ramp_fn, GetWorld())
 
-    owner.sail_stick_update = owner:DoPeriodicTask(FRAMES, function()
-        GetWorld().components.worldwind:SetOverrideAngle(GetPlayer().Transform:GetRotation())
-    end)
+    if GetWorld().components.worldwind then
+        owner.sail_stick_update = owner:DoPeriodicTask(FRAMES, function()
+            GetWorld().components.worldwind:SetOverrideAngle(GetPlayer().Transform:GetRotation())
+        end)
+    end
 end
 
 local function onunequip(inst, owner) 
@@ -34,9 +36,12 @@ local function onunequip(inst, owner)
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
     inst.components.fueled:StopConsuming()
-    GetWorld().components.worldwind:SetOverrideAngle(nil)
-    owner.sail_stick_update:Cancel()
-    owner.sail_stick_update = nil
+
+    if owner.sail_stick_update then
+        GetWorld().components.worldwind:SetOverrideAngle(nil)
+        owner.sail_stick_update:Cancel()
+        owner.sail_stick_update = nil
+    end
 end
 
 local function onfinished(inst)

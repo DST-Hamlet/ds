@@ -33,6 +33,7 @@ local function makefn(name, frame)
 		inst:AddComponent("tradable")
         
 		inst:AddTag("irreplaceable")
+		inst:AddTag("dropontravel")
 		inst:AddTag("teleportato_part")
 
        	return inst

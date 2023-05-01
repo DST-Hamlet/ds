@@ -144,6 +144,7 @@ local function fn(Sim)
     inst.components.inventoryitem.canbepickedup = false
 
     inst:AddTag("cattoyairborne")
+    inst:AddTag("invalidammo")
     inst:AddComponent("tradable")
 
     inst:AddComponent("fuel")

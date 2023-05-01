@@ -180,6 +180,7 @@ local function fn(Sim)
     inst:AddTag("chester_eyebone") --This tag is used in save code and stuff, that's why I didn't change it
     inst:AddTag("packim_fishbone") -- This tag is used to check explicitly for packim_fishbone
     inst:AddTag("irreplaceable")
+    inst:AddTag("dropontravel")
 	inst:AddTag("nonpotatable")
     inst:AddTag("follower_leash")
 

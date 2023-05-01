@@ -27,16 +27,19 @@ function Thief:StealItem(victim, itemtosteal, attack, food, setspeed)
             if food then
                 item = victim.components.inventory:FindItem(
                     function(item)
-                        return self.inst.components.eater:AbleToEat(item)
-                        and not item:HasTag("nosteal")
-                        or not (item.components.inventoryitem:IsHeld() and self.inst:HasTag("cannotstealequipped"))
-                    end)               
+                        return 
+                            self.inst.components.eater:AbleToEat(item)
+                            and (
+                                    not item:HasTag("nosteal")
+                                    or not (item.components.inventoryitem:IsHeld() and self.inst:HasTag("cannotstealequipped"))
+                                )
+                    end)
             else
                 item = victim.components.inventory:FindItem(
                     function(item)
                         return not item:HasTag("nosteal")
                         or not (item.components.inventoryitem:IsHeld() and self.inst:HasTag("cannotstealequipped"))
-                    end)        
+                    end)
             end
         end
 

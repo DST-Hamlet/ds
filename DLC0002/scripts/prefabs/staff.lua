@@ -12,6 +12,8 @@ local prefabs =
 	"stafflight",
     "staff_tornado",
     "cutgrass",
+    "sand_puff_large_front",
+    "sand_puff_large_back",
 }
 
 ---------RED STAFF---------
@@ -59,7 +61,7 @@ local function onattack_red(inst, attacker, target)
 
     attacker.SoundEmitter:PlaySound("dontstarve/wilson/fireball_explo")
 
-    target:PushEvent("attacked", { attacker = attacker, damage = 0 })
+    target:PushEvent("attacked", { attacker = attacker, damage = 0, weapon = inst})
 end
 
 local function onlight(inst, target)
@@ -92,7 +94,7 @@ local function onattack_blue(inst, attacker, target)
     end
 
     if target.sg ~= nil and not target.sg:HasStateTag("frozen") then
-        target:PushEvent("attacked", { attacker = attacker, damage = 0 })
+        target:PushEvent("attacked", { attacker = attacker, damage = 0, weapon = inst})
     end
 
     if target.components.freezable then
@@ -103,11 +105,11 @@ end
 
 ---------PURPLE STAFF---------
 
-local function getrandomposition(inst, caster)
+local function getrandomposition(inst, target)
     local ground = GetWorld()
     local centers = {}
 
-    if caster:HasTag("aquatic") then
+    if target:GetIsOnWater() or target:HasTag("aquatic") then
         for i,node in ipairs(ground.topology.nodes) do
             if inst:GetIsOnWater(node.x, 0, node.y) then
                 table.insert(centers, {x = node.x, z = node.y})
@@ -144,7 +146,7 @@ local function teleport_thread(inst, caster, teletarget, loctarget)
     if loctarget then
         t_loc = loctarget:GetPosition()
     else
-        t_loc = getrandomposition(inst, caster)
+        t_loc = getrandomposition(inst, teletarget)
     end
 
     local teleportee = teletarget
@@ -312,6 +314,10 @@ local function SpawnLootPrefab(inst, lootprefab)
                     pt = pt + Vector3(math.cos(angle), 0, math.sin(angle))*(loot.Physics:GetRadius() + inst.Physics:GetRadius())
                     loot.Transform:SetPosition(pt.x,pt.y,pt.z)
                 end
+
+                if loot.components.inventoryitem then
+                    loot.components.inventoryitem:OnLootDropped()
+                end
                 
                 loot:DoTaskInTime(1, 
                     function() 
@@ -439,7 +445,7 @@ local function cancreatelight(staff, caster, target, pos)
     local ground = GetWorld()
     if ground and pos then
         local tile = ground.Map:GetTileAtPoint(pos.x, pos.y, pos.z)
-        return tile ~= GROUND.IMPASSIBLE and tile < GROUND.UNDERGROUND
+        return tile ~= GROUND.IMPASSABLE and tile < GROUND.UNDERGROUND
     end
     return false
 end
@@ -555,9 +561,11 @@ local function red()
 
 
     inst:AddTag("firestaff")
+    inst:AddTag("projectile")
     inst:AddTag("rangedfireweapon")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     inst.components.weapon:SetOnAttack(onattack_red)
@@ -577,9 +585,11 @@ local function blue()
     local inst = commonfn("blue")
     
     inst:AddTag("icestaff")
+    inst:AddTag("projectile")
     inst:AddTag("extinguisher")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(0)
     inst.components.weapon:SetRange(8, 10)
     inst.components.weapon:SetOnAttack(onattack_blue)

@@ -145,6 +145,8 @@ local function commonfn()
     inst:AddComponent("explosive")
     inst.components.explosive.explosiverange = 3
     inst.components.explosive.lightonexplode = false
+    
+    inst:ListenForEvent("onextinguish", function(inst) inst.SoundEmitter:KillSound("rattle") end)
 
     inst.components.explosive:SetOnExplodeFn(OnExplodeFn)
     inst.components.explosive:SetOnIgniteFn(OnIgniteFn)

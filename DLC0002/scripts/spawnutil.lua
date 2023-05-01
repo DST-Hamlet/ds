@@ -152,17 +152,15 @@ local landprefabs =
 	"beachresurrector", "flower_evil", "crate", "tallbirdnest"
 }
 
-
-for i = 1, #waterprefabs, 1 do
-	assert(commonspawnfn[waterprefabs[i]] == nil) --don't replace an existing one
-	commonspawnfn[waterprefabs[i]] = surroundedbywater
+local function AddCommonSpawnTestFn(prefab_table, test_fn)
+	for i, prefab in pairs(prefab_table) do
+		assert(commonspawnfn[prefab] == nil, prefab .. " already exists in commonspawnfn table") -- don't replace an existing one
+		commonspawnfn[prefab] = test_fn
+	end
 end
 
-for i = 1, #landprefabs, 1 do
-	assert(commonspawnfn[landprefabs[i]] == nil) --don't replace an existing one
-	commonspawnfn[landprefabs[i]] = notclosetowater
-end
-
+AddCommonSpawnTestFn(waterprefabs, surroundedbywater)
+AddCommonSpawnTestFn(landprefabs, notclosetowater)
 
 function GetCommonSpawnFn(prefab, x, y, ents)
 	return prefab ~= nil and (commonspawnfn[prefab] == nil or commonspawnfn[prefab](x, y, ents))

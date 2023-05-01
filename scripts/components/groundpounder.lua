@@ -66,10 +66,17 @@ function GroundPounder:DestroyPoints(points, breakobjects, dodamage)
 		end
 		if ents and dodamage then
 		    for k2,v2 in pairs(ents) do
-		        if v2 and v2.components.health and not v2.components.health:IsDead() and 
-		        self.inst.components.combat:CanTarget(v2) then
-		            self.inst.components.combat:DoAttack(v2, nil, nil, nil, self.groundpounddamagemult)
-		        end
+		    	if not self.ignoreEnts then 
+		    		self.ignoreEnts = {}
+		    	end 
+		    	if not self.ignoreEnts[v2.GUID] then --If this entity hasn't already been hurt by this groundpound
+
+			        if v2 and v2.components.health and not v2.components.health:IsDead() and 
+			        self.inst.components.combat:CanTarget(v2) then
+			            self.inst.components.combat:DoAttack(v2, nil, nil, nil, self.groundpounddamagemult)
+			        end
+			        self.ignoreEnts[v2.GUID] = true --Keep track of which entities have been hit 
+			    end 
 		    end
 		end
 
@@ -85,8 +92,9 @@ function GroundPounder:GroundPound(pt)
 	SpawnPrefab(self.groundpoundringfx).Transform:SetPosition(pt:Get())
 	local points = self:GetPoints(pt)
 	local delay = 0
-	for i = 1, self.numRings do
+	self.ignoreEnts = nil
 
+	for i = 1, self.numRings do
 		self.inst:DoTaskInTime(delay, function() self:DestroyPoints(points[i], i <= self.destructionRings, i <= self.damageRings) end)
 		delay = delay + self.ringDelay
 	end

@@ -11,6 +11,7 @@ Action = Class(function(self, data, priority, instant, rmb, distance)
     self.rmb = rmb or nil
     self.distance = distance or nil
     self.mount_enabled = data.mount_enabled or false
+    self.valid_hold_action = data.valid_hold_action or false
 end)
 
 ACTIONS=
@@ -19,37 +20,37 @@ ACTIONS=
     READ = Action({mount_enabled=true}),
     DROP = Action({mount_enabled=true},-1),
     TRAVEL = Action({}, 2),
-    CHOP = Action({}),
+    CHOP = Action({},nil, nil, nil, 2),
     ATTACK = Action({mount_enabled=true},2, true),
     WHACK = Action({mount_enabled=true},2, true),
     FORCEATTACK = Action({mount_enabled=true},2, true),
-    EAT = Action({mount_enabled=true}),
-    PICK = Action({}),
-    PICKUP = Action({},1),
+	EAT = Action({mount_enabled=true, valid_hold_action=true}),
+    PICK = Action({mount_enabled=true}),
+    PICKUP = Action({mount_enabled=true},1),
     MINE = Action({}),
     DIG = Action({},nil, nil, true),
-    GIVE = Action({mount_enabled=true}),
-    COOK = Action({}),
+    GIVE = Action({mount_enabled=true, valid_hold_action=true}),
+    COOK = Action({valid_hold_action=true}),
     DRY = Action({}),
-    ADDFUEL = Action({mount_enabled=true}),
-    ADDWETFUEL = Action({mount_enabled=true}),
-    LIGHT = Action({},-4),
+    ADDFUEL = Action({mount_enabled=true, valid_hold_action=true}),
+    ADDWETFUEL = Action({mount_enabled=true, valid_hold_action=true}),
+	LIGHT = Action({}, -4, nil, nil, 1.5),
     EXTINGUISH = Action({},0),
     LOOKAT = Action({mount_enabled=true},-3, true),
     TALKTO = Action({mount_enabled=true},3, true),
     WALKTO = Action({mount_enabled=true},-4),
     BAIT = Action({}),
-    CHECKTRAP = Action({},2),
+    CHECKTRAP = Action({mount_enabled=true},2),
     BUILD = Action({mount_enabled=true}),
     PLANT = Action({}),
-    HARVEST = Action({}),
+    HARVEST = Action({valid_hold_action=true}),
     GOHOME = Action({}),
     SLEEPIN = Action({}),
     EQUIP = Action({mount_enabled=true},0,true),
     UNEQUIP = Action({mount_enabled=true},-2,true),
     --OPEN_SHOP = Action(),
     SHAVE = Action({mount_enabled=true}),
-    STORE = Action({}),
+    STORE = Action({valid_hold_action=true}),
     RUMMAGE = Action({mount_enabled=true},-1),
     DEPLOY = Action({}),
     PLAY = Action({mount_enabled=true}),
@@ -59,8 +60,8 @@ ACTIONS=
     FISH = Action({}),
     REEL = Action({},0, true),
     POLLINATE = Action({}),
-    FERTILIZE = Action({}),
-    SMOTHER = Action({}),
+    FERTILIZE = Action({valid_hold_action=true}),
+    SMOTHER = Action({mount_enabled=true}),
     MANUALEXTINGUISH = Action({},1),
     RANGEDSMOTHER = Action({},0, true),
     RANGEDLIGHT = Action({mount_enabled=true},-4, true),
@@ -71,17 +72,17 @@ ACTIONS=
     RESETMINE = Action({},3),
     ACTIVATE = Action({}),
     MURDER = Action({mount_enabled=true},0),
-    HEAL = Action({mount_enabled=true}),
+    HEAL = Action({mount_enabled=true, valid_hold_action=true}),
     INVESTIGATE = Action({mount_enabled=true}),
     UNLOCK = Action({}),
     TEACH = Action({mount_enabled=true}),
     TURNON = Action({},2),
     TURNOFF = Action({},2),
-    SEW = Action({mount_enabled=true}),
+    SEW = Action({mount_enabled=true, valid_hold_action=true}),
     STEAL = Action({}),
     USEITEM = Action({},1, true),
     TAKEITEM = Action({}),
-    MAKEBALLOON = Action({mount_enabled=true}),
+    MAKEBALLOON = Action({mount_enabled=true, valid_hold_action=true}),
     CASTSPELL = Action({mount_enabled=true},0, false, true, 20),
     BLINK = Action({mount_enabled=true},10, false, true, 36),
     COMBINESTACK = Action({mount_enabled=true}),
@@ -98,7 +99,7 @@ ACTIONS=
     BURY = Action({},0, false, false),
     FEED = Action({mount_enabled=true},0, false, true),
     FAN = Action({mount_enabled=true},0, false, true),
-    UPGRADE = Action({},0, false, true),
+    UPGRADE = Action({valid_hold_action=true},0, false, true),
 
     RIDE_MOUNT = Action({},1),  -- made distict from MOUNT due to the range problem of MOUNT
     BRUSH = Action({},3),
@@ -111,7 +112,7 @@ ACTIONS=
     BUNDLE = Action({},2, nil, true),
     BUNDLESTORE = Action({},nil, true ),
     WRAPBUNDLE = Action({},nil, true ),
-    UNWRAP = Action({},2, nil, true),
+    UNWRAP = Action({},3, nil, true),
     
     DRAW = Action({}),
     UNPIN = Action({}),
@@ -304,7 +305,7 @@ ACTIONS.DEPLOY.fn = function(act)
         local obj = (act.doer.components.inventory and act.doer.components.inventory:RemoveItem(act.invobject)) or 
         (act.doer.components.container and act.doer.components.container:RemoveItem(act.invobject))
         if obj then
-            if obj.components.deployable:Deploy(act.pos, act.doer) then
+            if obj.components.deployable:Deploy(act.pos, act.doer, act.rotation) then
                 return true
             else
                 act.doer.components.inventory:GiveItem(obj)
@@ -314,24 +315,16 @@ ACTIONS.DEPLOY.fn = function(act)
 end
 
 ACTIONS.DEPLOY.strfn = function(act)
-    if act.invobject and act.invobject:HasTag("groundtile") then
-        return "GROUNDTILE"
-    elseif act.invobject and act.invobject:HasTag("wallbuilder") then
-        return "WALL"
-    elseif act.invobject and act.invobject:HasTag("eyeturret") then
-        return "TURRET"
-    end
+	return act.invobject and (
+        (act.invobject:HasTag("eyeturret") and "TURRET") or
+        (act.invobject:HasTag("wallbuilder") and "WALL") or
+        (act.invobject:HasTag("groundtile") and "GROUNDTILE") or
+        (act.invobject:HasTag("gatebuilder") and "GATE") or 
+        (act.invobject:HasTag("fencebuilder") and "FENCE")
+    ) or nil
 end
 
-ACTIONS.TOGGLE_DEPLOY_MODE.strfn = function(act)
-    if act.invobject and act.invobject:HasTag("groundtile") then
-        return "GROUNDTILE"
-    elseif act.invobject and act.invobject:HasTag("wallbuilder") then
-        return "WALL"
-    elseif act.invobject and act.invobject:HasTag("eyeturret") then
-        return "TURRET"
-    end
-end
+ACTIONS.TOGGLE_DEPLOY_MODE.strfn = ACTIONS.DEPLOY.strfn
 
 ACTIONS.CHECKTRAP.fn = function(act)
     if act.target.components.trap then
@@ -369,7 +362,7 @@ ACTIONS.FERTILIZE.fn = function(act)
         return true
     elseif act.target.components.pickable and act.target.components.pickable:CanBeFertilized() and act.invobject and act.invobject.components.fertilizer then
         local obj = act.invobject
-        act.target.components.pickable:Fertilize(obj)
+        act.target.components.pickable:Fertilize(obj, act.doer)
         return true     
     end
 end
@@ -607,6 +600,11 @@ ACTIONS.GIVE.fn = function(act)
         act.target.components.trader:AcceptGift(act.doer, act.invobject)
         return true
     end
+
+    if act.invobject.components.usableitem then
+        act.invobject.components.usableitem:Use(act.doer, act.target)
+        return true
+    end
 end
 
 ACTIONS.GIVE.strfn = function(act)
@@ -661,9 +659,7 @@ end
 
 ACTIONS.BUILD.fn = function(act)
     if act.doer.components.builder then
-        if act.doer.components.builder:DoBuild(act.recipe, act.pos) then
-            return true
-        end
+        return act.doer.components.builder:DoBuild(act.recipe, act.pos, act.rotation, act.modifydata)
     end
 end
 

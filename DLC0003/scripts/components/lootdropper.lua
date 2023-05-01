@@ -14,6 +14,18 @@ local LootDropper = Class(function(self, inst)
 	self.speed = nil
 end)
 
+-- Translates prefabs to their cooked prefab for when they are not in default form (cookedXXX or XXX_cooked)
+local special_cooked_prefabs = {
+	["trunk_summer"] = "trunk_cooked",
+	["trunk_winter"] = "trunk_cooked",
+	["fish_raw"] = "fish_med_cooked",
+}
+
+-- For modders use:
+function AddSpecialCookedPrefab(prefab, cooked_prefab)
+	special_cooked_prefabs[prefab] = cooked_prefab
+end
+
 LootTables = {}
 function SetSharedLootTable(name, table)
 	LootTables[name] = table
@@ -183,6 +195,14 @@ function LootDropper:GetAllLoot()
 	return total_loot
 end
 
+local function InsertOincs(loots, num, type)
+	if num > 0 then
+		for n=1, num do
+			table.insert(loots, type)
+		end
+	end
+end
+
 function LootDropper:GenerateLoot()
 	local loots = {}
 	
@@ -252,14 +272,25 @@ function LootDropper:GenerateLoot()
 			if self.inst:HasTag("burnt") then
 				amt = math.ceil( (v.amount * TUNING.BURNT_HAMMER_LOOT_PERCENT) * percent)
 			end
-			for n = 1, amt do
-				table.insert(loots, v.type)
+			
+			if v.type == "oinc" then
+				local oinc100 = math.floor(amt / 100)
+				local oinc10  = math.floor((amt - (oinc100 * 100)) / 10)
+				local oinc    = amt - (oinc100 * 100) - (oinc10 * 10)
+				
+				InsertOincs(loots, oinc100, "oinc100")
+				InsertOincs(loots, oinc10,  "oinc10" )
+				InsertOincs(loots, oinc,    "oinc"   )
+			else
+				for n = 1, amt do
+					table.insert(loots, v.type)
+				end
 			end
 		end
+	end
 
-		if self.inst:HasTag("burnt") and math.random() < .4 then
-			table.insert(loots, "charcoal") -- Add charcoal to loot for burnt structures
-		end
+	if self.inst:HasTag("burnt") and math.random() < .4 then
+		table.insert(loots, "charcoal") -- Add charcoal to loot for burnt structures and trees.
 	end
 	
 	return loots
@@ -269,6 +300,15 @@ function LootDropper:DropLootPrefab(loot, pt, setangle, arc, alwaysinfront, drop
 	if loot then
 		if not pt then
 			pt = Point(self.inst.Transform:GetWorldPosition())
+		end
+
+        local interiorSpawner = GetWorld().components.interiorspawner
+
+		-- Prevents loot from getting stuck inside interiors walls.
+		if interiorSpawner.current_interior and not IsPointInInteriorBounds(self.inst:GetPosition(), 1) then
+			local originpt = interiorSpawner:getSpawnOrigin()
+
+			dropdir = Vector3(originpt.x - pt.x, 0.0, originpt.z - pt.z):GetNormalized() -- Drops towards the center of the room.
 		end
 
 		if self.inst.components.poisonable and self.inst.components.poisonable:IsPoisoned() and loot.components.perishable then
@@ -319,7 +359,7 @@ end
 
 function LootDropper:SpawnLootPrefab(lootprefab, pt)
 	if lootprefab then
-		if GetWorld().getworldgenoptions and  GetWorld().getworldgenoptions(GetWorld())[lootprefab] and GetWorld().getworldgenoptions(GetWorld())[lootprefab] == "never" then
+		if GetWorld():IsWorldGenOptionNever(lootprefab) then
 			return
 		end
 		local loot = SpawnPrefab(lootprefab)
@@ -334,18 +374,21 @@ end
 function LootDropper:CheckBurnable(prefabs)
 	-- check burnable
 	if not self.inst.components.fueled and self.inst.components.burnable and self.inst.components.burnable:IsBurning() then
-		for k,v in pairs(prefabs) do
-			local cookedAfter = v.."_cooked"
-			local cookedBefore = "cooked"..v
-			if PrefabExists(cookedAfter) then
-				prefabs[k] = cookedAfter
-			elseif PrefabExists(cookedBefore) then
-				prefabs[k] = cookedBefore
-			else
-				prefabs[k] = "ash"
-			end
-		end
-	end	
+        for k,v in pairs(prefabs) do
+            local cookedAfter = v.."_cooked"
+            local cookedBefore = "cooked"..v
+            
+            if special_cooked_prefabs[v] then
+                prefabs[k] = special_cooked_prefabs[v]
+            elseif PrefabExists(cookedAfter) then
+                prefabs[k] = cookedAfter
+            elseif PrefabExists(cookedBefore) then
+                prefabs[k] = cookedBefore 
+            else             
+                prefabs[k] = "ash"
+            end
+        end
+    end
 end
 
 function LootDropper:DropLoot(pt, loots)

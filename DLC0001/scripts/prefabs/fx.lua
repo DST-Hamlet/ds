@@ -66,11 +66,16 @@ local function MakeFx(t)
         end
 
         inst:AddTag("FX")
+        inst:AddTag("NOBLOCK")
         inst.persists = false
         inst:ListenForEvent("animover", function() 
             if inst.bloom then inst.AnimState:ClearBloomEffectHandle() end
             inst:Remove() 
         end)
+
+        if t.fn then
+            t.fn(inst)
+        end
 
         return inst
     end

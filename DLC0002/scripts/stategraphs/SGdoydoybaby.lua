@@ -10,10 +10,34 @@ local actionhandlers =
 
 local events=
 {
-	CommonHandlers.OnSleep(),
-	CommonHandlers.OnFreeze(),
-	CommonHandlers.OnAttacked(),
-	CommonHandlers.OnDeath(),
+	EventHandler("gotosleep", function(inst)
+		if not inst.onwater and inst.components.health and inst.components.health:GetPercent() > 0 then
+			if inst.sg:HasStateTag("sleeping") then
+				inst.sg:GoToState("sleeping")
+			else
+				inst.sg:GoToState("sleep")
+			end
+		end
+	end),
+
+	EventHandler("freeze", function(inst)
+		if not inst.onwater and inst.components.health and inst.components.health:GetPercent() > 0 then
+			inst.sg:GoToState("frozen")
+		end
+	end),
+
+	
+	EventHandler("attacked", function(inst)
+		if not inst.onwater and inst.components.health and not inst.components.health:IsDead()
+			and (not inst.sg:HasStateTag("busy") or inst.sg:HasStateTag("frozen") ) then
+			inst.sg:GoToState("hit")
+		end
+	end),
+
+	EventHandler("death", function(inst)
+		inst.sg:GoToState("death")
+	end),
+
 	CommonHandlers.OnLocomote(false,true),
 }
 
@@ -52,6 +76,28 @@ local states=
 		{
 			EventHandler("animover", function(inst) 
 				inst.sg:GoToState("idle") 
+			end),
+		},
+	},
+
+	State{
+		name = "idle_water",
+		tags = {"busy", "invisible"},
+		onenter = function(inst)
+			inst.Physics:Stop()
+			inst.AnimState:PlayAnimation("idle_water")
+			inst.SoundEmitter:PlaySound("dontstarve_DLC002/creatures/doy_doy/idle")
+			inst:AddTag("notarget")
+		end,
+
+		onexit = function(inst)
+			inst:RemoveTag("notarget")
+		end,
+	  
+		events=
+		{
+			EventHandler("animover", function(inst)
+				inst.sg:GoToState("idle_water")
 			end),
 		},
 	},

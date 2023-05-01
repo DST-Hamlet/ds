@@ -12,7 +12,9 @@ local assets =
     Asset("ANIM", "anim/python_segment_broken_build.zip"),    
     Asset("ANIM", "anim/python_segment_build.zip"),                            
     Asset("ANIM", "anim/python_segment_tail02_build.zip"), 
-    Asset("ANIM", "anim/python_segment_tail_build.zip"),     
+    Asset("ANIM", "anim/python_segment_tail_build.zip"),
+
+    Asset("MINIMAP_IMAGE", "snake_skull_buried"),
 }
 
 local prefabs =
@@ -624,7 +626,7 @@ local function corpsefn(Sim)
     local sound = inst.entity:AddSoundEmitter()
 
     local minimap = inst.entity:AddMiniMapEntity()
-    minimap:SetIcon( "xspot.png" )
+    minimap:SetIcon( "snake_skull_buried.png" )
 
     inst.Transform:SetSixFaced()
     

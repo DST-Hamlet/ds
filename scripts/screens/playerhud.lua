@@ -58,7 +58,8 @@ function PlayerHud:CreateOverlays(owner)
     self.clouds:GetAnimState():SetMultColour(1,1,1,0)
     self.clouds:SetScaleMode(SCALEMODE_FIXEDSCREEN_NONDYNAMIC)
     self.clouds:Hide()
-	
+
+	self.inst:ListenForEvent("continuefrompause", function() self:RefreshControllers() end, GetWorld())
 end
 
 function PlayerHud:OnLoseFocus()
@@ -135,27 +136,26 @@ function PlayerHud:IsCraftingOpen()
     return self.controls ~= nil and self.controls.crafttabs:IsCraftingOpen()
 end
 
-function PlayerHud:CloseContainer(container)
-    for k,v in pairs(self.controls.containers) do
-		if v.container == container then
-			v:Close()
-		end
+local function CloseContainerWidget(self, container, side, dont_close_container)
+    for k, v in pairs(self.controls.containers) do
+        if v.container == container then
+            v:Close(dont_close_container)
+        end
     end
 end
 
-function PlayerHud:GetFirstOpenContainerWidget()
-	
-	local k,v = next(self.controls.containers)
-	return v
+function PlayerHud:CloseContainer(container, side)
+    if container == nil then
+        return
+    elseif side and (TheInput:ControllerAttached() or Profile:GetIntegratedBackpack()) then
+        self.controls.inv.rebuild_pending = true
+    else
+        CloseContainerWidget(self, container, side)
+    end
 end
 
-function PlayerHud:OpenContainer(container, side)
-
-	if side and TheInput:ControllerAttached() then
-		return
-	end
-
-	if container then
+local function OpenContainerWidget(self, container, side)
+    if container then
 		local containerwidget = nil
 		if side then
 			containerwidget = self.controls.containerroot_side:AddChild(ContainerWidget(self.owner))
@@ -183,7 +183,47 @@ function PlayerHud:OpenContainer(container, side)
 	    
 		self.controls.containers[container] = containerwidget
 	end
-	    
+end
+
+function PlayerHud:OpenContainer(container, side)
+    if container == nil then
+        return
+    elseif side and (TheInput:ControllerAttached() or Profile:GetIntegratedBackpack()) then
+        self.controls.inv.rebuild_pending = true
+    else
+        OpenContainerWidget(self, container, side)
+    end
+end
+
+function PlayerHud:GetFirstOpenContainerWidget()
+	local k,v = next(self.controls.containers)
+	return v
+end
+
+function PlayerHud:RefreshControllers() -- this is really the event handler for "continuefrompause"
+    local controller_mode = TheInput:ControllerAttached()
+	if controller_mode then
+	    TheFrontEnd:StopTrackingMouse()
+	end
+
+	local integrated_backpack = controller_mode or Profile:GetIntegratedBackpack()
+    if self.controls.inv.controller_build ~= controller_mode or self.controls.inv.integrated_backpack ~= integrated_backpack then
+		self.controls.inv.rebuild_pending = true
+        local overflow = self.owner.components.inventory.overflow
+        if overflow == nil then
+            --switching to controller inv with no backpack
+            --don't animate out from the backpack position
+            self.controls.inv.rebuild_snapping = true
+        elseif controller_mode or integrated_backpack then
+            --switching to controller with backpack
+            --close mouse backpack container widget
+            CloseContainerWidget(self, overflow, overflow.components.container.side_widget, true)
+        elseif overflow.components.container:IsOpenedBy(self.owner) then
+            --switching to mouse with backpack
+            --reopen backpack if it was opened
+            OpenContainerWidget(self, overflow, overflow.components.container.side_widget)
+        end
+    end
 end
 
 function PlayerHud:GoSane()

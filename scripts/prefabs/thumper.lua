@@ -2,6 +2,8 @@ local assets =
 {
 	Asset("ANIM", "anim/wagstaff_thumper.zip"),
 	Asset("MINIMAP_IMAGE", "wagstaff_thumper"),
+
+    Asset("SOUND", "sound/dontstarve_wagstaff.fsb"),
 }
 
 local projectile_assets =

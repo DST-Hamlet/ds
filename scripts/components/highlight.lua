@@ -118,7 +118,17 @@ function Highlight:ApplyColour()
 
     if self.inst.AnimState then
 		self.inst.AnimState:SetAddColour((self.highlight_add_colour_red or 0) + (self.base_add_colour_red or orig_add_color_red), (self.highlight_add_colour_green or 0) + (self.base_add_colour_green or orig_add_color_green), (self.highlight_add_colour_blue or 0) + (self.base_add_colour_blue or orig_add_color_blue), 1)
-	end
+        
+        if self.inst.highlightchildren then
+            for _, children in pairs(self.inst.highlightchildren) do
+                if children:IsValid() and children.AnimState then
+                    children.AnimState:SetAddColour(self.inst.AnimState:GetAddColour())
+                end
+            end
+        end
+    end
+
+  
 end
 
 function Highlight:Highlight(r,g,b)

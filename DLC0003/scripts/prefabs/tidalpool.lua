@@ -45,7 +45,7 @@ local sizes =
 local function SetSize(inst, size)
 	inst.size = size or 1 --math.random(1, #sizes)
 	inst.AnimState:PlayAnimation(sizes[inst.size].anim, true)
-	inst.Physics:SetCylinder(sizes[inst.size].rad, 1.0)
+	inst.Physics:SetCapsule(sizes[inst.size].rad, 1.0)
 	SpawnPlants(inst, "marsh_plant_tropical", sizes[inst.size].plantcount, sizes[inst.size].plantrad)
 end
 

@@ -50,7 +50,9 @@ local function makestump(inst)
 	inst:AddTag("stump")
 	MakeSmallPropagator(inst)
 	MakeSmallBurnable(inst)
-	inst.components.burnable:SetOnBurntFn(stump_burnt)	
+	inst.components.burnable:SetOnBurntFn(stump_burnt)
+
+	inst.MiniMapEntity:SetIcon("mushroom_tree_stump.png")
     
     inst:AddComponent("workable")
     inst.components.workable:SetWorkAction(ACTIONS.DIG)
@@ -246,7 +248,7 @@ local function smallfn()
 	return inst
 end
 
-return Prefab("cave/objects/mushtree_tall", tallfn, { Asset("ANIM", "anim/mushroom_tree_tall.zip"), Asset("MINIMAP_IMAGE", "mushroom_tree"), }, prefabs),
-       Prefab("cave/objects/mushtree_medium", mediumfn, { Asset("ANIM", "anim/mushroom_tree_med.zip"), Asset("MINIMAP_IMAGE", "mushroom_tree_med"), }, prefabs),
-       Prefab("cave/objects/mushtree_small", smallfn, { Asset("ANIM", "anim/mushroom_tree_small.zip"), Asset("MINIMAP_IMAGE", "mushroom_tree_small"), }, prefabs) 
+return Prefab("cave/objects/mushtree_tall", tallfn, { Asset("ANIM", "anim/mushroom_tree_tall.zip"), Asset("MINIMAP_IMAGE", "mushroom_tree"), Asset("MINIMAP_IMAGE", "mushroom_tree_stump"),}, prefabs),
+       Prefab("cave/objects/mushtree_medium", mediumfn, { Asset("ANIM", "anim/mushroom_tree_med.zip"), Asset("MINIMAP_IMAGE", "mushroom_tree_med"), Asset("MINIMAP_IMAGE", "mushroom_tree_stump"),}, prefabs),
+       Prefab("cave/objects/mushtree_small", smallfn, { Asset("ANIM", "anim/mushroom_tree_small.zip"), Asset("MINIMAP_IMAGE", "mushroom_tree_small"), Asset("MINIMAP_IMAGE", "mushroom_tree_stump"),}, prefabs) 
 

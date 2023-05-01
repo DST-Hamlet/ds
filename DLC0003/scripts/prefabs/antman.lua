@@ -68,7 +68,7 @@ local function ShouldAcceptItem(inst, item)
     if item.components.equippable and item.components.equippable.equipslot == EQUIPSLOTS.HEAD then
         return true
     end
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         
         if (item.components.edible.foodtype == "MEAT" or item.components.edible.foodtype == "HORRIBLE")
            and inst.components.follower.leader
@@ -93,7 +93,7 @@ end
 
 local function OnGetItemFromPlayer(inst, giver, item)
     --I eat food    
-    if item.components.edible then
+    if inst.components.eater:CanEat(item) then
         --meat makes us friends
         if inst.components.eater:CanEat(item) then
       --  if item.components.edible.foodtype == "MEAT" or item.components.edible.foodtype == "HORRIBLE" then
@@ -133,7 +133,7 @@ local function OnEat(inst, food)
 end
 
 local function OnAttackedByDecidRoot(inst, attacker)
-    local fn = function(dude) return dude:HasTag("antman") end
+    local fn = function(dude) return dude:HasTag("ant") end
 
     local x, y, z = inst.Transform:GetWorldPosition()
     local ents = nil
@@ -281,7 +281,7 @@ local function common()
     inst.components.talker.offset = Vector3(0, -400, 0)
 
     MakeCharacterPhysics(inst, 50, .5)
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "antman_torso")
     
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.runspeed = TUNING.ANTMAN_RUN_SPEED --5

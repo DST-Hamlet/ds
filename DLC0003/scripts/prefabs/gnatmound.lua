@@ -12,12 +12,10 @@ local prefabs =
 SetSharedLootTable( 'gnatmound',
 {
     {'rocks',  1.00},
-
-    {'rocks',  1.00/4},
-
-    {'flint',  0.60/4},
-
-    {'iron',  1.00/4},    
+    {'rocks',  0.25},
+    {'flint',  0.25},
+    {'iron',   0.25},
+    {'nitre',  0.25},
 })
 
 local function onworked(inst)
@@ -28,8 +26,7 @@ local function onworked(inst)
 end
 
 local function onhit(inst)
-        
-    if inst.components.workable.workleft == 4 or inst.components.workable.workleft == 2 or inst.components.workable.workleft == 0 then
+    if inst.components.workable.workleft == 4 or inst.components.workable.workleft == 2 then
         inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
         inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
         if inst.components.childspawner then

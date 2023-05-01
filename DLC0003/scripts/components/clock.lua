@@ -1,6 +1,8 @@
 local NIGHT_COLOR = Point(0/255,   0/255,   0/255)
 local FULLMOON_COLOR = Point(84/255,  122/255, 156/255)
 
+local LERP_BACK_LIGHTINING_TIME = 1
+
 local Clock = Class(function(self, inst)
 
 	self.daysegs = TUNING.DAY_SEGS_DEFAULT
@@ -14,7 +16,7 @@ local Clock = Class(function(self, inst)
     self.lmax = 1
 
     self.dayColour =         Point(255/255, 230/255, 158/255) -- This isn't being used any longer: now use GetDayColour to do special casing for Spring
-    self.duskColour =        Point(100/255, 100/255, 100/255) -- This isn't being used any longer: now use GetDuskColour to do special casing for Spring
+    self.duskColour =        Point(150/255, 150/255, 150/255) -- This isn't being used any longer: now use GetDuskColour to do special casing for Spring
     self.nightColour =       NIGHT_COLOR
     self.fullMoonColour =    FULLMOON_COLOR
     self.caveColour =        Point(0/255,   0/255,   0/255)
@@ -90,7 +92,10 @@ end
 local function GetDuskColour()
     if TheCamera.interior then
         return NIGHT_COLOR
-    elseif GetPlayer() and false and GetPlayer():HasTag("under_leaf_canopy") then
+    else
+        return Point(150/255, 150/255, 150/255)
+    end
+    --[[ elseif GetPlayer() and false and GetPlayer():HasTag("under_leaf_canopy") then
         return Point(40/255, 40/255, 40/255)
     else        
         if GetSeasonManager() and GetSeasonManager():IsSpring() then
@@ -98,13 +103,16 @@ local function GetDuskColour()
         else
             return Point(100/255, 100/255, 100/255)--Point(100/255, 100/255, 100/255)
         end
-    end
+    end ]]
 end
 
 local function GetDayColour()
     if TheCamera.interior then
         return NIGHT_COLOR
-    elseif GetPlayer() and false and GetPlayer():HasTag("under_leaf_canopy") then
+    else
+        return Point(255/255, 230/255, 158/255)
+    end
+    --[[ elseif GetPlayer() and false and GetPlayer():HasTag("under_leaf_canopy") then
         if GetSeasonManager() and GetSeasonManager():IsSpring() then
             return Point(100/255, 100/255, 100/255)--Point(171/255, 146/255, 147/255)
         else
@@ -125,7 +133,7 @@ local function GetDayColour()
         else
             return Point(255/255, 230/255, 158/255)--Point(255/255, 230/255, 158/255)
         end
-    end
+    end ]]
 end
 
 function Clock:GetTimeLeftInEra()
@@ -584,9 +592,16 @@ function Clock:OnUpdate(dt)
         end
 
         self.lerptimeleft = self.lerptimeleft - dt
+
+    elseif self.lightning_dirty then
+        if self.totallerptime == LERP_BACK_LIGHTINING_TIME then
+            -- Hack: The "self:LerpAmbientColour(flash, col, LERP_BACK_LIGHTINING_TIME)" never reaches the value it should.
+            self.currentColour = self.lerpToColour
+        end
+
+        self.lightning_dirty = false
     end
-    
-    
+
     if self.lightning then
         
         self.lightningtime = self.lightningtime + dt
@@ -620,8 +635,9 @@ function Clock:OnUpdate(dt)
         if self.lightningtime < (1/30)*1 then 
             TheSim:SetAmbientColour(flash.x,flash.y,flash.z)
         else          
-            self:LerpAmbientColour(flash, col, 1)
+            self:LerpAmbientColour(flash, col, LERP_BACK_LIGHTINING_TIME)
             self.lightning = false
+            self.lightning_dirty = true
             self.last_lightning_time = GetTime()
         end
 
@@ -634,7 +650,7 @@ function Clock:OnUpdate(dt)
         if self:IsNight() and (self.totalEraTime - self.timeLeftInEra) <= 8 and self.last_lightning_time and (GetTime() - self.last_lightning_time) <= dt then
             if self:GetMoonPhase() ~= "full" and not GetWorld():IsCave() then
                 if not self:IsNightVision() then 
-                    self:LerpAmbientColour(GetDuskColour(), self.nightColour, 4) 
+                    self:LerpAmbientColour(GetDuskColour(), self.nightColour, 4)
                 end
             end
         else

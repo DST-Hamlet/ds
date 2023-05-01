@@ -70,8 +70,20 @@ local function OnChildDeath(inst, rotdist)
 end
 
 local function testlocation(inst, pt)
-	local testTile = GetWorld().Map:GetTileAtPoint(pt.x , pt.y, pt.z) 
-	if testTile ~= GROUND.RAINFOREST and testTile ~= GROUND.GASJUNGLE and testTile ~= GROUND.DEEPRAINFOREST and testTile ~= GROUND.PLAINS and testTile ~= GROUND.PAINTED and testTile ~= GROUND.BATTLEGROUND then
+	local tile = GetWorld().Map:GetTileAtPoint(pt.x , pt.y, pt.z)
+	
+	if      tile ~= GROUND.DEEPRAINFOREST 
+		and tile ~= GROUND.GASJUNGLE 
+		and tile ~= GROUND.RAINFOREST 
+		and tile ~= GROUND.PLAINS 
+		and tile ~= GROUND.PAINTED
+		and tile ~= GROUND.BATTLEGROUND
+		and tile ~= GROUND.DIRT
+	then
+		return false
+	end
+
+	if not inst:IsPosSurroundedByLand(pt.x, pt.y, pt.z, 3) then
 		return false
 	end
 
@@ -207,19 +219,21 @@ local function OnSave(inst, data)
 	end	
 
 	data.children = {}
-    if inst.core then
-    	table.insert(data.children,inst.core.GUID)
+    if inst.core and inst.core:IsValid() then
+    	table.insert(data.children, inst.core.GUID)
     	data.core = #data.children
     end
     
-    if inst.parenthedge then
-    	table.insert(data.children,inst.parenthedge.GUID)
+    if inst.parenthedge and inst.parenthedge:IsValid() then
+    	table.insert(data.children, inst.parenthedge.GUID)
     	data.parenthedge = #data.children
     end
    
-    if inst.childhedge then    	
-    	for i, child in ipairs(inst.childhedge)do
-    		table.insert(data.children,child.GUID)
+    if inst.childhedge then
+    	for i, child in ipairs(inst.childhedge) do
+			if child:IsValid() then
+    			table.insert(data.children, child.GUID)
+			end
     	end
     end
 

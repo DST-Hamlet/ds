@@ -68,7 +68,9 @@ local function OnWorked(inst, worker)
 end
 
 local function OnDropped(inst)
-	inst.sg:GoToState("catchbreath")
+	if not inst:GetIsOnWater() then
+		inst.sg:GoToState("catchbreath")
+	end
 	if inst.components.workable then
 		inst.components.workable:SetWorkLeft(1)
 	end
@@ -153,10 +155,10 @@ local function commonfn()
 	inst:AddComponent("tradable")
 
 	MakePoisonableCharacter(inst)
-	MakeCharacterPhysics(inst, 1, .5)
+	MakeAmphibiousCharacterPhysics(inst, 1, .5)
 	inst.Physics:SetCollisionGroup(COLLISION.FLYERS)
 	inst.Physics:ClearCollisionMask()
-	inst.Physics:CollidesWith(COLLISION.WORLD)
+	inst.Physics:CollidesWith(COLLISION.GROUND)
 	inst.Physics:CollidesWith(COLLISION.FLYERS)
 	
 	inst.AnimState:SetBank("bee")
@@ -174,6 +176,7 @@ local function commonfn()
 	-- inst.components.inventoryitem:SetOnDroppedFn(OnDropped) Done in MakeFeedablePet
 	-- inst.components.inventoryitem:SetOnPutInInventoryFn(OnPickedUp)
 	inst.components.inventoryitem.canbepickedup = false
+	inst.components.inventoryitem.nosink = true
 
 	---------------------
 	
@@ -246,6 +249,7 @@ local function workerbee()
 	inst.components.health:SetMaxHealth(TUNING.BEE_HEALTH)
 	inst.components.combat:SetDefaultDamage(TUNING.BEE_DAMAGE)
 	inst.components.combat:SetAttackPeriod(TUNING.BEE_ATTACK_PERIOD)
+	inst.components.combat:SetRange(0.6)
 	inst.components.combat:SetRetargetFunction(2, SpringBeeRetarget)
 	inst:AddComponent("pollinator")
 	inst:SetBrain(workerbrain)
@@ -270,6 +274,7 @@ local function killerbee()
 	inst.components.health:SetMaxHealth(TUNING.BEE_HEALTH)
 	inst.components.combat:SetDefaultDamage(TUNING.BEE_DAMAGE)
 	inst.components.combat:SetAttackPeriod(TUNING.BEE_ATTACK_PERIOD)
+	inst.components.combat:SetRange(0.6)
 	inst.components.combat:SetRetargetFunction(2, KillerRetarget)
 	inst:SetBrain(killerbrain)
 	inst.sounds = killersounds

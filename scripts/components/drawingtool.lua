@@ -1,16 +1,9 @@
 function FindEntityToDraw(target, tool)
     if target ~= nil then
-        print("GUU?")
         local x, y, z = target.Transform:GetWorldPosition()
-        local ents = TheSim:FindEntities(x, y, z, 15, { "isinventoryitem" }, { "INLIMBO" })
-        print(#ents)
-        if #ents > 0 then
-            for i, v in ipairs(ents) do
-                print(v.prefab, v.components.inventoryitem.imagename)
-                if v ~= target and v ~= tool and v.entity:IsVisible() then
-                    print("OK")
-                    return v
-                end
+        for i, v in ipairs(TheSim:FindEntities(x, y, z, 1.5, {"isinventoryitem" }, {"INLIMBO", "NOFORAGE"})) do
+            if v ~= target and v ~= tool and v.entity:IsVisible() then
+                return v
             end
         end
     end
@@ -29,9 +22,7 @@ end
 function DrawingTool:GetImageToDraw(target)
     local ent = FindEntityToDraw(target, self.inst)
     return ent ~= nil and (
-            #(ent.components.inventoryitem.imagename or "") > 0 and
-            ent.components.inventoryitem.imagename or
-            ent.prefab
+            ent.components.inventoryitem:GetImage():gsub("%.tex", "")
         ) or nil,
         ent
 end

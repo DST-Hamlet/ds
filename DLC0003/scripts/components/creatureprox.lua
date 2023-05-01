@@ -22,7 +22,7 @@ local function DoTest(inst)
             musthave = {"isinventoryitem", "monster", "animal", "character","insect","smallcreature"}
         end
 
-        local nothave = {"INTERIOR_LIMBO"}
+        local nothave = {"INTERIOR_LIMBO", "FX", "NOCLICK", "DECOR", "INLIMBO"}
         local ents = TheSim:FindEntities(x,y,z, range, nil, nothave,  musthave )
         local close = nil
 

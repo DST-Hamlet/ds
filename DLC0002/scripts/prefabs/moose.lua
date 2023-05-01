@@ -150,7 +150,7 @@ local function fn(Sim)
 	shadow:SetSize(6, 2.75)
 
     MakeCharacterPhysics(inst, 5000, 1)
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "goosemoose_body")
 
     inst.Physics:SetCollisionCallback(OnCollide)
 

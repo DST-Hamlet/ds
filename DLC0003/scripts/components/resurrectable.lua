@@ -38,7 +38,11 @@ function Resurrectable:FindClosestResurrector(cause)
 					local offset = Vector3(range * math.cos( newangle ), 0, -range * math.sin( newangle ))
 					
 					local tile = GetWorld().Map:GetTileAtPoint(x+offset.x, 0, z+offset.z)
-					if not GetWorld().Map:IsWater(tile) and tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID then
+					if not GetWorld().Map:IsWater(tile) and
+						tile ~= GROUND.IMPASSABLE and
+						tile ~= GROUND.INVALID and
+						self.inst:IsPosSurroundedByLand(x+offset.x, 0, z+offset.z, 3)
+					then
 						landtile ={x=x+offset.x,y=0, z=z+offset.z}
 					end
 				end
@@ -156,13 +160,24 @@ function Resurrectable:CanResurrect(cause)
 	return false
 end
 
-local function TrySpawnSkeleton(inst)
+function TrySpawnSkeleton(inst)
 	for i,ent in pairs(Ents) do
 		if ent.HiddenPlayerSkeleton then
 			ent.HiddenPlayerSkeleton = false
 			ent:DoTaskInTime(3, function(inst) 
 									inst:Show()
+									inst.Physics:SetActive(true)
 								end)
+		end
+	end
+	-- something else may rely on this
+	inst.last_death_position = nil
+end
+
+local function RemoveHiddenSkeleton(inst)
+	for i,ent in pairs(Ents) do
+		if ent.HiddenPlayerSkeleton then
+			ent:Remove()
 		end
 	end
 	-- something else may rely on this
@@ -185,8 +200,9 @@ function Resurrectable:DoResurrect(res, cause)
 		self.inst.sg:GoToState("amulet_rebirth")
 		if self.inst.components.poisonable and self.inst.components.poisonable:IsPoisoned() then 
 			self.inst.components.poisonable:Cure()
-		end 
-		TrySpawnSkeleton(self.inst)
+		end
+		RemoveHiddenSkeleton(self.inst)
+		--TrySpawnSkeleton(self.inst)
 	else
 		--External/Statue/Stone/etc
 		res.components.resurrector:Resurrect(self.inst)

@@ -15,23 +15,16 @@ local prefabs =
 	"soundplayer"
 }
 
-local loot = 
+SetSharedLootTable( 'dragoonegg',
 {
-	"flint",
-	--"obsidian",
-	--"obsidian",
-	"rocks",
-}
-
-local function DropLoot(inst)
-	print("dragoonegg - DropLoot")
-	
-	if inst.components.hatchable.toohot then
-		
-	else
-		inst.components.lootdropper:SetLoot(loot_cold)
-	end
-end
+    {'flint',     1.0},
+    {'flint',     0.5},
+    {'rocks',     1.0},
+    {'rocks',     0.5},
+    {'rocks',     0.3},
+    {'obsidian',  0.5},
+    {'obsidian',  0.5},
+})
 
 local function cracksound(inst, loudness) --is this worth a stategraph?
 	inst:DoTaskInTime(11*FRAMES, function(inst)
@@ -89,7 +82,7 @@ local function groundfn(Sim)
 	
 	inst:AddComponent("inspectable")
 	inst:AddComponent("lootdropper")
-	inst.components.lootdropper:SetLoot(loot)
+	inst.components.lootdropper:SetChanceLootTable("dragoonegg")
 
 	inst:AddComponent("workable")
 	inst.components.workable:SetWorkAction(ACTIONS.MINE)

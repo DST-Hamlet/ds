@@ -11,6 +11,22 @@ local prefabs =
 	"collapse_small",
 }
 
+local function OnRemoved(inst)
+    -- Remove from save index
+	SaveGameIndex:DeregisterResurrector(inst)
+
+	-- Remove penalty if not used
+	if inst.components.resurrector then 
+		inst.components.resurrector.penalty = 0 
+		if not inst.components.resurrector.used then
+			local player = GetPlayer()
+			if player and player.components.health then
+				player.components.health:RecalculatePenalty()
+			end
+		end
+	end
+end
+
 
 local function onhammered(inst, worker)
 	if inst:HasTag("fire") and inst.components.burnable then
@@ -25,19 +41,6 @@ local function onhammered(inst, worker)
 		SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
 	end
 	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
-
-	-- Remove from save index
-	SaveGameIndex:DeregisterResurrector(inst)
-
-	if inst.components.resurrector then 
-		inst.components.resurrector.penalty = 0 
-		if not inst.components.resurrector.used then
-			local player = GetPlayer()
-			if player then
-				player.components.health:RecalculatePenalty()
-			end
-		end
-	end
 	
 	inst:Remove()
 end
@@ -48,18 +51,9 @@ local function onburnt(inst)
     if inst.components.workable then
         inst.components.workable:SetWorkLeft(1)
     end
-    -- Remove from save index
-	SaveGameIndex:DeregisterResurrector(inst)
-	-- Remove penalty if not used
-	if inst.components.resurrector then
-		inst.components.resurrector.penalty = 0
-		if not inst.components.resurrector.used then
-			local player = GetPlayer()
-			if player and player.components.health then
-				player.components.health:RecalculatePenalty()
-			end
-		end
-	end
+    
+	OnRemoved(inst)
+
 	if inst.AnimState and inst.components.resurrector and not inst.components.resurrector.used then
         inst.AnimState:PlayAnimation("burnt", true)
         inst.components.resurrector.active = false
@@ -244,6 +238,8 @@ local function fn(Sim)
 
 	inst.OnSave = onsave 
     inst.OnLoad = onload
+
+	inst:ListenForEvent("onremove", OnRemoved)
    
     return inst
 end

@@ -7,6 +7,8 @@ local assets =
     Asset("ANIM", "anim/dust_fx.zip"),
     Asset("SOUND", "sound/forest.fsb"),
     Asset("MINIMAP_IMAGE", "evergreen_lumpy"),
+    Asset("MINIMAP_IMAGE", "evergreen_burnt"),
+    Asset("MINIMAP_IMAGE", "evergreen_stump"),
     
 }
 
@@ -88,7 +90,9 @@ local function chop_down_burnt_tree(inst, chopper)
     inst.SoundEmitter:PlaySound("dontstarve/wilson/use_axe_tree")          
 	inst.AnimState:PlayAnimation(inst.anims.chop_burnt)
     RemovePhysicsColliders(inst)
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+    inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
     inst.components.lootdropper:SpawnLootPrefab("charcoal")
     inst.components.lootdropper:DropLoot()
     if inst.pineconetask then
@@ -139,6 +143,8 @@ local function OnBurnt(inst, imm)
 	inst.AnimState:PlayAnimation(inst.anims.burnt, true)
     inst.AnimState:SetRayTestOnBB(true);
     inst:AddTag("burnt")
+
+    inst.MiniMapEntity:SetIcon("evergreen_burnt.png")
 
     inst.highlight_override = burnt_highlight_override
 end
@@ -310,6 +316,8 @@ local function chop_down_tree(inst, chopper)
     inst.components.workable:SetWorkAction(ACTIONS.DIG)
     inst.components.workable:SetOnFinishCallback(dig_up_stump)
     inst.components.workable:SetWorkLeft(1)
+
+    inst.MiniMapEntity:SetIcon("evergreen_stump.png")
     
     inst:AddTag("stump")
     if inst.components.growable then
@@ -426,6 +434,7 @@ local function onload(inst, data)
 
         if data.burnt then
             inst:AddTag("fire") -- Add the fire tag here: OnEntityWake will handle it actually doing burnt logic
+            inst.MiniMapEntity:SetIcon("evergreen_burnt.png")
         elseif data.stump then
             inst:RemoveComponent("burnable")
             MakeSmallBurnable(inst)
@@ -435,6 +444,7 @@ local function onload(inst, data)
             inst:RemoveComponent("growable")
             RemovePhysicsColliders(inst)
             inst.AnimState:PlayAnimation(inst.anims.stump)
+            inst.MiniMapEntity:SetIcon("evergreen_stump.png")
             inst:AddTag("stump")
             inst:RemoveTag("shelter")
             
@@ -583,6 +593,7 @@ local function makefn(build, stage, data)
             RemovePhysicsColliders(inst)
             inst.AnimState:PlayAnimation(inst.anims.stump)
             inst:AddTag("stump")
+            inst.MiniMapEntity:SetIcon("evergreen_stump.png")
             inst:AddComponent("workable")
             inst.components.workable:SetWorkAction(ACTIONS.DIG)
             inst.components.workable:SetOnFinishCallback(dig_up_stump)

@@ -1,4 +1,4 @@
-ChaseAndAttack = Class(BehaviourNode, function(self, inst, max_chase_time, give_up_dist, max_attacks, findnewtargetfn, walk)
+ChaseAndAttack = Class(BehaviourNode, function(self, inst, max_chase_time, give_up_dist, max_attacks, findnewtargetfn, walk, dont_reset_timer_on_atempt)
     BehaviourNode._ctor(self, "ChaseAndAttack")
     self.inst = inst
     self.findnewtargetfn = findnewtargetfn
@@ -14,7 +14,7 @@ ChaseAndAttack = Class(BehaviourNode, function(self, inst, max_chase_time, give_
     end
 
     self.inst:ListenForEvent("onattackother", self.onattackfn)
-    self.inst:ListenForEvent("onmissother", self.onattackfn)
+    if not dont_reset_timer_on_atempt then self.inst:ListenForEvent("onmissother", self.onattackfn) end
 end)
 
 function ChaseAndAttack:__tostring()

@@ -117,13 +117,13 @@ end
 
 function Eater:Eat( food )
     if self:CanEat(food) then
-		local stack_mult = self.eatwholestack and food.components.stackable ~= nil and food.components.stackable:StackSize() or 1
+        local stack_mult = self.eatwholestack and food.components.stackable ~= nil and food.components.stackable:StackSize() or 1
 
         if self.inst.components.health and not self.inst:HasTag("donthealfromfood") then
-			if (food.components.edible.healthvalue < 0 and self:DoFoodEffects(food) or food.components.edible.healthvalue > 0) and self.inst.components.health then
-                local delta = food.components.edible:GetHealth(self.inst) * self.healthabsorption * self.healthabsorption
-				self.inst.components.health:DoDelta(delta* stack_mult, nil, food.prefab) 
-			end
+            if (food.components.edible.healthvalue < 0 and self:DoFoodEffects(food) or food.components.edible.healthvalue > 0) and self.inst.components.health then
+                local delta = food.components.edible:GetHealth(self.inst) * self.healthabsorption
+                self.inst.components.health:DoDelta(delta* stack_mult, nil, food.prefab) 
+            end
         end
 
         if self.inst.components.hunger then

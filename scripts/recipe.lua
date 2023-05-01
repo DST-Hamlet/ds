@@ -5,8 +5,12 @@ Ingredient = Class(function(self, type, amount, atlas)
     self.type = type
     self.amount = amount
 	self.atlas = (atlas and resolvefilepath(atlas))
-					or resolvefilepath("images/inventoryimages.xml")
 end)
+
+function Ingredient:GetAtlas(imagename)
+	self.atlas = self.atlas or resolvefilepath(GetInventoryItemAtlas(imagename))
+	return self.atlas
+end
 
 local num = 0
 Recipes = {}
@@ -17,8 +21,6 @@ Recipe = Class(function(self, name, ingredients, tab, level, placer, min_spacing
     self.ingredients   = ingredients
     self.product       = name
     self.tab           = tab
-
-    self.atlas         = resolvefilepath("images/inventoryimages.xml")
 
     self.image         = name .. ".tex"
     self.sortkey       = num
@@ -37,9 +39,21 @@ Recipe = Class(function(self, name, ingredients, tab, level, placer, min_spacing
     Recipes[name]      = self
 end)
 
+function Recipe:GetAtlas()
+	self.atlas = self.atlas or resolvefilepath(GetInventoryItemAtlas(self.image))
+	return self.atlas
+end
+
 function Recipe:GetLevel()
     return self.level
 end
+
+DeconstructRecipe = Class(Recipe, function(self, name, return_ingredients)
+    Recipe._ctor(self, name, return_ingredients, nil, TECH.NONE)
+    self.is_deconstruction_recipe = true
+    self.nounlock = true
+end)
+
 function GetAllRecipes()
 	return Recipes
 end

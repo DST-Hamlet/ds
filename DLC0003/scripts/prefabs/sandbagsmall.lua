@@ -39,16 +39,30 @@ local function resolveanimtoplay(inst, percent)
 	end
 end
 
+local function ToFloodGrid(num)
+	-- The flood grid is is the center of a 2x2 tile pattern. So 1,3,5,7..
+	num = math.floor(num)
+
+    if math.mod(num, 2) == 0 then
+        num = num + 1
+    end
+
+    return num
+end
+
 local function quantizepos(pt)
-	local x, y, z = pt:Get()
-	y = 0
-	
+	pt.y = 0
+
 	if GetWorld().Flooding then
-		local px,py,pz = GetWorld().Flooding:GetTileCenterPoint(x,y,z)
-		return Vector3(px,py,pz)
-	else
-		return Vector3(x,y,z)
+		local px,py,pz = GetWorld().Flooding:GetTileCenterPoint(pt.x, pt.y, pt.z)
+
+		if px and py and pz then
+			return Vector3(px, py, pz)
+		end
 	end
+
+	-- Placement outside of Shipwrecked.
+	return Vector3(ToFloodGrid(pt.x), 0, ToFloodGrid(pt.z))
 end
 
 
@@ -145,10 +159,16 @@ local function onrepaired(inst)
 	makeobstacle(inst)
 end
 
+-- NOTES(DiogoW): Things that add walls to the path finder appear with a wrong visual rotation when
+-- entering/exiting interiors. I have no idea why.
+local function FixUpRotation(inst)
+    inst.Transform:SetRotation(inst.Transform:GetRotation())
+end
+
 local function test_wall(inst, pt)
 	local map = GetWorld().Map
 	local tiletype = GetGroundTypeAtPosition(pt)
-	local ground_OK = tiletype ~= GROUND.IMPASSABLE and not map:IsWater(tiletype)
+	local ground_OK = tiletype ~= GROUND.IMPASSABLE and not map:IsWater(tiletype) and IsPointInInteriorBounds(pt, 2)
 	
 
 	
@@ -197,6 +217,12 @@ local function onload(inst, data)
 	end
 end
 
+local function returntointeriorscene(inst)
+	makeobstacle(inst)
+	if inst.components.health:GetPercent() <= 0 then
+		clearobstacle(inst)
+	end
+end
 
 local function fn(Sim)
 	local inst = CreateEntity()
@@ -248,10 +274,10 @@ local function fn(Sim)
 			GetWorld():PushEvent("floodblockercreated",{blocker = inst})
 		end 
 	end, GetWorld())
-	
-	inst:DoTaskInTime(0, function() makeobstacle(inst) end)
 
-    inst.returntointeriorscene = makeobstacle
+	inst:ListenForEvent("entitywake", FixUpRotation)
+
+    inst.returntointeriorscene = returntointeriorscene
    	inst.removefrominteriorscene = clearobstacle
 
 	---------------------  

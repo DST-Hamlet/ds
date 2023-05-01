@@ -3,6 +3,7 @@ require("stategraphs/commonstates")
 local actionhandlers =
 {
 	ActionHandler(ACTIONS.EAT, "eat"),
+    ActionHandler(ACTIONS.HARVEST, "eat"),
 }
 
 local events=

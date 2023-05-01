@@ -1,6 +1,7 @@
 local assets =
 {
 	Asset("PKGREF", "sound/dontstarve.fev"),
+	Asset("SOUNDPACKAGE", "sound/dontstarve_wagstaff.fev"),
 	Asset("SOUNDPACKAGE", "sound/dontstarve_DLC003.fev"), --@bargle: To get the main menu music working for pax, should this be here? 
 	Asset("SOUNDPACKAGE", "sound/dontstarve_DLC002.fev"), --@bargle: To get the main menu music working for pax, should this be here? 
 	Asset("SOUNDPACKAGE", "sound/dontstarve_DLC001.fev"),
@@ -128,6 +129,12 @@ if PLATFORM == "PS4" then
     table.insert(assets, Asset("IMAGE", "images/ps4_controllers.tex"))
 end
 
+local bg_loading_images = ArrayUnion(BG_LOADING_IMAGES.MAIN_GAME, unpack(BG_LOADING_IMAGES.DLCS))
+
+for i, v in ipairs(bg_loading_images) do
+	table.insert(assets, Asset("ATLAS", "images/bg_loading_"..v..".xml"))
+	table.insert(assets, Asset("IMAGE", "images/bg_loading_"..v..".tex"))
+end
 
 require "fonts"
 for i, font in ipairs( FONTS ) do

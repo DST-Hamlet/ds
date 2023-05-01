@@ -60,22 +60,15 @@ end
 function OxBrain:OnStart()
     local root = PriorityNode(
     {
-        WhileNode( function() 
-                local tile = self.inst.components.tiletracker.tile
-                return tile == GROUND.OCEAN_MEDIUM or tile == GROUND.OCEAN_DEEP or tile == GROUND.OCEAN_SHALLOW
-            end, "intheocean",  
-            Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, WANDER_DIST_NIGHT)),
-
         WhileNode( function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
 		IfNode( function() return self.inst.components.combat.target ~= nil end, "hastarget", AttackWall(self.inst)),
-        ChaseAndAttack(self.inst, MAX_CHASE_TIME),
+        ChaseAndAttack(self.inst, MAX_CHASE_TIME, nil, nil, nil, nil, true),
         Follow(self.inst, function() return self.inst.components.follower and self.inst.components.follower.leader end, MIN_FOLLOW_DIST, TARGET_FOLLOW_DIST, MAX_FOLLOW_DIST, false),
         FaceEntity(self.inst, GetFaceTargetFn, KeepFaceTargetFn),
         Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("herd") end, GetWanderDistFn)
     }, .25)
     
     self.bt = BT(self.inst, root)
-    
 end
 
 return OxBrain

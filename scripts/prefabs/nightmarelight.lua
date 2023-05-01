@@ -130,6 +130,11 @@ local states =
     end
 }
 
+local function changestateinstant(inst, state)
+    inst.rockstate = state
+    spawnfx(inst)
+    states[inst.rockstate](inst, true)
+end
 
 local function onsave(inst, data)
     if inst.rockstate then
@@ -142,9 +147,7 @@ local function onload(inst, data)
         return
     end
     if data.rockstate then
-        inst.rockstate = data.rockstate        
-        spawnfx(inst)
-        states[inst.rockstate](inst, true)
+        changestateinstant(inst, data.rockstate)
     end
 end
 
@@ -159,12 +162,22 @@ local function getsanityaura(inst)
 end
 
 local function changestate(inst, data)
+    if POPULATING then return end
+
     local statefn = states[data.newphase]
 
     if statefn then
         spawnfx(inst)
         inst.rockstate = data.newphase
         inst:DoTaskInTime(math.random() * 2, statefn)
+    end
+end
+
+local function SyncNightmarePhase(inst)
+    local clock = GetWorld().components.nightmareclock
+
+    if clock then
+        changestateinstant(inst, clock.phase)
     end
 end
 
@@ -177,6 +190,8 @@ local function fn()
     
     local minimap = inst.entity:AddMiniMapEntity()
     minimap:SetIcon( "nightmarelight.png" )
+
+    inst:AddTag("nightmarelight")
 
     inst.rockstate = "calm"
 
@@ -203,6 +218,8 @@ local function fn()
     inst.components.lighttweener:StartTween(light, 1, .9, 0.9, {255/255,255/255,255/255}, 0, turnoff)
 
     inst:ListenForEvent("phasechange", function(world, data) changestate(inst, data) end, GetWorld())
+
+    inst:DoTaskInTime(0, SyncNightmarePhase)
 
     inst.OnSave = onsave
     inst.OnLoad = onload

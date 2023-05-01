@@ -214,6 +214,14 @@ local function item_droppedfn(inst)
 	end
 end
 
+local function returntointeriorscene(inst)
+	if inst.components.stewer and inst.components.stewer.cooking then
+		inst.Light:Enable(true)
+	else
+		inst.Light:Enable(false)
+	end
+end
+
 local function itemfn(Sim)
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
@@ -223,6 +231,7 @@ local function itemfn(Sim)
     MakeInventoryFloatable(inst, "idle_water", "idle_drop")
 
 	inst:AddTag("irreplaceable")
+	inst:AddTag("portableitem")
 
 	inst.AnimState:SetBank("cook_pot_warly")
 	inst.AnimState:SetBuild("cook_pot_warly")
@@ -237,10 +246,11 @@ local function itemfn(Sim)
 	inst.components.deployable.ondeploy = ondeploy
 	inst.components.deployable.placer = "portablecookpot_placer"
 	inst.components.deployable.test = item_deploytest
+	inst.components.deployable.deploydistance = 1.5
 
 	inst:AddComponent("characterspecific")
     inst.components.characterspecific:SetOwner("warly")
-	
+
 	return inst
 end
 
@@ -323,6 +333,8 @@ local function fn(Sim)
 	inst:AddComponent("pickupable")
 	inst.components.pickupable:SetOnPickupFn(pickupfn)
 	inst.components.pickupable.canpickupfn = canpickup
+
+	inst.returntointeriorscene = returntointeriorscene
 
 	inst:AddComponent("characterspecific")
     inst.components.characterspecific:SetOwner("warly")

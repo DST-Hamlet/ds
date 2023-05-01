@@ -86,8 +86,8 @@ function CrocodogBrain:OnStart()
         
         Leash(self.inst, GetNoLeaderLeashPos, HOUSE_MAX_DIST, HOUSE_RETURN_DIST),
         
-        DoAction(self.inst, EatFoodAction, "eat food", true ),
         DoAction(self.inst, HarvestAction, "harvest", true ),
+        DoAction(self.inst, EatFoodAction, "eat food", true ),
         Follow(self.inst, GetLeader, MIN_FOLLOW_LEADER, TARGET_FOLLOW_LEADER, MAX_FOLLOW_LEADER),
         FaceEntity(self.inst, GetLeader, GetLeader),
 

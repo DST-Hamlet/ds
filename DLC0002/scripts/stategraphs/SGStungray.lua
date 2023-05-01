@@ -466,6 +466,13 @@ local states =
         events=
         {
             EventHandler("onthaw", function(inst) inst.sg:GoToState("thaw") end ),
+			EventHandler("unfreeze", function(inst)
+                if inst.sg.sg.states.hit then
+                    inst.sg:GoToState("hit")
+                else
+                    inst.sg:GoToState("idle")
+                end
+            end),
         },
     },
 
@@ -560,7 +567,7 @@ local states =
         	if GoToLocoState(inst, "fly") then
 	            inst.AnimState:PlayAnimation("death")
                 inst.components.locomotor:StopMoving()
-				inst.Physics:ClearCollisionMask()
+				RemovePhysicsColliders(inst)
 	            inst.components.lootdropper:DropLoot(Vector3(inst.Transform:GetWorldPosition()))
 	        end
         end,

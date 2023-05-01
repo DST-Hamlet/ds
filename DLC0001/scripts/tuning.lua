@@ -82,8 +82,8 @@ function Tune(overrides)
 	    TELESTAFF_USES = 5,
 	    HAMBAT_USES = 100,
 	    BATBAT_USES = 75,
-	    MULTITOOL_AXE_PICKAXE_USES = 400,
-	    RUINS_BAT_USES = 150,
+	    MULTITOOL_AXE_PICKAXE_USES = 800,
+	    RUINS_BAT_USES = 200,
 
 	    REDAMULET_USES = 20,
 	    REDAMULET_CONVERSION = 5,
@@ -95,12 +95,15 @@ function Tune(overrides)
 		PURPLEAMULET_FUEL = total_day_time * 0.4,
 	    
 		YELLOWAMULET_FUEL = total_day_time,
-		YELLOWSTAFF_USES = 20,
+        YELLOWSTAFF_USES = 20,
+        YELLOWSTAFF_STAR_DURATION = total_day_time * 3.5,
 
 		ORANGEAMULET_USES = 225,
 		ORANGEAMULET_RANGE = 4,
 		ORANGEAMULET_ICD = 0.33,
 		ORANGESTAFF_USES = 20,
+
+		NIGHTMAREFUEL_FINITEUSESREPAIRVALUE = 50,
 
 		GREENAMULET_USES = 5,
 		GREENAMULET_INGREDIENTMOD = 0.5,
@@ -136,7 +139,7 @@ function Tune(overrides)
 	    UMBRELLA_DAMAGE = wilson_attack*.5,
 	    CANE_DAMAGE = wilson_attack*.5,
 	    BEAVER_DAMAGE = wilson_attack*1.5,
-	    MULTITOOL_DAMAGE = wilson_attack*.9,
+	    MULTITOOL_DAMAGE = wilson_attack * 1.25,
 	    RUINS_BAT_DAMAGE = wilson_attack * 1.75,
 	    NIGHTSTICK_DAMAGE = wilson_attack*.85, -- Due to the damage being electric, it will get multiplied by 1.5 against any mob
 
@@ -251,6 +254,7 @@ function Tune(overrides)
 	    MINOTAUR_WALK_SPEED = 5,
 	    MINOTAUR_RUN_SPEED = 17,
 	    MINOTAUR_TARGET_DIST = 25,
+		MINOTAUR_LEAP_CD = 10,
 	    
 	    SLURTLE_DAMAGE = 25,
 	    SLURTLE_HEALTH = 600,
@@ -610,6 +614,8 @@ function Tune(overrides)
 	    TENTACLE_STOPATTACK_DIST = 6,
 	    TENTACLE_HEALTH = 500,
 
+		BIG_TENTACLE_DAMAGE = 60,
+
 	    TENTACLE_PILLAR_HEALTH = 500,
         TENTACLE_PILLAR_ARMS = 12,   -- max spawned at a time
         TENTACLE_PILLAR_ARMS_TOTAL = 25,  -- max simultaneous arms
@@ -650,6 +656,9 @@ function Tune(overrides)
 	    TEENBIRD_STARVE_KILL_TIME = 240,
 	    TEENBIRD_GROW_TIME = total_day_time*18,
 	    TEENBIRD_TARGET_DIST = 8,
+
+		TALLBIRD_LAY_EGG_TIME_MIN = 3 * total_day_time,
+		TALLBIRD_LAY_EGG_TIME_VAR = 2 * total_day_time,
 	
 	    SMALLBIRD_HEALTH = 50,
 	    SMALLBIRD_DAMAGE = 10,
@@ -1072,10 +1081,12 @@ function Tune(overrides)
 	    
 		BASE_COOK_TIME = night_time*.3333,
 		
-	    TALLBIRDEGG_HEALTH = 15;
+	    TALLBIRDEGG_HEALTH = 15,
 	    TALLBIRDEGG_HUNGER = 15,
-	    TALLBIRDEGG_COOKED_HEALTH = 25;
+	    TALLBIRDEGG_COOKED_HEALTH = 25,
 	    TALLBIRDEGG_COOKED_HUNGER = 30,
+
+		TALLBIRD_MAKE_NEST_RADIUS = 2,
 		
 		REPAIR_CUTSTONE_HEALTH = 50,
 		REPAIR_ROCKS_HEALTH = 50/3,
@@ -1247,8 +1258,8 @@ function Tune(overrides)
 		MIN_SMOLDER_TIME = .5*seg_time,
 		MAX_SMOLDER_TIME = seg_time,
 		
-		TENT_USES = 6,
-		SIESTA_CANOPY_USES = 6,
+		TENT_USES = 10,
+		SIESTA_CANOPY_USES = 10,
 
 		BEARDLING_SANITY = .4,
 		UMBRELLA_USES = 20,

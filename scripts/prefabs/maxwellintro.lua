@@ -330,7 +330,7 @@ local function fn(Sim)
     inst:AddTag("notarget")
 
     inst:AddComponent("named")
-    inst.components.named:SetName("Maxwell")
+    inst.components.named:SetName(STRINGS.NAMES.MAXWELL)
 
     inst:AddComponent("talker")
     inst.components.talker.fontsize = 40

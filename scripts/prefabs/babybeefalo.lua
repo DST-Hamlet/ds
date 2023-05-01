@@ -100,6 +100,16 @@ local growth_stages =
     {name="grown", time = GetGrowTime, fn = SetFullyGrown, growfn = Grow},
 }
 
+local function OnPooped(inst, poop)
+	local heading_angle = -(inst.Transform:GetRotation()) + 180
+
+	local pos = Vector3(inst.Transform:GetWorldPosition())
+	pos.x = pos.x + (math.cos(heading_angle*DEGREES))
+	pos.y = pos.y + 0.9
+	pos.z = pos.z + (math.sin(heading_angle*DEGREES))
+	poop.Transform:SetPosition(pos.x, pos.y, pos.z)
+end
+
 local function fn(Sim)
 	local inst = CreateEntity()
 	local trans = inst.entity:AddTransform()
@@ -149,6 +159,7 @@ local function fn(Sim)
     inst.components.periodicspawner:SetRandomTimes(80, 110)
     inst.components.periodicspawner:SetDensityInRange(20, 2)
     inst.components.periodicspawner:SetMinimumSpacing(8)
+    inst.components.periodicspawner:SetOnSpawnFn(OnPooped)
     inst.components.periodicspawner:Start()
     
     inst:AddComponent("growable")

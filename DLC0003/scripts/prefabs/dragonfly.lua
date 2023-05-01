@@ -260,7 +260,7 @@ local function fn(Sim)
 
     inst.Transform:SetScale(1.3,1.3,1.3)
     
-    MakePoisonableCharacter(inst)
+    MakePoisonableCharacter(inst, "dragonfly_body")
 	MakeCharacterPhysics(inst, 500, 1.4)
     inst.Physics:SetCollisionCallback(OnCollide)
 

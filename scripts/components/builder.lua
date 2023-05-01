@@ -59,7 +59,8 @@ function Builder:IsBuildBuffered(recipe)
 end
 
 function Builder:BufferBuild(recipe)
-	self:RemoveIngredients(recipe)
+	local mats = self:GetIngredients(recipe)
+	self:RemoveIngredients(mats)
 	self.buffered_builds[recipe] = true
 end
 
@@ -105,14 +106,15 @@ function Builder:CanBuildAtPoint(pt, recipe)
         tile = ground.Map:GetTileAtPoint(pt:Get())
     end
 
+	local min_rad = recipe.min_spacing or 3.2
+
 	if tile == GROUND.IMPASSABLE then
 		return false
-	else
+
+	elseif min_rad ~= 0 then
 		local ents = TheSim:FindEntities(pt.x,pt.y,pt.z, 6, nil, {'player', 'fx', 'NOBLOCK'}) -- or we could include a flag to the search?
 		for k, v in pairs(ents) do
 			if v ~= self.inst and (not v.components.placer) and v.entity:IsVisible() and not (v.components.inventoryitem and v.components.inventoryitem.owner ) then
-				local min_rad = recipe.min_spacing or 2+1.2
-				--local rad = (v.Physics and v.Physics:GetRadius() or 1) + 1.25
 				
 				--stupid finalling hack because it's too late to change stuff
 				if recipe.name == "treasurechest" and v.prefab == "pond" then
@@ -120,7 +122,7 @@ function Builder:CanBuildAtPoint(pt, recipe)
 				end
 
 				local dsq = distsq(Vector3(v.Transform:GetWorldPosition()), pt)
-				if dsq <= min_rad*min_rad then
+				if dsq < min_rad*min_rad then
 					return false
 				end
 			end
@@ -213,27 +215,40 @@ function Builder:UnlockRecipe(recname)
 	end
 end
 
-function Builder:RemoveIngredients(recname)
-    local recipe = GetRecipe(recname)
-    self.inst:PushEvent("consumeingredients", {recipe = recipe})
-    if recipe then
-        for k, v in pairs(recipe.ingredients) do
-        	local amt = math.max(1, RoundUp(v.amount * self.ingredientmod))
-            self.inst.components.inventory:ConsumeByName(v.type, amt)
-        end
+function Builder:GetIngredients(recname)
+	local recipe = GetRecipe(recname)
+	if recipe then
+		local ingredients = {}
+		for k,v in pairs(recipe.ingredients) do
+			local amt = math.max(1, RoundUp(v.amount * self.ingredientmod))
+			local items = self.inst.components.inventory:GetCraftingIngredient(v.type, amt)
+			ingredients[v.type] = items
+		end
+		return ingredients
+	end
+end
+
+function Builder:RemoveIngredients(ingredients)
+    for item, ents in pairs(ingredients) do
+    	for k,v in pairs(ents) do
+    		for i = 1, v do
+				self.inst.components.inventory:RemoveItem(k, false, true):Remove()
+    		end
+    	end
     end
+    self.inst:PushEvent("consumeingredients")
 end
 
 function Builder:OnSetProfile(profile)
 end
 
-function Builder:MakeRecipe(recipe, pt, onsuccess)
+function Builder:MakeRecipe(recipe, pt, rot, onsuccess)
     if recipe then
     	self.inst:PushEvent("makerecipe", {recipe = recipe})
 		pt = pt or Point(self.inst.Transform:GetWorldPosition())
 		if self:IsBuildBuffered(recipe.name) or self:CanBuild(recipe.name) then
 			self.inst.components.locomotor:Stop()
-			local buffaction = BufferedAction(self.inst, nil, ACTIONS.BUILD, nil, pt, recipe.name, 1)
+			local buffaction = BufferedAction(self.inst, nil, ACTIONS.BUILD, nil, pt, recipe.name, recipe.distance or 1, rot)
 			if onsuccess then
 				buffaction:AddSuccessAction(onsuccess)
 			end
@@ -246,16 +261,23 @@ function Builder:MakeRecipe(recipe, pt, onsuccess)
     return false
 end
 
-function Builder:DoBuild(recname, pt)
+function Builder:DoBuild(recname, pt, rotation)
     local recipe = GetRecipe(recname)
     local buffered = self:IsBuildBuffered(recname)
 
     if recipe and self:IsBuildBuffered(recname) or self:CanBuild(recname) then
 
+		if recipe.placer ~= nil and
+		self.inst.components.rider ~= nil and
+		self.inst.components.rider:IsRiding() then
+			return false, "MOUNTED"
+		end
+
 		if self.buffered_builds[recname] then
 			self.buffered_builds[recname] = nil
         else
-			self:RemoveIngredients(recname)
+			local mats = self:GetIngredients(recname)
+			self:RemoveIngredients(mats)
 		end
 		
         local prod = SpawnPrefab(recipe.product)
@@ -311,6 +333,7 @@ function Builder:DoBuild(recname, pt)
 
                 pt = pt or Point(self.inst.Transform:GetWorldPosition())
 				prod.Transform:SetPosition(pt.x,pt.y,pt.z)
+				prod.Transform:SetRotation(rotation or 0)
                 self.inst:PushEvent("buildstructure", {item=prod, recipe = recipe})
                 prod:PushEvent("onbuilt")
                 ProfileStatsAdd("build_"..prod.prefab)
@@ -353,7 +376,7 @@ function Builder:CanBuild(recname)
     if recipe then
         for ik, iv in pairs(recipe.ingredients) do
         	local amt = math.max(1, RoundUp(iv.amount * self.ingredientmod))
-            if not self.inst.components.inventory:Has(iv.type, amt) then
+			if not self.inst.components.inventory:Has(iv.type, amt, true) then
                 return false
             end
         end

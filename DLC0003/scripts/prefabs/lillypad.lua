@@ -26,6 +26,7 @@ function MakeLilypadPhysics(inst, rad)
     inst.Physics:ClearCollisionMask()
     inst.Physics:CollidesWith(COLLISION.ITEMS)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
+    inst.Physics:CollidesWith(COLLISION.WAVES)
     inst.Physics:CollidesWith(COLLISION.INTWALL)
 end
 
@@ -179,6 +180,8 @@ local function fn(pondtype)
 	anim:SetOrientation( ANIM_ORIENTATION.OnGround )
 	anim:SetLayer( LAYER_BACKGROUND )
 	anim:SetSortOrder( 3 )
+
+	inst:AddComponent("waveobstacle")
 
 	local minimap = inst.entity:AddMiniMapEntity()
 	minimap:SetIcon( "lily_pad.png" )

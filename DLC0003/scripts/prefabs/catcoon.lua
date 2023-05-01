@@ -328,6 +328,7 @@ local function fn()
 	inst:AddComponent("inventory")
 
 	inst:AddComponent("trader")
+	inst.components.trader.acceptnontradable = true
     inst.components.trader:SetAcceptTest(ShouldAcceptItem)
     inst.components.trader.onaccept = OnGetItemFromPlayer
     inst.components.trader.onrefuse = OnRefuseItem

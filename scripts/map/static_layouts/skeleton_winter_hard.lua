@@ -84,7 +84,7 @@ return {
           height = 0,
           visible = true,
           properties = {
-            ["data.recipetouse"] = "earmuffshat"
+            ["data.recipetouse"] = "winterhat"
           }
         }
       }

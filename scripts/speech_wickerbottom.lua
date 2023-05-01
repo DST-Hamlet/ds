@@ -551,6 +551,7 @@ return
         LUCY = "A perfectly good axe.",
         BALLOONS_EMPTY = "These seem frivolous.",
         SPEAR_WATHGRITHR = "What a handsome hunting implement.",
+        WATHGRITHRHAT = "Anachronistic drivel.",
         WAXWELLJOURNAL = "I'm not letting THAT in MY library!",
 
         ABIGAIL_FLOWER = 
@@ -713,6 +714,8 @@ return
             GENERIC = "Perhaps later.",
             OPEN = "Maybe I should go back up for some fresh air.",
         },
+
+        CAVE_REGENERATOR = "What might transpire if it came in contact with the cave's entrance, I wonder?",
 
 		BOOMERANG = "It is a flat aerofoil.",
 		SPOILED_FOOD = "It is heavy with bacteria.",
@@ -2781,6 +2784,7 @@ return
         HARDSHELL_TACOS = "I'm quite certain these aren't normal taco shells.",
         GUMMY_CAKE = "Rather gummy.",
         STEAMEDHAMSANDWICH = "I am prepared for an unforgettable luncheon.",
+        MEATED_NETTLE = "Medicinal nourishment, with added protein.",
 
         ROC_NEST_DEBRIS1 = "Quite seasoned.",
         ROC_NEST_DEBRIS2 = "It's seen better days.",
@@ -2860,6 +2864,7 @@ return
         BILL_QUILL = "An Ornithorhynchidae quill.",
 
         ANTLER = "I do enjoy a good bird song.",
+        ANTLER_CORRUPTED = "One bird in particular does not seem to enjoy it.",
 
         PUGALISK_SKULL = "Belongs to some kind of Pythonidae.",
         PUGALISK_CORPSE = "An interesting specimen.",
@@ -2939,6 +2944,13 @@ return
         ---------YOTP--------
         FIRECRACKERS = "A little too noisy for my liking.",
         REDLANTERN = "What a colorful little lantern.",
+
+    	-------------Wormwood Specific-------
+
+        COMPOSTWRAP = "Oh dear. Those are some large droppings.",
+		POISONBALM = "A natural antidote for most venoms.",
+        ARMOR_BRAMBLE = "The brambles are knit together tightly, though rather clumsily.",
+        TRAP_BRAMBLE = "Microscopic barbs on the thorns make them quite unpleasant.",
 
         -------rewards update-------
 

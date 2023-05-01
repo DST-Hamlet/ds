@@ -55,6 +55,7 @@ local function fn(Sim)
 	local anim = inst.entity:AddAnimState()
     
     inst:AddTag("herd")
+    inst:AddTag("NOBLOCK")
     
     inst:AddComponent("herd")
     inst.components.herd:SetMemberTag("penguin")

@@ -64,8 +64,9 @@ AddIngredientValues(mushrooms, {veggie=.5}, true)
 
 AddIngredientValues({"meat"}, {meat=1}, true, true)
 AddIngredientValues({"monstermeat"}, {meat=1, monster=1}, true, true)
-AddIngredientValues({"froglegs", "drumstick"}, {meat=.5}, true)
+AddIngredientValues({"froglegs", "drumstick", "batwing"}, {meat=.5}, true)
 AddIngredientValues({"smallmeat"}, {meat=.5}, true, true)
+AddIngredientValues({"plantmeat"}, {meat=1}, true)
 
 AddIngredientValues({"fish", "eel"}, {meat=.5,fish=1}, true)
 
@@ -83,7 +84,7 @@ AddIngredientValues({"mole"}, {meat=.5})
 AddIngredientValues({"cactus_meat"}, {veggie=1}, true)
 AddIngredientValues({"watermelon"}, {fruit=1}, true)
 AddIngredientValues({"cactus_flower"}, {veggie=.5})
-AddIngredientValues({"acorn_cooked"}, {seed=1})
+AddIngredientValues({"acorn"}, {seed=1}, true)
 AddIngredientValues({"goatmilk"}, {dairy=1})
 -- AddIngredientValues({"seeds"}, {seed=1}, true)
 

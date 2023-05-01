@@ -214,9 +214,8 @@ local states =
 
 		timeline =
 		{
-			TimeEvent(4 * FRAMES, function(inst) inst.components.combat:DoAttack() end),
-			-- TODO: Put in a custom sound for the GIANT GRUB attack later.
-			TimeEvent(2 * FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/enemy/giant_grub/attack") end),
+			TimeEvent(2  * FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/enemy/giant_grub/attack") end),
+			TimeEvent(10 * FRAMES, function(inst) inst.components.combat:DoAttack() end),
 		},
 
 		events =
@@ -341,6 +340,7 @@ local states =
 			inst.AnimState:PlayAnimation("death")
 			inst.Physics:Stop()
 			RemovePhysicsColliders(inst)
+			inst.components.lootdropper:DropLoot()
 		end,
 
         timeline=

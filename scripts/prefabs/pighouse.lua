@@ -27,7 +27,7 @@ local function LightsOff(inst)
 end
 
 local function onfar(inst) 
-    if inst.components.spawner:IsOccupied() then
+    if inst.components.spawner and inst.components.spawner:IsOccupied() and not GetClock():IsDay() then
         LightsOn(inst)
     end
 end
@@ -111,8 +111,12 @@ local function onhammered(inst, worker)
 end
 
 local function onhit(inst, worker)
-	inst.AnimState:PlayAnimation("hit")
-	inst.AnimState:PushAnimation("idle")
+    inst.AnimState:PlayAnimation("hit")
+    if inst.lightson then
+        inst.AnimState:PushAnimation("lit")
+    else
+        inst.AnimState:PushAnimation("idle")
+    end
 end
 
 local function OnDay(inst)

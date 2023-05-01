@@ -196,7 +196,7 @@ local function OnLoad(inst, data)
 end
 
 local function SanityAura(inst, observer)
-    return -TUNING.SANITYAURA_SMALL
+    return not observer:HasTag("plantkin") and -TUNING.SANITYAURA_SMALL or 0
 end
 
 local function ShouldSleep(inst)

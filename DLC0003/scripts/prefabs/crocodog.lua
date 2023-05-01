@@ -211,6 +211,7 @@ local function fncommon()
     inst:AddTag("hostile")
     inst:AddTag("hound")
     inst:AddTag("crocodog")
+    inst:AddTag("breederpredator")
 	
     MakeAmphibiousCharacterPhysics(inst, 10, .5)
     --MakePoisonableCharacter(inst)

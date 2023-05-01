@@ -18,6 +18,7 @@ local function MakePreparedFood(data)
 		Asset("INV_IMAGE", "meatballs_yotp"),
 		Asset("INV_IMAGE", "monsterlasagna_yotp"),
 		Asset("INV_IMAGE", "nettlelosange_yotp"),
+		Asset("INV_IMAGE", "meated_nettle_yotp"),
 		Asset("INV_IMAGE", "perogies_yotp"),
 		Asset("INV_IMAGE", "pumpkincookie_yotp"),
 		Asset("INV_IMAGE", "ratatouille_yotp"),
@@ -77,15 +78,15 @@ local function MakePreparedFood(data)
 
 		if data.boost_surf then
 			inst.components.edible.surferdelta = TUNING.HYDRO_FOOD_BONUS_SURF
-			inst.components.edible.surferduration = TUNING.FOOD_SPEED_AVERAGE		
+			inst.components.edible.surferduration = TUNING.FOOD_SPEED_MED
 		end
 		if data.boost_dry then
 			inst.components.edible.autodrydelta = TUNING.HYDRO_FOOD_BONUS_DRY
-			inst.components.edible.autodryduration = TUNING.FOOD_SPEED_AVERAGE
+			inst.components.edible.autodryduration = TUNING.FOOD_SPEED_MED
 		end
 		if data.boost_cool then
-			inst.components.edible.autocooldelta = TUNING.HYDRO_FOOD_BONUS_COOL_RATE
-		end		
+			inst.components.edible.autocooldelta = TUNING.HYDRO_PREPAREDFOOD_BONUS_COOL_RATE
+		end
 
 		inst:AddComponent("inspectable")
 		inst.wet_prefix = data.wet_prefix

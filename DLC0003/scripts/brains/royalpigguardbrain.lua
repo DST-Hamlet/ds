@@ -248,9 +248,8 @@ end)
 
 
 local function shouldPanic(inst)
-
     local x,y,z = inst.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x,y,z, 20, {"hostile"},{"city_pig"}) 
+    local ents = TheSim:FindEntities(x,y,z, 20, {"hostile"}, {"city_pig", "INLIMBO", "shadowcreature", "bramble"}) 
     if #ents > 0 then
         return true
     end
@@ -258,18 +257,18 @@ local function shouldPanic(inst)
     if inst.components.combat.target then
         local threat = inst.components.combat.target
         if threat then
-            local myPos = Vector3(inst.Transform:GetWorldPosition() )
-            local threatPos = Vector3(threat.Transform:GetWorldPosition() )
-            local dist = distsq(threatPos, myPos)
-            if dist < FAR_ENOUGH*FAR_ENOUGH then
-                if dist > STOP_RUN_AWAY_DIST*STOP_RUN_AWAY_DIST then
-                    return true
-                end
-            else
+            local dist = inst:GetHorzDistanceSqToInst(threat)
+
+            if dist >= FAR_ENOUGH * FAR_ENOUGH then
                 inst.components.combat:GiveUp()
+
+            elseif dist > STOP_RUN_AWAY_DIST * STOP_RUN_AWAY_DIST then
+                -- Panic instead of running away.
+                return true
             end
         end
     end
+
     return false
 end
 

@@ -218,6 +218,7 @@ local function itemfn(Sim)
     MakeInventoryFloatable(inst, "idle_water", "idle_drop")
 
 	inst:AddTag("irreplaceable")
+	inst:AddTag("portableitem")
 
 	inst.AnimState:SetBank("cook_pot_warly")
 	inst.AnimState:SetBuild("cook_pot_warly")
@@ -232,6 +233,7 @@ local function itemfn(Sim)
 	inst.components.deployable.ondeploy = ondeploy
 	inst.components.deployable.placer = "portablecookpot_placer"
 	inst.components.deployable.test = item_deploytest
+	inst.components.deployable.deploydistance = 1.5
 
 	inst:AddComponent("characterspecific")
     inst.components.characterspecific:SetOwner("warly")

@@ -15,7 +15,10 @@ local function fx(Sim)
 	inst.entity:AddSoundEmitter()
     inst.AnimState:SetBank("collapse")
     inst.AnimState:SetBuild("structure_collapse_fx")
+
     inst:AddTag("NOCLICK")
+    inst:AddTag("FX")
+    inst:AddTag("NOBLOCK")
 
     inst.AnimState:PlayAnimation("collapse_large")
     inst:DoTaskInTime(1, kill)

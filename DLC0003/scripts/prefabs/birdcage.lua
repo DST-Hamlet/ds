@@ -30,13 +30,20 @@ local bird_symbols=
 	"tail_feather",
 }
 
+local invalid_foods =
+{
+    "bird_egg",
+    "bird_egg_cooked",
+    "rottenegg",
+}
+
 local function ShouldAcceptItem(inst, item)
 	local seed_name = string.lower(item.prefab .. "_seeds")
 	local can_accept = item.components.edible and (Prefabs[seed_name] or item.prefab == "seeds" or item.components.edible.foodtype == "MEAT") 
 	
-	if item.prefab == "egg" or item.prefab == "bird_egg" or item.prefab == "rottenegg" or item.prefab == "monstermeat" then
-		can_accept = false
-	end
+    if table.contains(invalid_foods, item.prefab) then
+        can_accept = false
+    end
 	
 	return can_accept
 end
@@ -179,11 +186,9 @@ local function onemptied(inst, bird)
 end
 
 local function onhammered(inst, worker)
-	--[[
-	inst.components.container:DropEverything()
 	SpawnPrefab("collapse_small").Transform:SetPosition(inst.Transform:GetWorldPosition())
-	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
-	--]]
+	inst.SoundEmitter:PlaySound("dontstarve/common/destroy_metal")
+
 	if inst.components.occupiable:IsOccupied() then
 		local item = inst.components.occupiable:Harvest()
 		if item then
@@ -193,7 +198,6 @@ local function onhammered(inst, worker)
 	end
 	inst.components.lootdropper:DropLoot()
 	inst:Remove()
-	
 end
 
 local function onhit(inst, worker)

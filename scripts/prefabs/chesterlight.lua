@@ -15,7 +15,9 @@ end
 local function TurnOff(inst)
 	inst.AnimState:PlayAnimation("off")
     inst.components.lighttweener:StartTween(inst.Light, 0, nil, nil, nil, FRAMES*6)
-	inst:ListenForEvent("animover", function() inst:Remove() end)	
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)	
 end
 
 local function fn()
@@ -30,6 +32,7 @@ local function fn()
 	anim:SetBuild("cave_exit_lightsource")
 
 	inst:AddTag("NOCLICK")
+	inst:AddTag("NOBLOCK")
 
 	local light = inst.entity:AddLight()
 	light:SetRadius(5)

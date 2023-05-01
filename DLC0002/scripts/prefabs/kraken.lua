@@ -156,6 +156,8 @@ local function fn()
     inst.components.minionspawner.maxminions = 45
 	inst.components.minionspawner:RegenerateFreePositions()
 	inst.components.minionspawner.shouldspawn = false
+    inst.components.minionspawner.addpositiondelay = 0
+
 
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetChanceLootTable('kraken')

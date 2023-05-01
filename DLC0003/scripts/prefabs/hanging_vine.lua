@@ -80,23 +80,25 @@ local function placegoffgrids(inst, radiusMax, prefab,tags)
 	return false
 end
 
-local function spawnitem(inst,prefab)
-	local rad = 14
-	if prefab == "grabbing_vine" then
-		rad = 12
-	end
-	placegoffgrids(inst, rad, prefab,{"hangingvine"}) 
+local function spawnitem(inst, prefab)
+    if GetWorld():IsWorldGenOptionNever(prefab) then
+        return
+    end
+
+    local rad = prefab == "grabbing_vine" and 12 or 14
+
+    placegoffgrids(inst, rad, prefab, {"hangingvine"})
 end
 
 local function spawnvines(inst)
 	inst.spawnedchildren = true
-    for i=1,math.random(8,16),1 do
-        spawnitem(inst,"hanging_vine")
-    end	
+    for i=1, math.random(TUNING.HANGING_VINE_SPAWN_MIN, TUNING.HANGING_VINE_SPAWN_MAX), 1 do
+        spawnitem(inst, "hanging_vine")
+    end
 
-    for i=1,math.random(6,9),1 do
-    	spawnitem(inst,"grabbing_vine")
-    end	   
+    for i=1, math.random(TUNING.GRABBING_VINE_SPAWN_MIN, TUNING.GRABBING_VINE_SPAWN_MAX), 1 do
+    	spawnitem(inst, "grabbing_vine")
+    end
 end
 
 local function spawnNewVine(inst,prefab)
@@ -120,8 +122,8 @@ local function onsave(inst, data)
     if inst.spawntasks then
     	data.spawntasks= {}
     	for i,oldtask in pairs(inst.spawntasks)do
-            local test = inst:DoTaskInTime(5,function()end)
-            dumptable(test,1,1)
+            --local test = inst:DoTaskInTime(5,function()end)
+            --dumptable(test,1,1)
 
     		local newtask = {}
     		newtask.prefab = oldtask.prefab

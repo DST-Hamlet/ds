@@ -1,6 +1,9 @@
 local assets =
 {
 	Asset("ANIM", "anim/living_jungle_tree.zip"),
+	Asset("MINIMAP_IMAGE", "livingjungletree"),
+	Asset("MINIMAP_IMAGE", "livingjungletree_stump"),
+	Asset("MINIMAP_IMAGE", "livingjungletree_burnt"),
 }
 
 local prefabs =
@@ -14,7 +17,9 @@ local function chop_down_burnt_tree(inst, chopper)
     inst.SoundEmitter:PlaySound("dontstarve/wilson/use_axe_tree")          
 	inst.AnimState:PlayAnimation("chop_burnt_tall")
     RemovePhysicsColliders(inst)
-	inst:ListenForEvent("animover", function() inst:Remove() end)
+	inst.persists = false
+	inst:ListenForEvent("animover", inst.Remove)
+	inst:ListenForEvent("entitysleep", inst.Remove)
     inst.components.lootdropper:SpawnLootPrefab("charcoal")
     inst.components.lootdropper:DropLoot()
 end
@@ -38,6 +43,7 @@ local function OnBurnt(inst)
 		end)
     
 	inst.AnimState:PlayAnimation("burnt_tall", true)
+	inst.MiniMapEntity:SetIcon("livingjungletree_burnt.png")
 
 	inst.SoundEmitter:PlaySound("dontstarve_DLC002/common/living_jungle_tree/burn")
 	
@@ -63,6 +69,8 @@ local function makestump(inst, instant)
     inst.components.workable:SetOnFinishCallback(ondug)
     inst.components.workable:SetWorkLeft(1)    
     inst:AddTag("stump")
+
+	inst.MiniMapEntity:SetIcon("livingjungletree_stump.png")
 end
 
 local function onworked(inst, chopper, workleft)

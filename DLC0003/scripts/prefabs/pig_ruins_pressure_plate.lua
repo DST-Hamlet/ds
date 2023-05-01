@@ -30,20 +30,26 @@ local function onsave(inst, data)
 end
 
 local function onload(inst, data)
-  if data then
-    if data.trap then
-        inst:AddTag(data.trap)
+    if data then
+        if data.trap then
+            inst:AddTag(data.trap)
+        end
+        if data.localtrap then
+            inst:AddTag("localtrap")
+        end
+        if data.reversetrigger then
+            inst:AddTag("reversetrigger")
+        end 
+        if data.startdown then
+            inst:AddTag("startdown")
+        end
     end
-    if data.localtrap then
-        inst:AddTag("localtrap")
+
+    if not inst.components.disarmable.armed then
+        inst.AnimState:PlayAnimation("disarmed")
+        inst.components.creatureprox:SetEnabled(false)
+        inst.down = false
     end
-    if data.reversetrigger then
-        inst:AddTag("reversetrigger")
-    end 
-    if data.startdown then
-        inst:AddTag("startdown")
-    end
-  end
 end
 
 local function trigger(inst)
@@ -142,7 +148,7 @@ local function onfar(inst)
 end
 
 local function testfn(testinst)
-    return not testinst:HasTag("flying")
+    return not testinst:HasTag("flying") and not testinst:HasTag("notraptrigger")
 end
 
 local function disarm(inst, doer)

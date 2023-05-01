@@ -71,6 +71,7 @@ local function commonfn()
     inst:AddTag("projectile")
 
     inst:AddComponent("weapon")
+    inst.components.weapon.projectilelaunchsymbol = "swap_object"
     inst.components.weapon:SetDamage(TUNING.SPEARGUN_DAMAGE)
     inst.components.weapon:SetRange(12, 14)
 

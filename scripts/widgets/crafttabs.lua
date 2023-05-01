@@ -101,7 +101,7 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
         local tab = self.tabs:AddTab(
         	STRINGS.TABS[v.str],  --name
         	resolvefilepath("images/hud.xml"),  -- atlas
-        	v.icon_atlas or resolvefilepath("images/hud.xml"),   --icon_atlas
+        	v.icon_atlas and resolvefilepath(v.icon_atlas) or resolvefilepath("images/hud.xml"),
         	v.icon, --icon
         	tab_bg.normal,  --imorm
         	tab_bg.selected, -- imselectde
@@ -133,7 +133,8 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
 
         tab.filter = v
         tab.icon = v.icon
-        tab.icon_atlas = v.icon_atlas or resolvefilepath("images/hud.xml")
+        tab.icon_atlas = v.icon_atlas and resolvefilepath(v.icon_atlas) or resolvefilepath("images/hud.xml")
+
         tab.tabname = STRINGS.TABS[v.str]
         self.tabbyfilter[v] = tab
 
@@ -145,6 +146,7 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
     self.inst:ListenForEvent("itemlose", function(inst, data) self:UpdateRecipes() end, self.owner)
     self.inst:ListenForEvent("stacksizechange", function(inst, data) self:UpdateRecipes() end, self.owner)
     self.inst:ListenForEvent("unlockrecipe", function(inst, data) self:UpdateRecipes() end, self.owner)
+	self.inst:ListenForEvent("refreshcrafting", function(inst, data) self:UpdateRecipes() end, self.owner)
     self:DoUpdateRecipes()
     self:SetScale(base_scale, base_scale, base_scale)
     self:StartUpdating()

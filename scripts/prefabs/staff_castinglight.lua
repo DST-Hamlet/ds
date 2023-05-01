@@ -31,6 +31,8 @@ local function fn()
 
 	inst.setupfn = SetUp
 
+	inst:AddTag("NOBLOCK")
+
 	inst.persists = false
 
 	return inst
